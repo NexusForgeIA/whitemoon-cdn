@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -7,89 +6,278 @@
 <title>WhiteMoon — Panel de Licencias</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#07070e;color:#ccc;padding:30px 5%;max-width:900px;margin:0 auto}
-h1{color:#fff;font-size:1.5rem;margin-bottom:4px}
-.sub{color:#666;font-size:.82rem;margin-bottom:24px}
-h2{color:#7c3aed;font-size:1rem;margin:28px 0 12px;border-bottom:1px solid #1a1a2e;padding-bottom:8px}
-h3{color:#fff;font-size:.88rem;margin:16px 0 6px}
-p{font-size:.84rem;line-height:1.7;margin-bottom:10px}
-code{background:#1a1a2e;padding:2px 8px;border-radius:4px;font-size:.78rem;color:#a78bfa}
-pre{background:#1a1a2e;padding:16px;border-radius:10px;overflow-x:auto;margin:10px 0 16px;font-size:.76rem;color:#e0e0e0;border:1px solid #2a2a3e;line-height:1.6}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#07070e;color:#ccc;min-height:100vh}
+.top{background:#111;border-bottom:1px solid #1a1a2e;padding:16px 24px;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:1.1rem;font-weight:700;color:#fff}
+.logo span{color:#7c3aed}
+.top-right{display:flex;gap:10px;align-items:center}
+.status{font-size:.7rem;padding:4px 12px;border-radius:12px;font-weight:600}
+.status.on{background:rgba(34,197,94,.15);color:#22c55e}
+.status.off{background:rgba(239,68,68,.15);color:#ef4444}
+.wrap{max-width:1000px;margin:0 auto;padding:24px}
+h2{color:#7c3aed;font-size:.95rem;margin:24px 0 12px;display:flex;align-items:center;gap:8px}
 .card{background:#111;border:1px solid #1a1a2e;border-radius:12px;padding:20px;margin-bottom:16px}
-.num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#7c3aed;color:#fff;font-size:.7rem;font-weight:700;margin-right:6px}
-.steps{display:flex;flex-direction:column;gap:10px;margin:10px 0}
-.step{background:#0a0a14;border:1px solid #1a1a2e;border-radius:8px;padding:12px;font-size:.82rem}
-.step b{color:#fff}
-.tag-ok{background:rgba(34,197,94,.15);color:#22c55e;padding:3px 10px;border-radius:12px;font-size:.68rem;font-weight:600}
-.tag-off{background:rgba(239,68,68,.15);color:#ef4444;padding:3px 10px;border-radius:12px;font-size:.68rem;font-weight:600}
-.warn{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:8px;padding:12px;font-size:.8rem;color:#f59e0b;margin:12px 0}
-.ok{background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.15);border-radius:8px;padding:12px;font-size:.8rem;color:#22c55e;margin:12px 0}
+.login-card{max-width:500px;margin:80px auto;text-align:center}
+.login-card h1{color:#fff;font-size:1.3rem;margin-bottom:6px}
+.login-card p{font-size:.82rem;color:#888;margin-bottom:20px}
+label{font-size:.7rem;color:#888;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px}
+input[type="password"],input[type="text"],select{width:100%;background:#0a0a14;border:1px solid #222;border-radius:8px;padding:10px 14px;color:#fff;font-size:.85rem;font-family:inherit;outline:none}
+input:focus{border-color:#7c3aed}
+.btn{padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-weight:600;font-size:.82rem;transition:all .2s}
+.btn-p{background:#7c3aed;color:#fff}.btn-p:hover{background:#6d28d9}
+.btn-g{background:rgba(34,197,94,.15);color:#22c55e;border:1px solid rgba(34,197,94,.2)}.btn-g:hover{background:rgba(34,197,94,.25)}
+.btn-r{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.2)}.btn-r:hover{background:rgba(239,68,68,.25)}
+.btn-o{background:rgba(124,58,237,.1);color:#a78bfa;border:1px solid rgba(124,58,237,.2)}.btn-o:hover{background:rgba(124,58,237,.2)}
+.btn-sm{padding:6px 14px;font-size:.74rem}
+.btn-xs{padding:4px 10px;font-size:.68rem}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:10px 12px;color:#666;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid #1a1a2e}
+td{padding:10px 12px;border-bottom:1px solid #111;font-size:.82rem}
+tr:hover td{background:#0a0a14}
+.token{font-family:monospace;color:#a78bfa;font-size:.76rem}
+.biz{font-weight:600;color:#fff}
+.domain{color:#888;font-size:.74rem}
+.badge{padding:3px 10px;border-radius:12px;font-size:.66rem;font-weight:600;display:inline-block}
+.badge-on{background:rgba(34,197,94,.15);color:#22c55e}
+.badge-off{background:rgba(239,68,68,.15);color:#ef4444}
+.empty{text-align:center;padding:40px;color:#555;font-size:.88rem}
+.flex{display:flex;gap:8px;align-items:center}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mb{margin-bottom:12px}
+.warn{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:8px;padding:12px;font-size:.78rem;color:#f59e0b;margin:12px 0}
+.ok{background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.15);border-radius:8px;padding:12px;font-size:.78rem;color:#22c55e;margin:12px 0}
+.toast{position:fixed;top:20px;right:20px;background:#22c55e;color:#fff;padding:12px 20px;border-radius:10px;font-size:.82rem;font-weight:600;display:none;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+@media(max-width:600px){.g2{grid-template-columns:1fr}table{font-size:.74rem}}
 </style>
 </head>
 <body>
 
-<h1>🔐 Panel de Licencias</h1>
-<p class="sub">WhiteMoon · Gestión de tokens de chatbot IA</p>
+<div class="toast" id="toast">✓ Guardado</div>
 
-<div class="card" style="text-align:center;color:#666;font-size:.84rem;padding:30px">
-  Sin licencias activas.<br>Añade tu primer cliente en <code>licenses.json</code>
+<!-- LOGIN -->
+<div id="loginView">
+  <div class="card login-card">
+    <div style="font-size:2rem;margin-bottom:12px">🔐</div>
+    <h1>Panel de Licencias</h1>
+    <p>WhiteMoon · Gestión de chatbots IA</p>
+    <div class="mb">
+      <label>GitHub Personal Access Token</label>
+      <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxx">
+    </div>
+    <div class="warn" style="text-align:left">El token se guarda SOLO en tu navegador (localStorage). Nunca se envía a terceros — solo a la API de GitHub para editar tu repo.</div>
+    <button class="btn btn-p" onclick="doLogin()" style="width:100%;margin-top:8px">Conectar</button>
+  </div>
 </div>
 
-<h2>Alta de nuevo cliente</h2>
+<!-- PANEL -->
+<div id="panelView" style="display:none">
+  <div class="top">
+    <div class="logo">White<span>Moon</span> · Panel de Licencias</div>
+    <div class="top-right">
+      <span class="status on" id="statusBadge">Conectado</span>
+      <button class="btn btn-xs btn-o" onclick="doLogout()">Cerrar sesión</button>
+    </div>
+  </div>
+  <div class="wrap">
 
-<div class="steps">
-<div class="step"><span class="num">1</span> <b>Generar token:</b> formato <code>WM-SECTOR-NNN</code> (ej: <code>WM-DENTAL-001</code>)</div>
-<div class="step"><span class="num">2</span> <b>Añadir a <code>licenses.json</code>:</b></div>
+    <!-- Stats -->
+    <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+      <div class="card" style="flex:1;min-width:120px;text-align:center"><div style="font-size:1.6rem;font-weight:700;color:#fff" id="statTotal">0</div><div style="font-size:.68rem;color:#888">Total clientes</div></div>
+      <div class="card" style="flex:1;min-width:120px;text-align:center"><div style="font-size:1.6rem;font-weight:700;color:#22c55e" id="statActive">0</div><div style="font-size:.68rem;color:#888">Activos</div></div>
+      <div class="card" style="flex:1;min-width:120px;text-align:center"><div style="font-size:1.6rem;font-weight:700;color:#ef4444" id="statInactive">0</div><div style="font-size:.68rem;color:#888">Inactivos</div></div>
+    </div>
+
+    <!-- Table -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <h2 style="margin:0">🤖 Licencias</h2>
+        <button class="btn btn-p btn-sm" onclick="showAddForm()">+ Nuevo cliente</button>
+      </div>
+      <div id="licTable"><div class="empty">Cargando...</div></div>
+    </div>
+
+    <!-- Add form (hidden) -->
+    <div class="card" id="addForm" style="display:none">
+      <h2 style="margin-top:0">➕ Alta de nuevo cliente</h2>
+      <div class="g2 mb">
+        <div><label>Token</label><input type="text" id="newToken" placeholder="WM-DENTAL-001"></div>
+        <div><label>Nombre del negocio</label><input type="text" id="newBiz" placeholder="Clínica Dental Sonríe"></div>
+      </div>
+      <div class="g2 mb">
+        <div><label>Dominio (sin https://)</label><input type="text" id="newDomain" placeholder="clinicasonrie.es"></div>
+        <div><label>Pack</label><select id="newPack"><option value="basic">Basic — 49€/mes</option><option value="advance" selected>Advance — 99€/mes</option><option value="pyme">Pyme — 1.800€</option><option value="enterprise">Enterprise — 3.599€</option></select></div>
+      </div>
+      <div class="g2 mb">
+        <div><label>Email de contacto</label><input type="text" id="newContact" placeholder="info@cliente.es"></div>
+        <div><label>Teléfono</label><input type="text" id="newPhone" placeholder="912345678"></div>
+      </div>
+      <div class="g2 mb">
+        <div><label>Fecha alta</label><input type="text" id="newCreated" placeholder="2026-04-15"></div>
+        <div><label>Expira</label><input type="text" id="newExpires" placeholder="2027-04-15"></div>
+      </div>
+      <div class="mb"><label>Notas</label><input type="text" id="newNotes" placeholder="Notas internas..."></div>
+      <div class="flex">
+        <button class="btn btn-p" onclick="addLicense()">Dar de alta</button>
+        <button class="btn btn-o" onclick="hideAddForm()">Cancelar</button>
+      </div>
+    </div>
+
+    <!-- Código de instalación -->
+    <div class="card" id="codeCard" style="display:none">
+      <h2 style="margin-top:0">📋 Código para el cliente</h2>
+      <p style="font-size:.78rem;color:#888;margin-bottom:8px">Pega esto antes de <code style="background:#1a1a2e;padding:2px 6px;border-radius:4px;color:#a78bfa">&lt;/body&gt;</code> en la web del cliente:</p>
+      <pre id="codeOutput" style="background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font-size:.76rem;color:#e0e0e0;overflow-x:auto;white-space:pre-wrap"></pre>
+      <button class="btn btn-sm btn-o" onclick="copyCode()" style="margin-top:8px">Copiar código</button>
+    </div>
+
+  </div>
 </div>
 
-<pre>{
-  "licenses": {
-    "WM-DENTAL-001": {
-      "biz": "Nombre del Negocio",
-      "domain": "dominiocliente.es",
-      "pack": "advance",
-      "active": true,
-      "created": "2026-04-15",
-      "expires": "2027-04-15",
-      "contact": "email@cliente.com",
-      "phone": "912345678",
-      "notes": "Pack Advance 99€/mes"
+<script>
+var REPO='NexusForgeIA/whitemoon-cdn';
+var FILE='licenses.json';
+var ghToken='';
+var licenses={};
+var fileSha='';
+
+function $(id){return document.getElementById(id)}
+function toast(msg){var t=$('toast');t.textContent='✓ '+msg;t.style.display='block';setTimeout(function(){t.style.display='none'},2500)}
+
+// LOGIN
+function doLogin(){
+  ghToken=$('ghToken').value.trim();
+  if(!ghToken){alert('Pega tu token de GitHub');return}
+  localStorage.setItem('wm_gh_token',ghToken);
+  $('loginView').style.display='none';
+  $('panelView').style.display='block';
+  loadLicenses();
+}
+function doLogout(){
+  localStorage.removeItem('wm_gh_token');
+  ghToken='';
+  $('loginView').style.display='block';
+  $('panelView').style.display='none';
+}
+
+// Check saved token
+var saved=localStorage.getItem('wm_gh_token');
+if(saved){ghToken=saved;$('loginView').style.display='none';$('panelView').style.display='block';loadLicenses()}
+
+// LOAD LICENSES
+function loadLicenses(){
+  fetch('https://api.github.com/repos/'+REPO+'/contents/'+FILE,{headers:{'Authorization':'Bearer '+ghToken}})
+  .then(function(r){return r.json()})
+  .then(function(data){
+    fileSha=data.sha;
+    var content=atob(data.content.replace(/\n/g,''));
+    licenses=JSON.parse(content).licenses||{};
+    renderTable();
+  })
+  .catch(function(e){$('licTable').innerHTML='<div class="empty" style="color:#ef4444">Error al conectar. Verifica tu token.</div>'});
+}
+
+// SAVE LICENSES
+function saveLicenses(msg){
+  var content=JSON.stringify({licenses:licenses},null,2);
+  var encoded=btoa(unescape(encodeURIComponent(content)));
+  return fetch('https://api.github.com/repos/'+REPO+'/contents/'+FILE,{
+    method:'PUT',
+    headers:{'Authorization':'Bearer '+ghToken,'Content-Type':'application/json'},
+    body:JSON.stringify({message:msg||'Actualizar licencias',content:encoded,sha:fileSha})
+  }).then(function(r){return r.json()}).then(function(data){fileSha=data.content.sha;renderTable();return data});
+}
+
+// RENDER TABLE
+function renderTable(){
+  var keys=Object.keys(licenses);
+  var active=keys.filter(function(k){return licenses[k].active}).length;
+  $('statTotal').textContent=keys.length;
+  $('statActive').textContent=active;
+  $('statInactive').textContent=keys.length-active;
+
+  if(!keys.length){$('licTable').innerHTML='<div class="empty">Sin clientes. Pulsa "+ Nuevo cliente" para empezar.</div>';return}
+
+  var h='<table><thead><tr><th>Token</th><th>Negocio</th><th>Dominio</th><th>Pack</th><th>Estado</th><th>Expira</th><th>Acciones</th></tr></thead><tbody>';
+  keys.forEach(function(k){
+    var l=licenses[k];
+    h+='<tr><td class="token">'+k+'</td><td class="biz">'+l.biz+'</td><td class="domain">'+(l.domain||'—')+'</td><td>'+(l.pack||'—')+'</td><td><span class="badge '+(l.active?'badge-on':'badge-off')+'">'+(l.active?'ACTIVA':'INACTIVA')+'</span></td><td>'+(l.expires||'—')+'</td><td class="flex">';
+    if(l.active){
+      h+='<button class="btn btn-r btn-xs" onclick="toggleLicense(\''+k+'\',false)">Desactivar</button>';
+    } else {
+      h+='<button class="btn btn-g btn-xs" onclick="toggleLicense(\''+k+'\',true)">Activar</button>';
     }
-  }
-}</pre>
+    h+='<button class="btn btn-o btn-xs" onclick="showCode(\''+k+'\')">Código</button>';
+    h+='<button class="btn btn-xs" style="background:rgba(239,68,68,.08);color:#ef4444;border:1px solid rgba(239,68,68,.15)" onclick="deleteLicense(\''+k+'\')">Eliminar</button>';
+    h+='</td></tr>';
+  });
+  h+='</tbody></table>';
+  $('licTable').innerHTML=h;
+}
 
-<div class="steps">
-<div class="step"><span class="num">3</span> <b>Subir a GitHub:</b> <code>git add . && git commit -m "Alta: NombreCliente" && git push</code></div>
-<div class="step"><span class="num">4</span> <b>Pegar en la web del cliente</b> (antes de <code>&lt;/body&gt;</code>):</div>
-</div>
+// TOGGLE LICENSE
+function toggleLicense(token,active){
+  licenses[token].active=active;
+  saveLicenses((active?'Activar':'Desactivar')+': '+licenses[token].biz).then(function(){
+    toast(licenses[token].biz+(active?' activado':' desactivado'));
+  });
+}
 
-<pre>&lt;script src="https://TUUSUARIO.github.io/whitemoon-cdn/chat.js"
-  data-token="WM-DENTAL-001"
-  data-color="#4A90D9"
-  data-services="Servicio 1,Servicio 2,Pedir cita"
-  data-bot-name="Lucía"&gt;&lt;/script&gt;</pre>
+// DELETE LICENSE
+function deleteLicense(token){
+  if(!confirm('¿Eliminar la licencia '+token+' ('+licenses[token].biz+')? Esta acción no se puede deshacer.'))return;
+  var name=licenses[token].biz;
+  delete licenses[token];
+  saveLicenses('Eliminar: '+name).then(function(){toast(name+' eliminado')});
+}
 
-<h2>Desactivar cliente (impago)</h2>
-<div class="steps">
-<div class="step"><span class="num">1</span> Abrir <code>licenses.json</code></div>
-<div class="step"><span class="num">2</span> Cambiar <code>"active": true</code> → <code>"active": false</code></div>
-<div class="step"><span class="num">3</span> <code>git commit -am "Desactivar: NombreCliente" && git push</code></div>
-</div>
-<div class="warn">El chatbot desaparece de su web en minutos. El cliente no ve error — solo desaparece el botón.</div>
+// ADD LICENSE
+function showAddForm(){
+  $('addForm').style.display='block';
+  var today=new Date().toISOString().split('T')[0];
+  var nextYear=new Date(new Date().setFullYear(new Date().getFullYear()+1)).toISOString().split('T')[0];
+  $('newCreated').value=today;
+  $('newExpires').value=nextYear;
+  $('newToken').value='WM-';
+  $('addForm').scrollIntoView({behavior:'smooth'});
+}
+function hideAddForm(){$('addForm').style.display='none'}
 
-<h2>Reactivar cliente</h2>
-<p>Cambiar <code>"active": false</code> → <code>"active": true</code> y hacer push.</p>
+function addLicense(){
+  var token=$('newToken').value.trim();
+  var biz=$('newBiz').value.trim();
+  var domain=$('newDomain').value.trim();
+  if(!token||!biz){alert('Token y nombre del negocio son obligatorios');return}
+  if(licenses[token]){alert('Ese token ya existe');return}
+  licenses[token]={
+    biz:biz,
+    domain:domain,
+    pack:$('newPack').value,
+    active:true,
+    created:$('newCreated').value,
+    expires:$('newExpires').value,
+    contact:$('newContact').value.trim(),
+    phone:$('newPhone').value.trim(),
+    notes:$('newNotes').value.trim()
+  };
+  saveLicenses('Alta: '+biz+' ('+token+')').then(function(){
+    toast(biz+' dado de alta');
+    hideAddForm();
+    showCode(token);
+  });
+}
 
-<h2>Seguridad</h2>
-<div class="steps">
-<div class="step"><b>Sin token</b> → no carga nada</div>
-<div class="step"><b>Token inactivo</b> → no carga nada</div>
-<div class="step"><b>Dominio incorrecto</b> → si copian el código en otra web, no funciona</div>
-<div class="step"><b>Licencia expirada</b> → se desactiva automáticamente</div>
-</div>
-
-<div class="ok">Si un informático copia el script → el token está vinculado al dominio. Si dejan de pagar → desactivas el token y el chatbot desaparece de su web.</div>
-
-<p style="margin-top:40px;color:#444;font-size:.72rem;text-align:center">WHITEMOON · whitemoon.es · USO INTERNO</p>
+// SHOW CODE
+function showCode(token){
+  var l=licenses[token];
+  var code='<!-- WhiteMoon Chatbot IA -->\n<script src="https://nexusforgeia.github.io/whitemoon-cdn/chat.js"\n  data-token="'+token+'"\n  data-color="#7c3aed"\n  data-services="Servicio 1,Servicio 2,Pedir cita"\n  data-bot-name="Asistente"><\/script>';
+  $('codeOutput').textContent=code;
+  $('codeCard').style.display='block';
+  $('codeCard').scrollIntoView({behavior:'smooth'});
+}
+function copyCode(){
+  navigator.clipboard.writeText($('codeOutput').textContent);
+  toast('Código copiado');
+}
+</script>
 </body>
 </html>

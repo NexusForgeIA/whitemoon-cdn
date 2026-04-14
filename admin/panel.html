@@ -1,0 +1,95 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WhiteMoon — Panel de Licencias</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#07070e;color:#ccc;padding:30px 5%;max-width:900px;margin:0 auto}
+h1{color:#fff;font-size:1.5rem;margin-bottom:4px}
+.sub{color:#666;font-size:.82rem;margin-bottom:24px}
+h2{color:#7c3aed;font-size:1rem;margin:28px 0 12px;border-bottom:1px solid #1a1a2e;padding-bottom:8px}
+h3{color:#fff;font-size:.88rem;margin:16px 0 6px}
+p{font-size:.84rem;line-height:1.7;margin-bottom:10px}
+code{background:#1a1a2e;padding:2px 8px;border-radius:4px;font-size:.78rem;color:#a78bfa}
+pre{background:#1a1a2e;padding:16px;border-radius:10px;overflow-x:auto;margin:10px 0 16px;font-size:.76rem;color:#e0e0e0;border:1px solid #2a2a3e;line-height:1.6}
+.card{background:#111;border:1px solid #1a1a2e;border-radius:12px;padding:20px;margin-bottom:16px}
+.num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#7c3aed;color:#fff;font-size:.7rem;font-weight:700;margin-right:6px}
+.steps{display:flex;flex-direction:column;gap:10px;margin:10px 0}
+.step{background:#0a0a14;border:1px solid #1a1a2e;border-radius:8px;padding:12px;font-size:.82rem}
+.step b{color:#fff}
+.tag-ok{background:rgba(34,197,94,.15);color:#22c55e;padding:3px 10px;border-radius:12px;font-size:.68rem;font-weight:600}
+.tag-off{background:rgba(239,68,68,.15);color:#ef4444;padding:3px 10px;border-radius:12px;font-size:.68rem;font-weight:600}
+.warn{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:8px;padding:12px;font-size:.8rem;color:#f59e0b;margin:12px 0}
+.ok{background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.15);border-radius:8px;padding:12px;font-size:.8rem;color:#22c55e;margin:12px 0}
+</style>
+</head>
+<body>
+
+<h1>🔐 Panel de Licencias</h1>
+<p class="sub">WhiteMoon · Gestión de tokens de chatbot IA</p>
+
+<div class="card" style="text-align:center;color:#666;font-size:.84rem;padding:30px">
+  Sin licencias activas.<br>Añade tu primer cliente en <code>licenses.json</code>
+</div>
+
+<h2>Alta de nuevo cliente</h2>
+
+<div class="steps">
+<div class="step"><span class="num">1</span> <b>Generar token:</b> formato <code>WM-SECTOR-NNN</code> (ej: <code>WM-DENTAL-001</code>)</div>
+<div class="step"><span class="num">2</span> <b>Añadir a <code>licenses.json</code>:</b></div>
+</div>
+
+<pre>{
+  "licenses": {
+    "WM-DENTAL-001": {
+      "biz": "Nombre del Negocio",
+      "domain": "dominiocliente.es",
+      "pack": "advance",
+      "active": true,
+      "created": "2026-04-15",
+      "expires": "2027-04-15",
+      "contact": "email@cliente.com",
+      "phone": "912345678",
+      "notes": "Pack Advance 99€/mes"
+    }
+  }
+}</pre>
+
+<div class="steps">
+<div class="step"><span class="num">3</span> <b>Subir a GitHub:</b> <code>git add . && git commit -m "Alta: NombreCliente" && git push</code></div>
+<div class="step"><span class="num">4</span> <b>Pegar en la web del cliente</b> (antes de <code>&lt;/body&gt;</code>):</div>
+</div>
+
+<pre>&lt;script src="https://TUUSUARIO.github.io/whitemoon-cdn/chat.js"
+  data-token="WM-DENTAL-001"
+  data-color="#4A90D9"
+  data-services="Servicio 1,Servicio 2,Pedir cita"
+  data-bot-name="Lucía"&gt;&lt;/script&gt;</pre>
+
+<h2>Desactivar cliente (impago)</h2>
+<div class="steps">
+<div class="step"><span class="num">1</span> Abrir <code>licenses.json</code></div>
+<div class="step"><span class="num">2</span> Cambiar <code>"active": true</code> → <code>"active": false</code></div>
+<div class="step"><span class="num">3</span> <code>git commit -am "Desactivar: NombreCliente" && git push</code></div>
+</div>
+<div class="warn">El chatbot desaparece de su web en minutos. El cliente no ve error — solo desaparece el botón.</div>
+
+<h2>Reactivar cliente</h2>
+<p>Cambiar <code>"active": false</code> → <code>"active": true</code> y hacer push.</p>
+
+<h2>Seguridad</h2>
+<div class="steps">
+<div class="step"><b>Sin token</b> → no carga nada</div>
+<div class="step"><b>Token inactivo</b> → no carga nada</div>
+<div class="step"><b>Dominio incorrecto</b> → si copian el código en otra web, no funciona</div>
+<div class="step"><b>Licencia expirada</b> → se desactiva automáticamente</div>
+</div>
+
+<div class="ok">Si un informático copia el script → el token está vinculado al dominio. Si dejan de pagar → desactivas el token y el chatbot desaparece de su web.</div>
+
+<p style="margin-top:40px;color:#444;font-size:.72rem;text-align:center">WHITEMOON · whitemoon.es · USO INTERNO</p>
+</body>
+</html>

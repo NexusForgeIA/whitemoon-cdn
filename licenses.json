@@ -1,3 +1,35 @@
 {
-  "licenses": {}
+  "licenses": {
+    "WM-17e3ae12e1f2a1b5acd2676d": {
+      "biz": "Whitemoon",
+      "domain": "whitemoon.es",
+      "pack": "pyme",
+      "active": true,
+      "created": "2026-04-17",
+      "expires": "2027-04-17",
+      "contact": "comercial@whitemoon.es",
+      "phone": "643199580",
+      "notes": "",
+      "botName": "Agente Chatbot",
+      "color": "#7c3aed",
+      "calendar": false,
+      "greeting": "",
+      "serviceButtons": [],
+      "pendingPayments": [
+        {
+          "concept": "2º pago setup Pyme (50%)",
+          "amount": 900,
+          "dueDate": "2026-10-17",
+          "paid": false
+        },
+        {
+          "concept": "Renovación mantenimiento anual",
+          "amount": 599,
+          "dueDate": "2027-04-17",
+          "paid": false
+        }
+      ],
+      "updated": "2026-04-17T13:39:00.785Z"
+    }
+  }
 }

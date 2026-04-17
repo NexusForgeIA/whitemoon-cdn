@@ -7,20 +7,21 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:#07070e;color:#ccc;min-height:100vh}
-.top{background:#111;border-bottom:1px solid #1a1a2e;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.top{background:#111;border-bottom:1px solid #1a1a2e;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:100}
 .logo{font-size:1.1rem;font-weight:700;color:#fff}.logo span{color:#7c3aed}
 .top-right{display:flex;gap:10px;align-items:center}
 .status{font-size:.7rem;padding:4px 12px;border-radius:12px;font-weight:600}
 .status.on{background:rgba(34,197,94,.15);color:#22c55e}
-.wrap{max-width:1000px;margin:0 auto;padding:24px}
+.wrap{max-width:1100px;margin:0 auto;padding:24px}
 h2{color:#7c3aed;font-size:.95rem;margin:24px 0 12px;display:flex;align-items:center;gap:8px}
 .card{background:#111;border:1px solid #1a1a2e;border-radius:12px;padding:20px;margin-bottom:16px}
 .login-card{max-width:500px;margin:80px auto;text-align:center}
 .login-card h1{color:#fff;font-size:1.3rem;margin-bottom:6px}
 .login-card p{font-size:.82rem;color:#888;margin-bottom:20px}
 label{font-size:.7rem;color:#888;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px}
-input[type="password"],input[type="text"],select,textarea{width:100%;background:#0a0a14;border:1px solid #222;border-radius:8px;padding:10px 14px;color:#fff;font-size:.85rem;font-family:inherit;outline:none}
+input[type="password"],input[type="text"],input[type="date"],input[type="email"],input[type="tel"],input[type="color"],select,textarea{width:100%;background:#0a0a14;border:1px solid #222;border-radius:8px;padding:10px 14px;color:#fff;font-size:.85rem;font-family:inherit;outline:none;transition:border .2s}
 input:focus,textarea:focus,select:focus{border-color:#7c3aed}
+input[type="color"]{padding:4px;height:42px;cursor:pointer}
 textarea{resize:vertical;min-height:60px;line-height:1.5}
 .btn{padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-weight:600;font-size:.82rem;transition:all .2s}
 .btn-p{background:#7c3aed;color:#fff}.btn-p:hover{background:#6d28d9}
@@ -28,16 +29,20 @@ textarea{resize:vertical;min-height:60px;line-height:1.5}
 .btn-r{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.2)}.btn-r:hover{background:rgba(239,68,68,.25)}
 .btn-o{background:rgba(124,58,237,.1);color:#a78bfa;border:1px solid rgba(124,58,237,.2)}.btn-o:hover{background:rgba(124,58,237,.2)}
 .btn-c{background:rgba(6,182,212,.1);color:#06b6d4;border:1px solid rgba(6,182,212,.2)}.btn-c:hover{background:rgba(6,182,212,.2)}
+.btn-y{background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.2)}.btn-y:hover{background:rgba(245,158,11,.2)}
 .btn-sm{padding:6px 14px;font-size:.74rem}.btn-xs{padding:4px 10px;font-size:.68rem}
+.btn:disabled{opacity:.5;cursor:not-allowed}
 table{width:100%;border-collapse:collapse}
-th{text-align:left;padding:10px 12px;color:#666;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid #1a1a2e}
-td{padding:10px 12px;border-bottom:1px solid #111;font-size:.82rem}
+th{text-align:left;padding:10px 12px;color:#666;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid #1a1a2e;cursor:pointer;user-select:none}
+th:hover{color:#a78bfa}
+td{padding:10px 12px;border-bottom:1px solid #111;font-size:.82rem;vertical-align:middle}
 tr:hover td{background:#0a0a14}
-.token{font-family:monospace;color:#a78bfa;font-size:.76rem}
+.token{font-family:'Courier New',monospace;color:#a78bfa;font-size:.72rem;word-break:break-all}
 .biz{font-weight:600;color:#fff}.domain{color:#888;font-size:.74rem}
-.badge{padding:3px 10px;border-radius:12px;font-size:.66rem;font-weight:600;display:inline-block}
+.badge{padding:3px 10px;border-radius:12px;font-size:.66rem;font-weight:600;display:inline-block;white-space:nowrap}
 .badge-on{background:rgba(34,197,94,.15);color:#22c55e}
 .badge-off{background:rgba(239,68,68,.15);color:#ef4444}
+.badge-warn{background:rgba(245,158,11,.15);color:#f59e0b}
 .empty{text-align:center;padding:40px;color:#555;font-size:.88rem}
 .flex{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -45,104 +50,1011 @@ tr:hover td{background:#0a0a14}
 .mb{margin-bottom:12px}
 .info{background:rgba(124,58,237,.06);border:1px solid rgba(124,58,237,.15);border-radius:8px;padding:12px;font-size:.78rem;color:#a78bfa;margin:8px 0 12px}
 .warn{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:8px;padding:12px;font-size:.78rem;color:#f59e0b;margin:12px 0}
-.toast{position:fixed;top:20px;right:20px;background:#22c55e;color:#fff;padding:12px 20px;border-radius:10px;font-size:.82rem;font-weight:600;display:none;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.err{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:8px;padding:12px;font-size:.78rem;color:#ef4444;margin:12px 0}
+.toast{position:fixed;top:20px;right:20px;padding:12px 20px;border-radius:10px;font-size:.82rem;font-weight:600;display:none;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.3);color:#fff;max-width:320px}
+.toast.ok{background:#22c55e}
+.toast.err{background:#ef4444}
+.toast.info{background:#7c3aed}
 .resp-row{display:flex;gap:8px;margin-bottom:8px;align-items:flex-start}
 .resp-row input{flex:1}.resp-row textarea{flex:2}
 .resp-del{background:none;border:none;color:#ef4444;cursor:pointer;font-size:1.1rem;padding:8px}
+.pay-row{display:grid;grid-template-columns:1fr 110px 110px 40px;gap:8px;margin-bottom:8px;align-items:center}
+.pay-row input{width:100%}
+.pay-item{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.pay-item .pi-biz{font-weight:600;color:#fff;font-size:.88rem}
+.pay-item .pi-d{font-size:.76rem;color:#aaa}
+.pay-item .pi-amt{font-weight:700;color:#f59e0b;font-size:1rem}
+.pay-item.overdue{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.2)}
+.pay-item.overdue .pi-amt{color:#ef4444}
+.pay-item.soon{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.3)}
+@media(max-width:600px){.pay-row{grid-template-columns:1fr 1fr 40px}.pay-row input:first-child{grid-column:1 / span 2}}
 code{background:#1a1a2e;padding:2px 6px;border-radius:4px;font-size:.78rem;color:#a78bfa}
 pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font-size:.76rem;color:#e0e0e0;overflow-x:auto;white-space:pre-wrap;margin:8px 0}
 .stitle{font-size:.78rem;font-weight:700;color:#fff;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid #1a1a2e}
-@media(max-width:600px){.g2,.g3{grid-template-columns:1fr}}
+.search-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.search-bar input,.search-bar select{flex:1;min-width:140px}
+.token-gen{display:flex;gap:4px;align-items:stretch}
+.token-gen input{flex:1}
+.token-gen button{padding:0 14px;background:#1a1a2e;color:#a78bfa;border:1px solid #2a2a3e;border-radius:8px;cursor:pointer;font-family:inherit;font-size:.74rem;font-weight:600}
+.token-gen button:hover{background:#2a2a3e}
+.stat-card{flex:1;min-width:120px;text-align:center}
+.stat-card .v{font-size:1.6rem;font-weight:700}
+.stat-card .l{font-size:.68rem;color:#888;margin-top:2px}
+.expire-soon{color:#f59e0b!important}
+.expired{color:#ef4444!important}
+.modal-bg{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-bg.show{display:flex}
+.modal{background:#111;border:1px solid #1a1a2e;border-radius:12px;padding:24px;max-width:450px;width:100%;text-align:center}
+.modal h3{color:#fff;margin-bottom:12px}
+.modal p{font-size:.85rem;color:#aaa;margin-bottom:18px;line-height:1.5}
+.ddown{position:relative;display:inline-block}
+.dmenu{display:none;position:absolute;right:0;top:100%;margin-top:4px;background:#111;border:1px solid #1a1a2e;border-radius:8px;min-width:160px;box-shadow:0 8px 24px rgba(0,0,0,.5);z-index:50}
+.dmenu.show{display:block}
+.dmenu a{display:block;padding:10px 14px;color:#ccc;text-decoration:none;font-size:.8rem;cursor:pointer;border-bottom:1px solid #1a1a2e}
+.dmenu a:hover{background:#0a0a14;color:#a78bfa}
+.dmenu a:last-child{border:none}
+.pw-toggle{position:relative}
+.pw-toggle .eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#666;cursor:pointer;font-size:1rem;padding:4px}
+@media(max-width:700px){.g2,.g3{grid-template-columns:1fr}table{font-size:.75rem}.wrap{padding:12px}.search-bar input,.search-bar select{min-width:120px}}
 </style>
 </head>
 <body>
 <div class="toast" id="toast"></div>
-<div id="loginView"><div class="card login-card"><div style="font-size:2rem;margin-bottom:12px">🔐</div><h1>Panel de Licencias</h1><p>WhiteMoon · Gestión de chatbots IA</p><div class="mb"><label>GitHub Personal Access Token</label><input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxx"></div><div class="warn" style="text-align:left">El token se guarda SOLO en tu navegador.</div><button class="btn btn-p" onclick="doLogin()" style="width:100%;margin-top:8px">Conectar</button></div></div>
+
+<!-- LOGIN -->
+<div id="loginView">
+  <div class="card login-card">
+    <div style="font-size:2rem;margin-bottom:12px">🔐</div>
+    <h1>Panel de Licencias</h1>
+    <p>WhiteMoon · Gestión de chatbots IA</p>
+    <div class="mb">
+      <label>GitHub Personal Access Token</label>
+      <div class="pw-toggle">
+        <input type="password" id="ghToken" placeholder="github_pat_... o ghp_...">
+        <button type="button" class="eye" onclick="togglePw()" title="Mostrar/ocultar">👁</button>
+      </div>
+    </div>
+    <div class="warn" style="text-align:left">🔒 El token se guarda SOLO en tu navegador (localStorage). Recomendado: usa un token <b>Fine-grained</b> con permisos limitados al repo y expiración de 90 días.</div>
+    <button class="btn btn-p" onclick="doLogin()" style="width:100%;margin-top:8px">Conectar</button>
+  </div>
+</div>
+
+<!-- PANEL -->
 <div id="panelView" style="display:none">
-<div class="top"><div class="logo">White<span>Moon</span> · Panel</div><div class="top-right"><span class="status on">Conectado</span><button class="btn btn-xs btn-o" onclick="doLogout()">Salir</button></div></div>
-<div class="wrap">
-<div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
-<div class="card" style="flex:1;min-width:100px;text-align:center"><div style="font-size:1.6rem;font-weight:700;color:#fff" id="sT">0</div><div style="font-size:.68rem;color:#888">Total</div></div>
-<div class="card" style="flex:1;min-width:100px;text-align:center"><div style="font-size:1.6rem;font-weight:700;color:#22c55e" id="sA">0</div><div style="font-size:.68rem;color:#888">Activos</div></div>
-<div class="card" style="flex:1;min-width:100px;text-align:center"><div style="font-size:1.6rem;font-weight:700;color:#ef4444" id="sI">0</div><div style="font-size:.68rem;color:#888">Inactivos</div></div>
+  <div class="top">
+    <div class="logo">White<span>Moon</span> · Panel</div>
+    <div class="top-right">
+      <span class="status on" id="statusDot">Conectado</span>
+      <div class="ddown">
+        <button class="btn btn-xs btn-o" onclick="toggleMenu(event)">⋮ Más</button>
+        <div class="dmenu" id="dmenu">
+          <a onclick="showPendingPayments()">💸 Ver pagos pendientes</a>
+          <a onclick="exportCSV()">📥 Exportar CSV</a>
+          <a onclick="exportPaymentsCSV()">📥 Exportar pagos pendientes</a>
+          <a onclick="exportJSON()">💾 Backup JSON</a>
+          <a onclick="reloadData()">🔄 Recargar</a>
+          <a onclick="doLogout()">🚪 Salir</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <!-- ESTADÍSTICAS -->
+    <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+      <div class="card stat-card"><div class="v" style="color:#fff" id="sT">0</div><div class="l">Total clientes</div></div>
+      <div class="card stat-card"><div class="v" style="color:#22c55e" id="sA">0</div><div class="l">Activos</div></div>
+      <div class="card stat-card"><div class="v" style="color:#ef4444" id="sI">0</div><div class="l">Inactivos</div></div>
+      <div class="card stat-card"><div class="v" style="color:#f59e0b" id="sE">0</div><div class="l">Expiran ≤30d</div></div>
+      <div class="card stat-card"><div class="v" style="color:#06b6d4" id="sR">0€</div><div class="l">Ingreso/mes</div></div>
+      <div class="card stat-card" style="cursor:pointer" onclick="showPendingPayments()" title="Click para ver detalle"><div class="v" style="color:#f59e0b" id="sP">0€</div><div class="l">💸 Pendiente cobrar</div></div>
+    </div>
+
+    <!-- PAGOS PENDIENTES (detalle) -->
+    <div class="card" id="pendingCard" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h2 style="margin:0">💸 Pagos pendientes</h2>
+        <button class="btn btn-xs btn-o" onclick="$('pendingCard').style.display='none'">Ocultar</button>
+      </div>
+      <div id="pendingList"></div>
+    </div>
+
+    <!-- TABLA -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+        <h2 style="margin:0">🤖 Licencias</h2>
+        <button class="btn btn-p btn-sm" onclick="showAdd()">+ Nuevo cliente</button>
+      </div>
+      <div class="search-bar">
+        <input type="text" id="searchQ" placeholder="🔍 Buscar por nombre, token, dominio, email..." oninput="render()">
+        <select id="filterPack" onchange="render()">
+          <option value="">Todos los packs</option>
+          <option value="basic">Basic</option>
+          <option value="advance">Advance</option>
+          <option value="pyme">Pyme</option>
+          <option value="enterprise">Enterprise</option>
+        </select>
+        <select id="filterStatus" onchange="render()">
+          <option value="">Todos los estados</option>
+          <option value="active">Activos</option>
+          <option value="inactive">Inactivos</option>
+          <option value="expiring">Expiran pronto</option>
+        </select>
+      </div>
+      <div id="tbl"><div class="empty">Cargando...</div></div>
+    </div>
+
+    <!-- FORMULARIO -->
+    <div class="card" id="frm" style="display:none">
+      <h2 style="margin-top:0" id="frmTitle">➕ Nuevo cliente</h2>
+      <input type="hidden" id="fMode" value="add">
+      <input type="hidden" id="fOrig" value="">
+
+      <div class="stitle">Datos del negocio</div>
+      <div class="g2 mb">
+        <div>
+          <label>Token <span style="color:#f59e0b">*</span></label>
+          <div class="token-gen">
+            <input type="text" id="fTk" placeholder="WM-..." maxlength="60">
+            <button type="button" onclick="genTk()" title="Generar token aleatorio seguro">🎲 Generar</button>
+          </div>
+        </div>
+        <div>
+          <label>Nombre negocio <span style="color:#f59e0b">*</span></label>
+          <input type="text" id="fBiz" placeholder="Clínica Dental Sonríe" maxlength="100">
+        </div>
+      </div>
+      <div class="g2 mb">
+        <div><label>Dominio</label><input type="text" id="fDom" placeholder="clinicasonrie.es" maxlength="100"></div>
+        <div>
+          <label>Pack</label>
+          <select id="fPk" onchange="suggestPayments()">
+            <option value="basic">Basic 49€/mes</option>
+            <option value="advance" selected>Advance 99€/mes</option>
+            <option value="pyme">Pyme 1.800€</option>
+            <option value="enterprise">Enterprise 3.599€</option>
+          </select>
+        </div>
+      </div>
+      <div class="g2 mb">
+        <div><label>Email contacto</label><input type="email" id="fEm" placeholder="info@cliente.es" maxlength="100"></div>
+        <div><label>Teléfono</label><input type="tel" id="fPh" placeholder="912345678" maxlength="20"></div>
+      </div>
+      <div class="g2 mb">
+        <div><label>Fecha alta</label><input type="date" id="fCr"></div>
+        <div><label>Fecha expiración</label><input type="date" id="fEx"></div>
+      </div>
+      <div class="mb"><label>Notas internas</label><input type="text" id="fNo" placeholder="Observaciones..." maxlength="300"></div>
+
+      <div class="stitle">💸 Pagos pendientes (opcional)</div>
+      <div class="info">Para Pyme (2º pago 900€ a los 6 meses) o cualquier pago futuro que tengas que cobrar a este cliente. Se mostrará en la tarjeta "Pendiente cobrar".</div>
+      <div id="paysList"></div>
+      <button class="btn btn-sm btn-y" onclick="addPay()" style="margin:8px 0 16px">+ Añadir pago pendiente</button>
+
+      <div class="stitle">Configuración chatbot</div>
+      <div class="g3 mb">
+        <div><label>Nombre asistente</label><input type="text" id="fBn" placeholder="Lucía" value="Asistente" maxlength="30"></div>
+        <div><label>Color principal</label><input type="color" id="fCo" value="#7c3aed"></div>
+        <div><label>Calendario</label><select id="fCal"><option value="true">Sí</option><option value="false">No</option></select></div>
+      </div>
+      <div class="mb"><label>Saludo inicial</label><input type="text" id="fGr" placeholder="¡Hola! 👋 Bienvenido/a. ¿En qué puedo ayudarte?" maxlength="200"></div>
+      <div class="mb"><label>Botones rápidos (separados por coma)</label><input type="text" id="fBt" placeholder="Implantes, Ortodoncia, Blanqueamiento, Pedir cita" maxlength="300"></div>
+
+      <div class="stitle">Respuestas personalizadas</div>
+      <div class="info">Cada fila: <b>palabras clave</b> (separadas por coma) → <b>respuesta</b> del chatbot. Si el cliente escribe algo que contenga esas palabras, responde con ese texto. Después le pide datos de contacto.</div>
+      <div id="rList"></div>
+      <button class="btn btn-sm btn-c" onclick="addR()" style="margin:8px 0 16px">+ Añadir respuesta</button>
+
+      <div class="stitle">Mensajes del flujo</div>
+      <div class="mb"><label>Pedir nombre</label><textarea id="fAN" rows="2" placeholder="¿Me dices tu nombre y apellidos?"></textarea></div>
+      <div class="mb"><label>Pedir teléfono (usa {nombre})</label><textarea id="fAP" rows="2" placeholder="Perfecto {nombre}. ¿Un teléfono móvil?"></textarea></div>
+      <div class="mb"><label>Resumen cita (usa {nombre} {telefono} {servicio} {fecha} {hora})</label><textarea id="fSu" rows="4" placeholder="Perfecto {nombre}. He tomado nota:&#10;• Nombre: {nombre}&#10;• Teléfono: {telefono}&#10;• Servicio: {servicio}&#10;&#10;Nuestro equipo confirmará por WhatsApp. ¡Saludos!"></textarea></div>
+      <div class="mb"><label>Despedida</label><textarea id="fBy" rows="2" placeholder="Nuestro equipo te contactará por WhatsApp. ¡Saludos y gracias! 😊"></textarea></div>
+
+      <div class="flex" style="margin-top:12px;justify-content:space-between">
+        <div class="flex">
+          <button class="btn btn-p" onclick="saveF()" id="saveBtn">Guardar</button>
+          <button class="btn btn-o" onclick="hideF()">Cancelar</button>
+        </div>
+        <small style="color:#666;font-size:.7rem">Ctrl+S para guardar · Esc para cancelar</small>
+      </div>
+    </div>
+
+    <!-- CÓDIGO -->
+    <div class="card" id="codeC" style="display:none">
+      <h2 style="margin-top:0">📋 Código para el cliente</h2>
+      <p style="font-size:.78rem;color:#888;margin-bottom:8px">Pegar antes de <code>&lt;/body&gt;</code> en la web del cliente:</p>
+      <pre id="codeO"></pre>
+      <div class="flex" style="margin-top:8px">
+        <button class="btn btn-sm btn-o" onclick="cpCode()">📋 Copiar código</button>
+        <button class="btn btn-sm btn-c" onclick="emailCode()">✉️ Email al cliente</button>
+      </div>
+    </div>
+  </div>
 </div>
-<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><h2 style="margin:0">🤖 Licencias</h2><button class="btn btn-p btn-sm" onclick="showAdd()">+ Nuevo cliente</button></div><div id="tbl"><div class="empty">Cargando...</div></div></div>
 
-<!-- FORM -->
-<div class="card" id="frm" style="display:none">
-<h2 style="margin-top:0" id="frmTitle">➕ Nuevo cliente</h2>
-<input type="hidden" id="fMode" value="add"><input type="hidden" id="fOrig" value="">
-<div class="stitle">Datos del negocio</div>
-<div class="g2 mb"><div><label>Token</label><input type="text" id="fTk" placeholder="WM-DENTAL-001"></div><div><label>Nombre negocio</label><input type="text" id="fBiz" placeholder="Clínica Dental Sonríe"></div></div>
-<div class="g2 mb"><div><label>Dominio</label><input type="text" id="fDom" placeholder="clinicasonrie.es"></div><div><label>Pack</label><select id="fPk"><option value="basic">Basic 49€/mes</option><option value="advance" selected>Advance 99€/mes</option><option value="pyme">Pyme 1.800€</option><option value="enterprise">Enterprise 3.599€</option></select></div></div>
-<div class="g2 mb"><div><label>Email</label><input type="text" id="fEm" placeholder="info@cliente.es"></div><div><label>Teléfono</label><input type="text" id="fPh" placeholder="912345678"></div></div>
-<div class="g2 mb"><div><label>Alta</label><input type="text" id="fCr"></div><div><label>Expira</label><input type="text" id="fEx"></div></div>
-<div class="mb"><label>Notas</label><input type="text" id="fNo" placeholder="Observaciones..."></div>
-
-<div class="stitle">Configuración chatbot</div>
-<div class="g3 mb"><div><label>Nombre asistente</label><input type="text" id="fBn" placeholder="Lucía" value="Asistente"></div><div><label>Color</label><input type="text" id="fCo" placeholder="#7c3aed" value="#7c3aed"></div><div><label>Calendario</label><select id="fCal"><option value="true">Sí</option><option value="false">No</option></select></div></div>
-<div class="mb"><label>Saludo inicial</label><input type="text" id="fGr" placeholder="¡Hola! 👋 Bienvenido/a. ¿En qué puedo ayudarte?"></div>
-<div class="mb"><label>Botones rápidos (coma)</label><input type="text" id="fBt" placeholder="Implantes, Ortodoncia, Blanqueamiento, Pedir cita"></div>
-
-<div class="stitle">Respuestas personalizadas</div>
-<div class="info">Cada fila: <b>palabras clave</b> (separadas por coma) → <b>respuesta</b> del chatbot. Si el cliente escribe algo que contenga esas palabras, responde con ese texto. Después le pide datos de contacto.</div>
-<div id="rList"></div>
-<button class="btn btn-sm btn-c" onclick="addR()" style="margin:8px 0 16px">+ Añadir respuesta</button>
-
-<div class="stitle">Mensajes del flujo</div>
-<div class="mb"><label>Pedir nombre</label><textarea id="fAN" rows="2" placeholder="¿Me dices tu nombre y apellidos?"></textarea></div>
-<div class="mb"><label>Pedir teléfono (usa {nombre})</label><textarea id="fAP" rows="2" placeholder="Perfecto {nombre}. ¿Un teléfono móvil?"></textarea></div>
-<div class="mb"><label>Resumen cita (usa {nombre} {telefono} {servicio} {fecha} {hora})</label><textarea id="fSu" rows="4" placeholder="Perfecto {nombre}. He tomado nota:&#10;• Nombre: {nombre}&#10;• Teléfono: {telefono}&#10;• Servicio: {servicio}&#10;&#10;Nuestro equipo confirmará por WhatsApp. ¡Saludos!"></textarea></div>
-<div class="mb"><label>Despedida</label><textarea id="fBy" rows="2" placeholder="Nuestro equipo te contactará por WhatsApp. ¡Saludos y gracias! 😊"></textarea></div>
-
-<div class="flex" style="margin-top:12px"><button class="btn btn-p" onclick="saveF()">Guardar</button><button class="btn btn-o" onclick="hideF()">Cancelar</button></div>
+<!-- MODAL CONFIRMACIÓN -->
+<div class="modal-bg" id="confirmModal">
+  <div class="modal">
+    <h3 id="cmTitle">¿Confirmar?</h3>
+    <p id="cmText">Esta acción no se puede deshacer.</p>
+    <div class="flex" style="justify-content:center">
+      <button class="btn btn-r" id="cmOk">Sí, confirmar</button>
+      <button class="btn btn-o" onclick="closeCm()">Cancelar</button>
+    </div>
+  </div>
 </div>
-
-<div class="card" id="codeC" style="display:none"><h2 style="margin-top:0">📋 Código para el cliente</h2><p style="font-size:.78rem;color:#888;margin-bottom:8px">Pegar antes de <code>&lt;/body&gt;</code>:</p><pre id="codeO"></pre><button class="btn btn-sm btn-o" onclick="cpCode()" style="margin-top:8px">Copiar código</button></div>
-</div></div>
 
 <script>
-var REPO='NexusForgeIA/whitemoon-cdn',FILE='licenses.json',ghToken='',lics={},sha='';
+/* ============================================================
+   CONFIG
+   ============================================================ */
+var REPO='NexusForgeIA/whitemoon-cdn';
+var FILE='licenses.json';
+var CDN_BASE='https://nexusforgeia.github.io/whitemoon-cdn';
+var PACK_PRICES={
+  // Ingresos MENSUALES reales (mensualidad + mantenimiento anual prorrateado /12)
+  // Setups son pagos únicos ya cobrados, NO cuentan como recurrente
+  basic:      49   + (89/12),    // 49€/mes + 89€/año mant. = 56,42€/mes
+  advance:    99   + (199/12),   // 99€/mes + 199€/año mant. = 115,58€/mes
+  pyme:              (599/12),   // pago único + 599€/año mant. = 49,92€/mes
+  enterprise:        (1399/12)   // pago único + 1.399€/año mant. = 116,58€/mes
+};
+
+/* ============================================================
+   ESTADO
+   ============================================================ */
+var ghToken='';
+var lics={};
+var sha='';
+var currentSort={col:'created',dir:'desc'};
+
+/* ============================================================
+   UTILIDADES
+   ============================================================ */
 function $(i){return document.getElementById(i)}
-function toast(m){var t=$('toast');t.textContent='\u2713 '+m;t.style.display='block';setTimeout(function(){t.style.display='none'},2500)}
-function doLogin(){ghToken=$('ghToken').value.trim();if(!ghToken)return;localStorage.setItem('wm_t',ghToken);$('loginView').style.display='none';$('panelView').style.display='block';load()}
-function doLogout(){localStorage.removeItem('wm_t');location.reload()}
-var sv=localStorage.getItem('wm_t');if(sv){ghToken=sv;$('loginView').style.display='none';$('panelView').style.display='block';load()}
 
-function load(){fetch('https://api.github.com/repos/'+REPO+'/contents/'+FILE,{headers:{'Authorization':'Bearer '+ghToken}}).then(function(r){return r.json()}).then(function(d){sha=d.sha;lics=JSON.parse(atob(d.content.replace(/\n/g,''))).licenses||{};render()}).catch(function(){$('tbl').innerHTML='<div class="empty" style="color:#ef4444">Error. Verifica token.</div>'})}
+function toast(m,type){
+  type=type||'ok';
+  var t=$('toast');
+  t.className='toast '+type;
+  t.innerHTML=(type==='err'?'⚠ ':type==='info'?'ℹ ':'✓ ')+m;
+  t.style.display='block';
+  clearTimeout(window._toastT);
+  window._toastT=setTimeout(function(){t.style.display='none'},3500);
+}
 
-function save(msg){var c=JSON.stringify({licenses:lics},null,2);var e=btoa(unescape(encodeURIComponent(c)));return fetch('https://api.github.com/repos/'+REPO+'/contents/'+FILE,{method:'PUT',headers:{'Authorization':'Bearer '+ghToken,'Content-Type':'application/json'},body:JSON.stringify({message:msg,content:e,sha:sha})}).then(function(r){return r.json()}).then(function(d){sha=d.content.sha;render();return d})}
+function escapeHtml(s){
+  if(!s)return'';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 
-function render(){var ks=Object.keys(lics),ac=ks.filter(function(k){return lics[k].active}).length;$('sT').textContent=ks.length;$('sA').textContent=ac;$('sI').textContent=ks.length-ac;if(!ks.length){$('tbl').innerHTML='<div class="empty">Sin clientes.</div>';return}
-var h='<table><thead><tr><th>Token</th><th>Negocio</th><th>Pack</th><th>Estado</th><th>Respuestas</th><th>Acciones</th></tr></thead><tbody>';
-ks.forEach(function(k){var l=lics[k];var rc=l.responses?Object.keys(l.responses).filter(function(x){return!x.startsWith('_')}).length:0;
-h+='<tr><td class="token">'+k+'</td><td><span class="biz">'+l.biz+'</span><br><span class="domain">'+(l.domain||'')+'</span></td><td>'+(l.pack||'—')+'</td><td><span class="badge '+(l.active?'badge-on':'badge-off')+'">'+(l.active?'ACTIVA':'INACTIVA')+'</span></td><td style="color:#06b6d4">'+rc+' resp.</td><td class="flex">';
-h+=l.active?'<button class="btn btn-r btn-xs" onclick="tog(\''+k+'\',false)">Desactivar</button>':'<button class="btn btn-g btn-xs" onclick="tog(\''+k+'\',true)">Activar</button>';
-h+='<button class="btn btn-c btn-xs" onclick="edit(\''+k+'\')">Editar</button><button class="btn btn-o btn-xs" onclick="code(\''+k+'\')">Código</button><button class="btn btn-xs" style="background:rgba(239,68,68,.06);color:#ef4444;border:1px solid rgba(239,68,68,.12)" onclick="del(\''+k+'\')">X</button></td></tr>'});
-h+='</tbody></table>';$('tbl').innerHTML=h}
+function sanitizeToken(t){
+  // solo letras, números y guiones. Max 60 caracteres
+  return String(t||'').replace(/[^A-Za-z0-9\-_]/g,'').substring(0,60);
+}
 
-function tog(k,a){lics[k].active=a;save((a?'Activar':'Desactivar')+': '+lics[k].biz).then(function(){toast(lics[k].biz+(a?' activado':' desactivado'))})}
-function del(k){if(!confirm('¿Eliminar '+k+'?'))return;var n=lics[k].biz;delete lics[k];save('Eliminar: '+n).then(function(){toast(n+' eliminado')})}
+function genTkValue(){
+  // genera token criptográficamente seguro: WM- + 24 caracteres hex
+  var array=new Uint8Array(12);
+  crypto.getRandomValues(array);
+  var hex=Array.from(array,function(b){return b.toString(16).padStart(2,'0')}).join('');
+  return 'WM-'+hex;
+}
 
-function showAdd(){$('fMode').value='add';$('fOrig').value='';$('frmTitle').textContent='\u2795 Nuevo cliente';$('fTk').value='WM-';$('fTk').readOnly=false;$('fBiz').value='';$('fDom').value='';$('fPk').value='advance';$('fEm').value='';$('fPh').value='';$('fNo').value='';$('fBn').value='Asistente';$('fCo').value='#7c3aed';$('fCal').value='true';$('fGr').value='';$('fBt').value='';$('fAN').value='';$('fAP').value='';$('fSu').value='';$('fBy').value='';$('rList').innerHTML='';var t=new Date().toISOString().split('T')[0];$('fCr').value=t;$('fEx').value=new Date(new Date().setFullYear(new Date().getFullYear()+1)).toISOString().split('T')[0];$('frm').style.display='block';$('frm').scrollIntoView({behavior:'smooth'})}
+function genTk(){
+  var t=genTkValue();
+  $('fTk').value=t;
+  toast('Token seguro generado','info');
+}
 
-function edit(k){var l=lics[k];$('fMode').value='edit';$('fOrig').value=k;$('frmTitle').textContent='\u270f\ufe0f '+l.biz;$('fTk').value=k;$('fTk').readOnly=true;$('fBiz').value=l.biz||'';$('fDom').value=l.domain||'';$('fPk').value=l.pack||'advance';$('fEm').value=l.contact||'';$('fPh').value=l.phone||'';$('fNo').value=l.notes||'';$('fBn').value=l.botName||'Asistente';$('fCo').value=l.color||'#7c3aed';$('fCal').value=l.calendar===false?'false':'true';$('fGr').value=l.greeting||'';$('fBt').value=(l.serviceButtons||[]).join(', ');$('fAN').value=(l.responses&&l.responses._ask_name)||'';$('fAP').value=(l.responses&&l.responses._ask_phone)||'';$('fSu').value=(l.responses&&l.responses._summary)||'';$('fBy').value=(l.responses&&l.responses._goodbye)||'';$('rList').innerHTML='';if(l.responses)Object.keys(l.responses).forEach(function(x){if(!x.startsWith('_'))addR(x,l.responses[x])});$('frm').style.display='block';$('frm').scrollIntoView({behavior:'smooth'})}
+function togglePw(){
+  var i=$('ghToken');
+  i.type=i.type==='password'?'text':'password';
+}
 
-function hideF(){$('frm').style.display='none'}
-function addR(k,v){var d=document.createElement('div');d.className='resp-row';d.innerHTML='<input type="text" class="rk" placeholder="Palabras clave (coma)" value="'+(k||'').replace(/"/g,'&quot;')+'"><textarea class="rv" rows="2" placeholder="Respuesta del chatbot...">'+(v||'').replace(/</g,'&lt;')+'</textarea><button class="resp-del" onclick="this.parentElement.remove()">\u00d7</button>';$('rList').appendChild(d)}
+function toggleMenu(e){
+  e.stopPropagation();
+  $('dmenu').classList.toggle('show');
+}
+document.addEventListener('click',function(){$('dmenu').classList.remove('show')});
 
-function saveF(){var tk=$('fTk').value.trim(),biz=$('fBiz').value.trim();if(!tk||!biz){alert('Token y nombre obligatorios');return}var mode=$('fMode').value;if(mode==='add'&&lics[tk]){alert('Token existe');return}
-var resp={};document.querySelectorAll('.resp-row').forEach(function(r){var k=r.querySelector('.rk').value.trim(),v=r.querySelector('.rv').value.trim();if(k&&v)resp[k]=v});
-if($('fAN').value.trim())resp._ask_name=$('fAN').value.trim();
-if($('fAP').value.trim())resp._ask_phone=$('fAP').value.trim();
-if($('fSu').value.trim())resp._summary=$('fSu').value.trim();
-if($('fBy').value.trim())resp._goodbye=$('fBy').value.trim();
-var bt=$('fBt').value.trim();
-lics[tk]={biz:biz,domain:$('fDom').value.trim(),pack:$('fPk').value,active:mode==='edit'?lics[$('fOrig').value].active:true,created:$('fCr').value,expires:$('fEx').value,contact:$('fEm').value.trim(),phone:$('fPh').value.trim(),notes:$('fNo').value.trim(),botName:$('fBn').value.trim()||'Asistente',color:$('fCo').value.trim()||'#7c3aed',calendar:$('fCal').value!=='false',greeting:$('fGr').value.trim(),serviceButtons:bt?bt.split(',').map(function(s){return s.trim()}):[],responses:Object.keys(resp).length?resp:undefined};
-save((mode==='add'?'Alta':'Editar')+': '+biz).then(function(){toast(biz+(mode==='add'?' alta':' actualizado'));hideF();if(mode==='add')code(tk)})}
+function daysUntil(dateStr){
+  if(!dateStr)return null;
+  var d=new Date(dateStr);
+  if(isNaN(d))return null;
+  var now=new Date();now.setHours(0,0,0,0);
+  return Math.floor((d-now)/(1000*60*60*24));
+}
 
-function code(k){var l=lics[k];var sv=l.serviceButtons&&l.serviceButtons.length?'\n  data-services="'+l.serviceButtons.join(',')+'"':'';var c='<!-- WhiteMoon Chatbot IA -->\n<script src="https://nexusforgeia.github.io/whitemoon-cdn/chat.js"\n  data-token="'+k+'"'+(l.color&&l.color!=='#7c3aed'?'\n  data-color="'+l.color+'"':'')+sv+(l.botName&&l.botName!=='Asistente'?'\n  data-bot-name="'+l.botName+'"':'')+'><\/script>';$('codeO').textContent=c;$('codeC').style.display='block';$('codeC').scrollIntoView({behavior:'smooth'})}
-function cpCode(){navigator.clipboard.writeText($('codeO').textContent);toast('Código copiado')}
+/* ============================================================
+   LOGIN / LOGOUT
+   ============================================================ */
+function doLogin(){
+  var t=$('ghToken').value.trim();
+  if(!t){toast('Introduce un token','err');return}
+  // validación básica del formato
+  if(!t.match(/^(ghp_|github_pat_)/)){
+    if(!confirm('El token no tiene un formato estándar de GitHub. ¿Continuar de todas formas?'))return;
+  }
+  ghToken=t;
+  localStorage.setItem('wm_t',ghToken);
+  $('loginView').style.display='none';
+  $('panelView').style.display='block';
+  load();
+}
+
+function doLogout(){
+  if(!confirm('¿Cerrar sesión? Tendrás que volver a pegar el token.'))return;
+  localStorage.removeItem('wm_t');
+  location.reload();
+}
+
+var sv=localStorage.getItem('wm_t');
+if(sv){
+  ghToken=sv;
+  $('loginView').style.display='none';
+  $('panelView').style.display='block';
+  load();
+}
+
+/* ============================================================
+   API GITHUB: CARGAR / GUARDAR
+   ============================================================ */
+function load(){
+  $('tbl').innerHTML='<div class="empty">Cargando...</div>';
+  fetch('https://api.github.com/repos/'+REPO+'/contents/'+FILE,{
+    headers:{'Authorization':'Bearer '+ghToken,'Accept':'application/vnd.github+json'}
+  })
+  .then(function(r){
+    if(r.status===401){throw new Error('Token inválido o caducado')}
+    if(r.status===404){throw new Error('Archivo licenses.json no existe en el repo')}
+    if(!r.ok)throw new Error('Error '+r.status);
+    return r.json();
+  })
+  .then(function(d){
+    sha=d.sha;
+    var decoded=decodeURIComponent(escape(atob(d.content.replace(/\n/g,''))));
+    var parsed=JSON.parse(decoded);
+    lics=parsed.licenses||{};
+    render();
+  })
+  .catch(function(err){
+    $('tbl').innerHTML='<div class="err">❌ '+escapeHtml(err.message)+'. Verifica que tu token tiene permisos Contents: Read and write en el repo '+REPO+'.</div>';
+    toast(err.message,'err');
+  });
+}
+
+function reloadData(){
+  toast('Recargando...','info');
+  load();
+}
+
+function save(msg){
+  var saveBtn=$('saveBtn');
+  if(saveBtn)saveBtn.disabled=true;
+  var c=JSON.stringify({licenses:lics},null,2);
+  var e=btoa(unescape(encodeURIComponent(c)));
+  return fetch('https://api.github.com/repos/'+REPO+'/contents/'+FILE,{
+    method:'PUT',
+    headers:{'Authorization':'Bearer '+ghToken,'Content-Type':'application/json','Accept':'application/vnd.github+json'},
+    body:JSON.stringify({message:msg,content:e,sha:sha})
+  })
+  .then(function(r){
+    if(!r.ok)throw new Error('Error al guardar ('+r.status+')');
+    return r.json();
+  })
+  .then(function(d){
+    sha=d.content.sha;
+    render();
+    if(saveBtn)saveBtn.disabled=false;
+    return d;
+  })
+  .catch(function(err){
+    if(saveBtn)saveBtn.disabled=false;
+    toast(err.message,'err');
+    throw err;
+  });
+}
+
+/* ============================================================
+   RENDER TABLA + ESTADÍSTICAS
+   ============================================================ */
+function render(){
+  var ks=Object.keys(lics);
+  var ac=0,ex=0,rev=0,pendingTotal=0;
+  var now=new Date();now.setHours(0,0,0,0);
+
+  ks.forEach(function(k){
+    var l=lics[k];
+    if(l.active){
+      ac++;
+      // contar ingresos de activos
+      var price=PACK_PRICES[l.pack]||0;
+      rev+=price;
+      // contar expiraciones próximas
+      var d=daysUntil(l.expires);
+      if(d!==null&&d>=0&&d<=30)ex++;
+    }
+    // contar pagos pendientes (de activos e inactivos)
+    if(l.pendingPayments&&l.pendingPayments.length){
+      l.pendingPayments.forEach(function(p){
+        if(!p.paid&&p.amount>0)pendingTotal+=parseFloat(p.amount)||0;
+      });
+    }
+  });
+
+  $('sT').textContent=ks.length;
+  $('sA').textContent=ac;
+  $('sI').textContent=ks.length-ac;
+  $('sE').textContent=ex;
+  $('sR').textContent=Math.round(rev)+'€';
+  $('sP').textContent=Math.round(pendingTotal)+'€';
+
+  // aplicar filtros y búsqueda
+  var q=($('searchQ').value||'').toLowerCase().trim();
+  var fPack=$('filterPack').value;
+  var fStatus=$('filterStatus').value;
+
+  var filtered=ks.filter(function(k){
+    var l=lics[k];
+    if(fPack&&l.pack!==fPack)return false;
+    if(fStatus==='active'&&!l.active)return false;
+    if(fStatus==='inactive'&&l.active)return false;
+    if(fStatus==='expiring'){
+      var d=daysUntil(l.expires);
+      if(d===null||d<0||d>30)return false;
+    }
+    if(q){
+      var hay=(k+' '+(l.biz||'')+' '+(l.domain||'')+' '+(l.contact||'')+' '+(l.phone||'')).toLowerCase();
+      if(hay.indexOf(q)===-1)return false;
+    }
+    return true;
+  });
+
+  // ordenación
+  filtered.sort(function(a,b){
+    var la=lics[a],lb=lics[b];
+    var va,vb;
+    switch(currentSort.col){
+      case'biz':va=la.biz||'';vb=lb.biz||'';break;
+      case'pack':va=la.pack||'';vb=lb.pack||'';break;
+      case'expires':va=la.expires||'';vb=lb.expires||'';break;
+      default:va=la.created||'';vb=lb.created||'';
+    }
+    if(va<vb)return currentSort.dir==='asc'?-1:1;
+    if(va>vb)return currentSort.dir==='asc'?1:-1;
+    return 0;
+  });
+
+  if(!ks.length){
+    $('tbl').innerHTML='<div class="empty">Sin clientes. Pulsa "+ Nuevo cliente" para empezar.</div>';
+    return;
+  }
+  if(!filtered.length){
+    $('tbl').innerHTML='<div class="empty">Ningún cliente coincide con los filtros.</div>';
+    return;
+  }
+
+  var h='<table><thead><tr>';
+  h+='<th onclick="sortBy(\'biz\')">Negocio</th>';
+  h+='<th>Token</th>';
+  h+='<th onclick="sortBy(\'pack\')">Pack</th>';
+  h+='<th>Estado</th>';
+  h+='<th onclick="sortBy(\'expires\')">Expira</th>';
+  h+='<th>Resp.</th>';
+  h+='<th>Acciones</th>';
+  h+='</tr></thead><tbody>';
+
+  filtered.forEach(function(k){
+    var l=lics[k];
+    var rc=l.responses?Object.keys(l.responses).filter(function(x){return!x.startsWith('_')}).length:0;
+    var d=daysUntil(l.expires);
+    var expClass='',expBadge='';
+    if(d!==null){
+      if(d<0){expClass='expired';expBadge='<br><small style="color:#ef4444">⚠ Expirada hace '+Math.abs(d)+'d</small>'}
+      else if(d<=30){expClass='expire-soon';expBadge='<br><small style="color:#f59e0b">⏰ En '+d+'d</small>'}
+    }
+
+    h+='<tr>';
+    h+='<td><span class="biz">'+escapeHtml(l.biz)+'</span>';
+    if(l.domain)h+='<br><span class="domain">'+escapeHtml(l.domain)+'</span>';
+    h+='</td>';
+    h+='<td class="token">'+escapeHtml(k)+'</td>';
+    h+='<td>'+escapeHtml(l.pack||'—')+'</td>';
+    h+='<td><span class="badge '+(l.active?'badge-on':'badge-off')+'">'+(l.active?'ACTIVA':'INACTIVA')+'</span></td>';
+    h+='<td class="'+expClass+'">'+escapeHtml(l.expires||'—')+expBadge+'</td>';
+    h+='<td style="color:#06b6d4">'+rc+'</td>';
+    h+='<td class="flex">';
+    h+=l.active
+      ?'<button class="btn btn-r btn-xs" onclick="tog(\''+escapeHtml(k)+'\',false)" title="Desactivar chatbot">Desactivar</button>'
+      :'<button class="btn btn-g btn-xs" onclick="tog(\''+escapeHtml(k)+'\',true)" title="Reactivar chatbot">Activar</button>';
+    h+='<button class="btn btn-c btn-xs" onclick="edit(\''+escapeHtml(k)+'\')" title="Editar">✎</button>';
+    h+='<button class="btn btn-o btn-xs" onclick="code(\''+escapeHtml(k)+'\')" title="Ver código">&lt;/&gt;</button>';
+    h+='<button class="btn btn-y btn-xs" onclick="dupl(\''+escapeHtml(k)+'\')" title="Duplicar">⎘</button>';
+    h+='<button class="btn btn-xs" style="background:rgba(239,68,68,.06);color:#ef4444;border:1px solid rgba(239,68,68,.12)" onclick="del(\''+escapeHtml(k)+'\')" title="Eliminar">✕</button>';
+    h+='</td></tr>';
+  });
+  h+='</tbody></table>';
+  $('tbl').innerHTML=h;
+}
+
+function sortBy(col){
+  if(currentSort.col===col){
+    currentSort.dir=currentSort.dir==='asc'?'desc':'asc';
+  } else {
+    currentSort.col=col;
+    currentSort.dir='asc';
+  }
+  render();
+}
+
+/* ============================================================
+   PAGOS PENDIENTES
+   ============================================================ */
+function showPendingPayments(){
+  var ks=Object.keys(lics);
+  var items=[];
+
+  ks.forEach(function(k){
+    var l=lics[k];
+    if(l.pendingPayments&&l.pendingPayments.length){
+      l.pendingPayments.forEach(function(p,idx){
+        if(!p.paid){
+          items.push({
+            token:k,
+            biz:l.biz,
+            phone:l.phone,
+            concept:p.concept,
+            amount:p.amount,
+            dueDate:p.dueDate,
+            idx:idx
+          });
+        }
+      });
+    }
+  });
+
+  // ordenar por fecha
+  items.sort(function(a,b){return(a.dueDate||'').localeCompare(b.dueDate||'')});
+
+  var container=$('pendingList');
+  if(!items.length){
+    container.innerHTML='<div class="empty">No tienes pagos pendientes. 🎉</div>';
+  } else {
+    var h='';
+    items.forEach(function(it){
+      var d=daysUntil(it.dueDate);
+      var cls='',lbl='';
+      if(d!==null){
+        if(d<0){cls='overdue';lbl='⚠ Vencido hace '+Math.abs(d)+' días'}
+        else if(d===0){cls='soon';lbl='🔴 HOY'}
+        else if(d<=7){cls='soon';lbl='🟡 En '+d+' días'}
+        else if(d<=30){lbl='📅 En '+d+' días'}
+        else{lbl='📅 En '+d+' días'}
+      }
+      h+='<div class="pay-item '+cls+'">';
+      h+='<div>';
+      h+='<div class="pi-biz">'+escapeHtml(it.biz)+'</div>';
+      h+='<div class="pi-d">'+escapeHtml(it.concept)+' · '+escapeHtml(it.dueDate||'sin fecha')+' · '+lbl+'</div>';
+      if(it.phone)h+='<div class="pi-d">📞 <a href="tel:'+escapeHtml(it.phone)+'" style="color:#a78bfa;text-decoration:none">'+escapeHtml(it.phone)+'</a></div>';
+      h+='</div>';
+      h+='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
+      h+='<span class="pi-amt">'+it.amount.toFixed(2)+'€</span>';
+      h+='<button class="btn btn-xs btn-g" onclick="markPaid(\''+escapeHtml(it.token)+'\','+it.idx+')" title="Marcar como cobrado">✓ Cobrado</button>';
+      h+='</div>';
+      h+='</div>';
+    });
+    container.innerHTML=h;
+  }
+  $('pendingCard').style.display='block';
+  $('pendingCard').scrollIntoView({behavior:'smooth'});
+}
+
+function markPaid(token,idx){
+  if(!lics[token]||!lics[token].pendingPayments||!lics[token].pendingPayments[idx])return;
+  var p=lics[token].pendingPayments[idx];
+  confirmAction(
+    '¿Marcar como cobrado?',
+    'Vas a marcar como COBRADO el pago: "'+p.concept+'" de '+p.amount+'€ para '+lics[token].biz+'. ¿Confirmar?',
+    function(){
+      // Guardamos histórico: en lugar de borrar, marcamos paid=true
+      lics[token].pendingPayments[idx].paid=true;
+      lics[token].pendingPayments[idx].paidDate=new Date().toISOString().split('T')[0];
+      save('Pago cobrado: '+p.concept+' ('+lics[token].biz+')').then(function(){
+        toast('Pago marcado como cobrado ✅');
+        showPendingPayments();
+      });
+    }
+  );
+}
+
+/* ============================================================
+   CONFIRMACIÓN MODAL
+   ============================================================ */
+function confirmAction(title,text,onOk){
+  $('cmTitle').textContent=title;
+  $('cmText').textContent=text;
+  $('confirmModal').classList.add('show');
+  $('cmOk').onclick=function(){closeCm();onOk()};
+}
+function closeCm(){$('confirmModal').classList.remove('show')}
+
+/* ============================================================
+   ACCIONES: ACTIVAR / DESACTIVAR / ELIMINAR / DUPLICAR
+   ============================================================ */
+function tog(k,a){
+  if(!lics[k])return;
+  var action=a?'activar':'desactivar';
+  confirmAction(
+    '¿'+(a?'Reactivar':'Desactivar')+' cliente?',
+    (a?'El chatbot volverá a funcionar en la web del cliente.':'El chatbot dejará de funcionar inmediatamente en la web del cliente. Úsalo para impagos.'),
+    function(){
+      lics[k].active=a;
+      save((a?'Activar':'Desactivar')+': '+lics[k].biz).then(function(){
+        toast(lics[k].biz+(a?' activado ✅':' desactivado 🚫'));
+      });
+    }
+  );
+}
+
+function del(k){
+  if(!lics[k])return;
+  var n=lics[k].biz;
+  confirmAction(
+    '¿Eliminar cliente definitivamente?',
+    'Se borrará "'+n+'" ('+k+') del sistema. Esta acción NO se puede deshacer. El chatbot dejará de funcionar.',
+    function(){
+      delete lics[k];
+      save('Eliminar: '+n).then(function(){toast(n+' eliminado')});
+    }
+  );
+}
+
+function dupl(k){
+  if(!lics[k])return;
+  var orig=lics[k];
+  var newTk=genTkValue();
+  lics[newTk]=JSON.parse(JSON.stringify(orig));
+  lics[newTk].biz=orig.biz+' (copia)';
+  lics[newTk].domain='';
+  lics[newTk].active=false;
+  lics[newTk].created=new Date().toISOString().split('T')[0];
+  save('Duplicar: '+orig.biz).then(function(){
+    toast('Cliente duplicado. Edítalo para personalizar.','info');
+    edit(newTk);
+  });
+}
+
+/* ============================================================
+   FORMULARIO: MOSTRAR / OCULTAR / GUARDAR
+   ============================================================ */
+function showAdd(){
+  $('fMode').value='add';
+  $('fOrig').value='';
+  $('frmTitle').innerHTML='➕ Nuevo cliente';
+  $('fTk').value=genTkValue(); // ⭐ AUTO-GENERAR TOKEN SEGURO
+  $('fTk').readOnly=false;
+  $('fBiz').value='';
+  $('fDom').value='';
+  $('fPk').value='advance';
+  $('fEm').value='';
+  $('fPh').value='';
+  $('fNo').value='';
+  $('fBn').value='Asistente';
+  $('fCo').value='#7c3aed';
+  $('fCal').value='true';
+  $('fGr').value='';
+  $('fBt').value='';
+  $('fAN').value='';
+  $('fAP').value='';
+  $('fSu').value='';
+  $('fBy').value='';
+  $('rList').innerHTML='';
+  $('paysList').innerHTML='';
+  var t=new Date().toISOString().split('T')[0];
+  $('fCr').value=t;
+  $('fEx').value=new Date(new Date().setFullYear(new Date().getFullYear()+1)).toISOString().split('T')[0];
+  $('frm').style.display='block';
+  $('frm').scrollIntoView({behavior:'smooth'});
+  setTimeout(function(){$('fBiz').focus()},300);
+}
+
+function edit(k){
+  var l=lics[k];
+  if(!l)return;
+  $('fMode').value='edit';
+  $('fOrig').value=k;
+  $('frmTitle').innerHTML='✏️ '+escapeHtml(l.biz);
+  $('fTk').value=k;
+  $('fTk').readOnly=true;
+  $('fBiz').value=l.biz||'';
+  $('fDom').value=l.domain||'';
+  $('fPk').value=l.pack||'advance';
+  $('fEm').value=l.contact||'';
+  $('fPh').value=l.phone||'';
+  $('fCr').value=l.created||new Date().toISOString().split('T')[0];
+  $('fEx').value=l.expires||'';
+  $('fNo').value=l.notes||'';
+  $('fBn').value=l.botName||'Asistente';
+  $('fCo').value=l.color||'#7c3aed';
+  $('fCal').value=l.calendar===false?'false':'true';
+  $('fGr').value=l.greeting||'';
+  $('fBt').value=(l.serviceButtons||[]).join(', ');
+  $('fAN').value=(l.responses&&l.responses._ask_name)||'';
+  $('fAP').value=(l.responses&&l.responses._ask_phone)||'';
+  $('fSu').value=(l.responses&&l.responses._summary)||'';
+  $('fBy').value=(l.responses&&l.responses._goodbye)||'';
+  $('rList').innerHTML='';
+  if(l.responses){
+    Object.keys(l.responses).forEach(function(x){
+      if(!x.startsWith('_'))addR(x,l.responses[x]);
+    });
+  }
+  $('paysList').innerHTML='';
+  if(l.pendingPayments&&l.pendingPayments.length){
+    l.pendingPayments.forEach(function(p){
+      if(!p.paid)addPay(p.concept,p.amount,p.dueDate,p.paid);
+    });
+  }
+  $('frm').style.display='block';
+  $('frm').scrollIntoView({behavior:'smooth'});
+}
+
+function hideF(){
+  $('frm').style.display='none';
+}
+
+function addR(k,v){
+  var d=document.createElement('div');
+  d.className='resp-row';
+  d.innerHTML='<input type="text" class="rk" placeholder="Palabras clave (coma)" value="'+escapeHtml(k||'').replace(/"/g,'&quot;')+'" maxlength="150"><textarea class="rv" rows="2" placeholder="Respuesta del chatbot..." maxlength="500">'+escapeHtml(v||'')+'</textarea><button class="resp-del" onclick="this.parentElement.remove()" title="Eliminar">×</button>';
+  $('rList').appendChild(d);
+}
+
+/* Pagos pendientes en el formulario */
+function addPay(concept,amount,dueDate,paid){
+  var d=document.createElement('div');
+  d.className='pay-row';
+  var defaultDate=new Date();
+  defaultDate.setMonth(defaultDate.getMonth()+6);
+  var defaultDateStr=defaultDate.toISOString().split('T')[0];
+  d.innerHTML=
+    '<input type="text" class="pay-concept" placeholder="Concepto (ej: 2º pago setup Pyme)" value="'+escapeHtml(concept||'').replace(/"/g,'&quot;')+'" maxlength="100">'+
+    '<input type="number" class="pay-amount" placeholder="€" value="'+escapeHtml(String(amount||''))+'" min="0" step="0.01">'+
+    '<input type="date" class="pay-date" value="'+escapeHtml(dueDate||defaultDateStr)+'">'+
+    '<button class="resp-del" onclick="this.parentElement.remove()" title="Eliminar">×</button>';
+  $('paysList').appendChild(d);
+}
+
+/* Auto-sugerencia según el pack elegido */
+function suggestPayments(){
+  var pack=$('fPk').value;
+  var mode=$('fMode').value;
+  if(mode!=='add')return;// solo en alta nueva
+  // solo sugerir si no hay pagos ya añadidos
+  if($('paysList').children.length>0)return;
+
+  var altaDate=$('fCr').value||new Date().toISOString().split('T')[0];
+  var base=new Date(altaDate);
+
+  if(pack==='pyme'){
+    // 2º pago setup a los 6 meses
+    var d=new Date(base);d.setMonth(d.getMonth()+6);
+    addPay('2º pago setup Pyme (50%)',900,d.toISOString().split('T')[0]);
+    // Mantenimiento a los 12 meses
+    var d2=new Date(base);d2.setFullYear(d2.getFullYear()+1);
+    addPay('Renovación mantenimiento anual',599,d2.toISOString().split('T')[0]);
+    toast('Pagos sugeridos para Pyme añadidos','info');
+  } else if(pack==='enterprise'){
+    // Mantenimiento a los 12 meses
+    var d3=new Date(base);d3.setFullYear(d3.getFullYear()+1);
+    addPay('Renovación mantenimiento anual',1399,d3.toISOString().split('T')[0]);
+    toast('Pago sugerido para Enterprise añadido','info');
+  } else if(pack==='basic'){
+    var d4=new Date(base);d4.setFullYear(d4.getFullYear()+1);
+    addPay('Renovación mantenimiento anual',89,d4.toISOString().split('T')[0]);
+  } else if(pack==='advance'){
+    var d5=new Date(base);d5.setFullYear(d5.getFullYear()+1);
+    addPay('Renovación mantenimiento anual',199,d5.toISOString().split('T')[0]);
+  }
+}
+
+function saveF(){
+  var tk=sanitizeToken($('fTk').value.trim());
+  var biz=$('fBiz').value.trim();
+  if(!tk||!biz){
+    toast('Token y nombre del negocio son obligatorios','err');
+    return;
+  }
+  if(tk.length<5){
+    toast('El token debe tener al menos 5 caracteres','err');
+    return;
+  }
+  // advertencia si el token es predecible
+  if(/^WM-(cliente|test|demo|prueba|taller|pelu|dental|abogado|gestoria|cursos)-?\d*$/i.test(tk)){
+    if(!confirm('⚠️ ATENCIÓN: Ese token es predecible y un competidor podría adivinarlo.\n\nRecomendado: usa el botón 🎲 Generar para crear uno aleatorio seguro.\n\n¿Continuar de todas formas?'))return;
+  }
+  var mode=$('fMode').value;
+  if(mode==='add'&&lics[tk]){
+    toast('Ya existe un cliente con ese token','err');
+    return;
+  }
+
+  // recopilar respuestas personalizadas
+  var resp={};
+  document.querySelectorAll('.resp-row').forEach(function(r){
+    var k=r.querySelector('.rk').value.trim();
+    var v=r.querySelector('.rv').value.trim();
+    if(k&&v)resp[k]=v;
+  });
+  if($('fAN').value.trim())resp._ask_name=$('fAN').value.trim();
+  if($('fAP').value.trim())resp._ask_phone=$('fAP').value.trim();
+  if($('fSu').value.trim())resp._summary=$('fSu').value.trim();
+  if($('fBy').value.trim())resp._goodbye=$('fBy').value.trim();
+
+  // recopilar pagos pendientes
+  var pendingPayments=[];
+  document.querySelectorAll('.pay-row').forEach(function(r){
+    var concept=r.querySelector('.pay-concept').value.trim();
+    var amount=parseFloat(r.querySelector('.pay-amount').value)||0;
+    var dueDate=r.querySelector('.pay-date').value;
+    if(concept&&amount>0&&dueDate){
+      pendingPayments.push({concept:concept,amount:amount,dueDate:dueDate,paid:false});
+    }
+  });
+
+  var bt=$('fBt').value.trim();
+  lics[tk]={
+    biz:biz,
+    domain:$('fDom').value.trim(),
+    pack:$('fPk').value,
+    active:mode==='edit'?(lics[$('fOrig').value]?lics[$('fOrig').value].active:true):true,
+    created:$('fCr').value,
+    expires:$('fEx').value,
+    contact:$('fEm').value.trim(),
+    phone:$('fPh').value.trim(),
+    notes:$('fNo').value.trim(),
+    botName:$('fBn').value.trim()||'Asistente',
+    color:$('fCo').value.trim()||'#7c3aed',
+    calendar:$('fCal').value!=='false',
+    greeting:$('fGr').value.trim(),
+    serviceButtons:bt?bt.split(',').map(function(s){return s.trim()}).filter(function(s){return s}):[],
+    responses:Object.keys(resp).length?resp:undefined,
+    pendingPayments:pendingPayments.length?pendingPayments:undefined,
+    updated:new Date().toISOString()
+  };
+
+  save((mode==='add'?'Alta':'Editar')+': '+biz).then(function(){
+    toast(biz+(mode==='add'?' dado de alta ✅':' actualizado ✅'));
+    hideF();
+    if(mode==='add')code(tk);
+  });
+}
+
+/* ============================================================
+   SNIPPET DE CÓDIGO PARA EL CLIENTE
+   ============================================================ */
+function code(k){
+  var l=lics[k];
+  if(!l)return;
+  var sv=l.serviceButtons&&l.serviceButtons.length?'\n  data-services="'+l.serviceButtons.join(',')+'"':'';
+  var c='<!-- WhiteMoon Chatbot IA · '+l.biz+' -->\n<script src="'+CDN_BASE+'/chat.js"\n  data-token="'+k+'"'
+    +(l.color&&l.color!=='#7c3aed'?'\n  data-color="'+l.color+'"':'')
+    +sv
+    +(l.botName&&l.botName!=='Asistente'?'\n  data-bot-name="'+l.botName+'"':'')
+    +'><\/script>';
+  $('codeO').textContent=c;
+  $('codeC').style.display='block';
+  $('codeC').scrollIntoView({behavior:'smooth'});
+}
+
+function cpCode(){
+  navigator.clipboard.writeText($('codeO').textContent).then(function(){
+    toast('Código copiado al portapapeles');
+  }).catch(function(){
+    toast('No se pudo copiar. Selecciónalo manualmente.','err');
+  });
+}
+
+function emailCode(){
+  var code=$('codeO').textContent;
+  var subject='Tu chatbot WhiteMoon está listo';
+  var body='Hola,\n\nTu chatbot IA ya está configurado y listo para instalar en tu web.\n\nSolo tienes que pegar este código antes de la etiqueta </body> en tu web:\n\n'+code+'\n\nSi no tienes acceso al código de tu web, envíaselo a tu diseñador web o contáctanos y te ayudamos a instalarlo.\n\nUn saludo,\nEquipo WhiteMoon\nhttps://whitemoon.es';
+  window.location.href='mailto:?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+}
+
+/* ============================================================
+   EXPORTAR
+   ============================================================ */
+function exportCSV(){
+  var ks=Object.keys(lics);
+  if(!ks.length){toast('No hay clientes para exportar','err');return}
+  var rows=[['Token','Negocio','Dominio','Pack','Estado','Alta','Expira','Email','Teléfono','Pagos pendientes (€)','Notas']];
+  ks.forEach(function(k){
+    var l=lics[k];
+    var pend=0;
+    if(l.pendingPayments){
+      l.pendingPayments.forEach(function(p){if(!p.paid)pend+=parseFloat(p.amount)||0});
+    }
+    rows.push([k,l.biz||'',l.domain||'',l.pack||'',l.active?'Activa':'Inactiva',l.created||'',l.expires||'',l.contact||'',l.phone||'',pend.toFixed(2),l.notes||'']);
+  });
+  var csv=rows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"'}).join(',')}).join('\n');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download='whitemoon-clientes-'+new Date().toISOString().split('T')[0]+'.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('CSV descargado');
+}
+
+function exportPaymentsCSV(){
+  var ks=Object.keys(lics);
+  var rows=[['Cliente','Token','Teléfono','Concepto','Importe (€)','Fecha vencimiento','Días restantes','Estado']];
+  var count=0;
+  ks.forEach(function(k){
+    var l=lics[k];
+    if(l.pendingPayments&&l.pendingPayments.length){
+      l.pendingPayments.forEach(function(p){
+        if(!p.paid){
+          var d=daysUntil(p.dueDate);
+          var est=d!==null?(d<0?'VENCIDO':(d===0?'HOY':(d<=7?'URGENTE':(d<=30?'PRÓXIMO':'FUTURO')))):'-';
+          rows.push([l.biz||'',k,l.phone||'',p.concept||'',(parseFloat(p.amount)||0).toFixed(2),p.dueDate||'',d!==null?d:'-',est]);
+          count++;
+        }
+      });
+    }
+  });
+  if(!count){toast('No hay pagos pendientes','err');return}
+  // ordenar por fecha (más próximos primero) - ignorar cabecera
+  var header=rows[0];
+  var data=rows.slice(1).sort(function(a,b){return(a[5]||'').localeCompare(b[5]||'')});
+  rows=[header].concat(data);
+  var csv=rows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"'}).join(',')}).join('\n');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download='whitemoon-pagos-pendientes-'+new Date().toISOString().split('T')[0]+'.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast(count+' pagos pendientes exportados');
+}
+
+function exportJSON(){
+  var data={exported:new Date().toISOString(),licenses:lics};
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download='whitemoon-backup-'+new Date().toISOString().split('T')[0]+'.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Backup JSON descargado');
+}
+
+/* ============================================================
+   ATAJOS DE TECLADO
+   ============================================================ */
+document.addEventListener('keydown',function(e){
+  // Ctrl/Cmd + N: nuevo cliente
+  if((e.ctrlKey||e.metaKey)&&e.key==='n'&&$('panelView').style.display!=='none'){
+    e.preventDefault();
+    showAdd();
+  }
+  // Ctrl/Cmd + S: guardar formulario
+  if((e.ctrlKey||e.metaKey)&&e.key==='s'&&$('frm').style.display!=='none'){
+    e.preventDefault();
+    saveF();
+  }
+  // Esc: cerrar formulario o modal
+  if(e.key==='Escape'){
+    if($('confirmModal').classList.contains('show'))closeCm();
+    else if($('frm').style.display!=='none')hideF();
+  }
+});
 </script>
 </body>
 </html>

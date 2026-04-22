@@ -95,6 +95,11 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
 .dmenu a:last-child{border:none}
 .pw-toggle{position:relative}
 .pw-toggle .eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#666;cursor:pointer;font-size:1rem;padding:4px}
+/* INSTALACIÓN */
+.install-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.install-content{font-size:.78rem;color:#ccc;line-height:1.9;background:#0a0a14;border:1px solid #1a1a2e;border-radius:8px;padding:14px;display:none;margin-top:4px}
+.install-step{display:flex;gap:8px;align-items:flex-start;margin-bottom:6px}
+.install-num{background:#7c3aed;color:#fff;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;flex-shrink:0;margin-top:1px}
 @media(max-width:700px){.g2,.g3{grid-template-columns:1fr}table{font-size:.75rem}.wrap{padding:12px}.search-bar input,.search-bar select{min-width:120px}}
 </style>
 </head>
@@ -140,7 +145,6 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
   </div>
 
   <div class="wrap">
-    <!-- ESTADÍSTICAS -->
     <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
       <div class="card stat-card"><div class="v" style="color:#fff" id="sT">0</div><div class="l">Total clientes</div></div>
       <div class="card stat-card"><div class="v" style="color:#22c55e" id="sA">0</div><div class="l">Activos</div></div>
@@ -150,7 +154,6 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
       <div class="card stat-card" style="cursor:pointer" onclick="showPendingPayments()" title="Click para ver detalle"><div class="v" style="color:#f59e0b" id="sP">0€</div><div class="l">💸 Pendiente cobrar</div></div>
     </div>
 
-    <!-- PAGOS PENDIENTES (detalle) -->
     <div class="card" id="pendingCard" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <h2 style="margin:0">💸 Pagos pendientes</h2>
@@ -159,7 +162,6 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
       <div id="pendingList"></div>
     </div>
 
-    <!-- TABLA -->
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
         <h2 style="margin:0">🤖 Licencias</h2>
@@ -184,7 +186,6 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
       <div id="tbl"><div class="empty">Cargando...</div></div>
     </div>
 
-    <!-- FORMULARIO -->
     <div class="card" id="frm" style="display:none">
       <h2 style="margin-top:0" id="frmTitle">➕ Nuevo cliente</h2>
       <input type="hidden" id="fMode" value="add">
@@ -227,7 +228,7 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
       <div class="mb"><label>Notas internas</label><input type="text" id="fNo" placeholder="Observaciones..." maxlength="300"></div>
 
       <div class="stitle">💸 Pagos pendientes (opcional)</div>
-      <div class="info">Para Pyme (2º pago 900€ a los 6 meses) o cualquier pago futuro que tengas que cobrar a este cliente. Se mostrará en la tarjeta "Pendiente cobrar".</div>
+      <div class="info">Para Pyme (2º pago 900€ a los 6 meses) o cualquier pago futuro que tengas que cobrar a este cliente.</div>
       <div id="paysList"></div>
       <button class="btn btn-sm btn-y" onclick="addPay()" style="margin:8px 0 16px">+ Añadir pago pendiente</button>
 
@@ -241,7 +242,7 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
       <div class="mb"><label>Botones rápidos (separados por coma)</label><input type="text" id="fBt" placeholder="Implantes, Ortodoncia, Blanqueamiento, Pedir cita" maxlength="300"></div>
 
       <div class="stitle">Respuestas personalizadas</div>
-      <div class="info">Cada fila: <b>palabras clave</b> (separadas por coma) → <b>respuesta</b> del chatbot. Si el cliente escribe algo que contenga esas palabras, responde con ese texto. Después le pide datos de contacto.</div>
+      <div class="info">Cada fila: <b>palabras clave</b> → <b>respuesta</b> del chatbot.</div>
       <div id="rList"></div>
       <button class="btn btn-sm btn-c" onclick="addR()" style="margin:8px 0 16px">+ Añadir respuesta</button>
 
@@ -260,7 +261,7 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
       </div>
     </div>
 
-    <!-- CÓDIGO -->
+    <!-- CÓDIGO — CON INSTRUCCIONES DE INSTALACIÓN -->
     <div class="card" id="codeC" style="display:none">
       <h2 style="margin-top:0">📋 Código para el cliente</h2>
       <p style="font-size:.78rem;color:#888;margin-bottom:8px">Pegar antes de <code>&lt;/body&gt;</code> en la web del cliente:</p>
@@ -269,11 +270,24 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
         <button class="btn btn-sm btn-o" onclick="cpCode()">📋 Copiar código</button>
         <button class="btn btn-sm btn-c" onclick="emailCode()">✉️ Email al cliente</button>
       </div>
+
+      <!-- INSTRUCCIONES INSTALACIÓN -->
+      <div style="margin-top:20px;border-top:1px solid #1a1a2e;padding-top:16px">
+        <div style="font-size:.78rem;font-weight:700;color:#fff;margin-bottom:10px">📖 ¿Cómo instalarlo en la web del cliente?</div>
+        <div class="install-tabs">
+          <button class="btn btn-xs btn-o" onclick="showInstall('wp')">WordPress</button>
+          <button class="btn btn-xs btn-c" onclick="showInstall('joomla')">Joomla</button>
+          <button class="btn btn-xs btn-y" onclick="showInstall('html')">HTML puro</button>
+          <button class="btn btn-xs btn-g" onclick="showInstall('shopify')">Shopify</button>
+          <button class="btn btn-xs" style="background:rgba(124,58,237,.1);color:#a78bfa;border:1px solid rgba(124,58,237,.2)" onclick="showInstall('wix')">Wix</button>
+        </div>
+        <div class="install-content" id="installContent"></div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- MODAL CONFIRMACIÓN -->
+<!-- MODAL -->
 <div class="modal-bg" id="confirmModal">
   <div class="modal">
     <h3 id="cmTitle">¿Confirmar?</h3>
@@ -286,32 +300,15 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
 </div>
 
 <script>
-/* ============================================================
-   CONFIG
-   ============================================================ */
 var REPO='NexusForgeIA/whitemoon-cdn';
 var FILE='licenses.json';
 var CDN_BASE='https://nexusforgeia.github.io/whitemoon-cdn';
-var PACK_PRICES={
-  // Ingresos MENSUALES reales (mensualidad + mantenimiento anual prorrateado /12)
-  // Setups son pagos únicos ya cobrados, NO cuentan como recurrente
-  basic:      49   + (89/12),    // 49€/mes + 89€/año mant. = 56,42€/mes
-  advance:    99   + (199/12),   // 99€/mes + 199€/año mant. = 115,58€/mes
-  pyme:              (599/12),   // pago único + 599€/año mant. = 49,92€/mes
-  enterprise:        (1399/12)   // pago único + 1.399€/año mant. = 116,58€/mes
-};
-
-/* ============================================================
-   ESTADO
-   ============================================================ */
+var PACK_PRICES={basic:49+(89/12),advance:99+(199/12),pyme:(599/12),enterprise:(1399/12)};
 var ghToken='';
 var lics={};
 var sha='';
 var currentSort={col:'created',dir:'desc'};
 
-/* ============================================================
-   UTILIDADES
-   ============================================================ */
 function $(i){return document.getElementById(i)}
 
 function toast(m,type){
@@ -324,736 +321,311 @@ function toast(m,type){
   window._toastT=setTimeout(function(){t.style.display='none'},3500);
 }
 
-function escapeHtml(s){
-  if(!s)return'';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
-
-function sanitizeToken(t){
-  // solo letras, números y guiones. Max 60 caracteres
-  return String(t||'').replace(/[^A-Za-z0-9\-_]/g,'').substring(0,60);
-}
-
-function genTkValue(){
-  // genera token criptográficamente seguro: WM- + 24 caracteres hex
-  var array=new Uint8Array(12);
-  crypto.getRandomValues(array);
-  var hex=Array.from(array,function(b){return b.toString(16).padStart(2,'0')}).join('');
-  return 'WM-'+hex;
-}
-
-function genTk(){
-  var t=genTkValue();
-  $('fTk').value=t;
-  toast('Token seguro generado','info');
-}
-
-function togglePw(){
-  var i=$('ghToken');
-  i.type=i.type==='password'?'text':'password';
-}
-
-function toggleMenu(e){
-  e.stopPropagation();
-  $('dmenu').classList.toggle('show');
-}
+function escapeHtml(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+function sanitizeToken(t){return String(t||'').replace(/[^A-Za-z0-9\-_]/g,'').substring(0,60)}
+function genTkValue(){var a=new Uint8Array(12);crypto.getRandomValues(a);var h=Array.from(a,function(b){return b.toString(16).padStart(2,'0')}).join('');return'WM-'+h}
+function genTk(){$('fTk').value=genTkValue();toast('Token seguro generado','info')}
+function togglePw(){var i=$('ghToken');i.type=i.type==='password'?'text':'password'}
+function toggleMenu(e){e.stopPropagation();$('dmenu').classList.toggle('show')}
 document.addEventListener('click',function(){$('dmenu').classList.remove('show')});
+function daysUntil(d){if(!d)return null;var dt=new Date(d);if(isNaN(dt))return null;var n=new Date();n.setHours(0,0,0,0);return Math.floor((dt-n)/(1000*60*60*24))}
 
-function daysUntil(dateStr){
-  if(!dateStr)return null;
-  var d=new Date(dateStr);
-  if(isNaN(d))return null;
-  var now=new Date();now.setHours(0,0,0,0);
-  return Math.floor((d-now)/(1000*60*60*24));
-}
-
-/* ============================================================
-   LOGIN / LOGOUT
-   ============================================================ */
 function doLogin(){
   var t=$('ghToken').value.trim();
   if(!t){toast('Introduce un token','err');return}
-  // validación básica del formato
-  if(!t.match(/^(ghp_|github_pat_)/)){
-    if(!confirm('El token no tiene un formato estándar de GitHub. ¿Continuar de todas formas?'))return;
-  }
-  ghToken=t;
-  localStorage.setItem('wm_t',ghToken);
-  $('loginView').style.display='none';
-  $('panelView').style.display='block';
-  load();
+  if(!t.match(/^(ghp_|github_pat_)/)){if(!confirm('El token no tiene formato estándar. ¿Continuar?'))return}
+  ghToken=t;localStorage.setItem('wm_t',ghToken);
+  $('loginView').style.display='none';$('panelView').style.display='block';load();
 }
-
-function doLogout(){
-  if(!confirm('¿Cerrar sesión? Tendrás que volver a pegar el token.'))return;
-  localStorage.removeItem('wm_t');
-  location.reload();
-}
-
+function doLogout(){if(!confirm('¿Cerrar sesión?'))return;localStorage.removeItem('wm_t');location.reload()}
 var sv=localStorage.getItem('wm_t');
-if(sv){
-  ghToken=sv;
-  $('loginView').style.display='none';
-  $('panelView').style.display='block';
-  load();
-}
+if(sv){ghToken=sv;$('loginView').style.display='none';$('panelView').style.display='block';load()}
 
-/* ============================================================
-   API GITHUB: CARGAR / GUARDAR
-   ============================================================ */
 function load(){
   $('tbl').innerHTML='<div class="empty">Cargando...</div>';
-  fetch('https://api.github.com/repos/'+REPO+'/contents/'+FILE,{
-    headers:{'Authorization':'Bearer '+ghToken,'Accept':'application/vnd.github+json'}
-  })
-  .then(function(r){
-    if(r.status===401){throw new Error('Token inválido o caducado')}
-    if(r.status===404){throw new Error('Archivo licenses.json no existe en el repo')}
-    if(!r.ok)throw new Error('Error '+r.status);
-    return r.json();
-  })
-  .then(function(d){
-    sha=d.sha;
-    var decoded=decodeURIComponent(escape(atob(d.content.replace(/\n/g,''))));
-    var parsed=JSON.parse(decoded);
-    lics=parsed.licenses||{};
-    render();
-  })
-  .catch(function(err){
-    $('tbl').innerHTML='<div class="err">❌ '+escapeHtml(err.message)+'. Verifica que tu token tiene permisos Contents: Read and write en el repo '+REPO+'.</div>';
-    toast(err.message,'err');
-  });
+  fetch('https://api.github.com/repos/'+REPO+'/contents/'+FILE,{headers:{'Authorization':'Bearer '+ghToken,'Accept':'application/vnd.github+json'}})
+  .then(function(r){if(r.status===401)throw new Error('Token inválido o caducado');if(r.status===404)throw new Error('Archivo licenses.json no existe');if(!r.ok)throw new Error('Error '+r.status);return r.json()})
+  .then(function(d){sha=d.sha;var dec=decodeURIComponent(escape(atob(d.content.replace(/\n/g,''))));var p=JSON.parse(dec);lics=p.licenses||{};render()})
+  .catch(function(e){$('tbl').innerHTML='<div class="err">❌ '+escapeHtml(e.message)+'</div>';toast(e.message,'err')});
 }
-
-function reloadData(){
-  toast('Recargando...','info');
-  load();
-}
+function reloadData(){toast('Recargando...','info');load()}
 
 function save(msg){
-  var saveBtn=$('saveBtn');
-  if(saveBtn)saveBtn.disabled=true;
+  var sb=$('saveBtn');if(sb)sb.disabled=true;
   var c=JSON.stringify({licenses:lics},null,2);
   var e=btoa(unescape(encodeURIComponent(c)));
-  return fetch('https://api.github.com/repos/'+REPO+'/contents/'+FILE,{
-    method:'PUT',
-    headers:{'Authorization':'Bearer '+ghToken,'Content-Type':'application/json','Accept':'application/vnd.github+json'},
-    body:JSON.stringify({message:msg,content:e,sha:sha})
-  })
-  .then(function(r){
-    if(!r.ok)throw new Error('Error al guardar ('+r.status+')');
-    return r.json();
-  })
-  .then(function(d){
-    sha=d.content.sha;
-    render();
-    if(saveBtn)saveBtn.disabled=false;
-    return d;
-  })
-  .catch(function(err){
-    if(saveBtn)saveBtn.disabled=false;
-    toast(err.message,'err');
-    throw err;
-  });
+  return fetch('https://api.github.com/repos/'+REPO+'/contents/'+FILE,{method:'PUT',headers:{'Authorization':'Bearer '+ghToken,'Content-Type':'application/json','Accept':'application/vnd.github+json'},body:JSON.stringify({message:msg,content:e,sha:sha})})
+  .then(function(r){if(!r.ok)throw new Error('Error al guardar ('+r.status+')');return r.json()})
+  .then(function(d){sha=d.content.sha;render();if(sb)sb.disabled=false;return d})
+  .catch(function(e){if(sb)sb.disabled=false;toast(e.message,'err');throw e});
 }
 
-/* ============================================================
-   RENDER TABLA + ESTADÍSTICAS
-   ============================================================ */
 function render(){
-  var ks=Object.keys(lics);
-  var ac=0,ex=0,rev=0,pendingTotal=0;
+  var ks=Object.keys(lics),ac=0,ex=0,rev=0,pt=0;
   var now=new Date();now.setHours(0,0,0,0);
-
   ks.forEach(function(k){
     var l=lics[k];
-    if(l.active){
-      ac++;
-      // contar ingresos de activos
-      var price=PACK_PRICES[l.pack]||0;
-      rev+=price;
-      // contar expiraciones próximas
-      var d=daysUntil(l.expires);
-      if(d!==null&&d>=0&&d<=30)ex++;
-    }
-    // contar pagos pendientes (de activos e inactivos)
-    if(l.pendingPayments&&l.pendingPayments.length){
-      l.pendingPayments.forEach(function(p){
-        if(!p.paid&&p.amount>0)pendingTotal+=parseFloat(p.amount)||0;
-      });
-    }
+    if(l.active){ac++;rev+=PACK_PRICES[l.pack]||0;var d=daysUntil(l.expires);if(d!==null&&d>=0&&d<=30)ex++}
+    if(l.pendingPayments&&l.pendingPayments.length)l.pendingPayments.forEach(function(p){if(!p.paid&&p.amount>0)pt+=parseFloat(p.amount)||0});
   });
-
-  $('sT').textContent=ks.length;
-  $('sA').textContent=ac;
-  $('sI').textContent=ks.length-ac;
-  $('sE').textContent=ex;
-  $('sR').textContent=Math.round(rev)+'€';
-  $('sP').textContent=Math.round(pendingTotal)+'€';
-
-  // aplicar filtros y búsqueda
+  $('sT').textContent=ks.length;$('sA').textContent=ac;$('sI').textContent=ks.length-ac;$('sE').textContent=ex;$('sR').textContent=Math.round(rev)+'€';$('sP').textContent=Math.round(pt)+'€';
   var q=($('searchQ').value||'').toLowerCase().trim();
-  var fPack=$('filterPack').value;
-  var fStatus=$('filterStatus').value;
-
+  var fP=$('filterPack').value,fS=$('filterStatus').value;
   var filtered=ks.filter(function(k){
     var l=lics[k];
-    if(fPack&&l.pack!==fPack)return false;
-    if(fStatus==='active'&&!l.active)return false;
-    if(fStatus==='inactive'&&l.active)return false;
-    if(fStatus==='expiring'){
-      var d=daysUntil(l.expires);
-      if(d===null||d<0||d>30)return false;
-    }
-    if(q){
-      var hay=(k+' '+(l.biz||'')+' '+(l.domain||'')+' '+(l.contact||'')+' '+(l.phone||'')).toLowerCase();
-      if(hay.indexOf(q)===-1)return false;
-    }
+    if(fP&&l.pack!==fP)return false;
+    if(fS==='active'&&!l.active)return false;
+    if(fS==='inactive'&&l.active)return false;
+    if(fS==='expiring'){var d=daysUntil(l.expires);if(d===null||d<0||d>30)return false}
+    if(q){var h=(k+' '+(l.biz||'')+' '+(l.domain||'')+' '+(l.contact||'')+' '+(l.phone||'')).toLowerCase();if(h.indexOf(q)===-1)return false}
     return true;
   });
-
-  // ordenación
-  filtered.sort(function(a,b){
-    var la=lics[a],lb=lics[b];
-    var va,vb;
-    switch(currentSort.col){
-      case'biz':va=la.biz||'';vb=lb.biz||'';break;
-      case'pack':va=la.pack||'';vb=lb.pack||'';break;
-      case'expires':va=la.expires||'';vb=lb.expires||'';break;
-      default:va=la.created||'';vb=lb.created||'';
-    }
-    if(va<vb)return currentSort.dir==='asc'?-1:1;
-    if(va>vb)return currentSort.dir==='asc'?1:-1;
-    return 0;
-  });
-
-  if(!ks.length){
-    $('tbl').innerHTML='<div class="empty">Sin clientes. Pulsa "+ Nuevo cliente" para empezar.</div>';
-    return;
-  }
-  if(!filtered.length){
-    $('tbl').innerHTML='<div class="empty">Ningún cliente coincide con los filtros.</div>';
-    return;
-  }
-
-  var h='<table><thead><tr>';
-  h+='<th onclick="sortBy(\'biz\')">Negocio</th>';
-  h+='<th>Token</th>';
-  h+='<th onclick="sortBy(\'pack\')">Pack</th>';
-  h+='<th>Estado</th>';
-  h+='<th onclick="sortBy(\'expires\')">Expira</th>';
-  h+='<th>Resp.</th>';
-  h+='<th>Acciones</th>';
-  h+='</tr></thead><tbody>';
-
+  filtered.sort(function(a,b){var la=lics[a],lb=lics[b],va,vb;switch(currentSort.col){case'biz':va=la.biz||'';vb=lb.biz||'';break;case'pack':va=la.pack||'';vb=lb.pack||'';break;case'expires':va=la.expires||'';vb=lb.expires||'';break;default:va=la.created||'';vb=lb.created||''}if(va<vb)return currentSort.dir==='asc'?-1:1;if(va>vb)return currentSort.dir==='asc'?1:-1;return 0});
+  if(!ks.length){$('tbl').innerHTML='<div class="empty">Sin clientes. Pulsa "+ Nuevo cliente" para empezar.</div>';return}
+  if(!filtered.length){$('tbl').innerHTML='<div class="empty">Ningún cliente coincide con los filtros.</div>';return}
+  var h='<table><thead><tr><th onclick="sortBy(\'biz\')">Negocio</th><th>Token</th><th onclick="sortBy(\'pack\')">Pack</th><th>Estado</th><th onclick="sortBy(\'expires\')">Expira</th><th>Resp.</th><th>Acciones</th></tr></thead><tbody>';
   filtered.forEach(function(k){
-    var l=lics[k];
-    var rc=l.responses?Object.keys(l.responses).filter(function(x){return!x.startsWith('_')}).length:0;
-    var d=daysUntil(l.expires);
-    var expClass='',expBadge='';
-    if(d!==null){
-      if(d<0){expClass='expired';expBadge='<br><small style="color:#ef4444">⚠ Expirada hace '+Math.abs(d)+'d</small>'}
-      else if(d<=30){expClass='expire-soon';expBadge='<br><small style="color:#f59e0b">⏰ En '+d+'d</small>'}
-    }
-
-    h+='<tr>';
-    h+='<td><span class="biz">'+escapeHtml(l.biz)+'</span>';
-    if(l.domain)h+='<br><span class="domain">'+escapeHtml(l.domain)+'</span>';
-    h+='</td>';
-    h+='<td class="token">'+escapeHtml(k)+'</td>';
-    h+='<td>'+escapeHtml(l.pack||'—')+'</td>';
+    var l=lics[k],rc=l.responses?Object.keys(l.responses).filter(function(x){return!x.startsWith('_')}).length:0;
+    var d=daysUntil(l.expires),ec='',eb='';
+    if(d!==null){if(d<0){ec='expired';eb='<br><small style="color:#ef4444">⚠ Expirada hace '+Math.abs(d)+'d</small>'}else if(d<=30){ec='expire-soon';eb='<br><small style="color:#f59e0b">⏰ En '+d+'d</small>'}}
+    h+='<tr><td><span class="biz">'+escapeHtml(l.biz)+'</span>'+(l.domain?'<br><span class="domain">'+escapeHtml(l.domain)+'</span>':'')+'</td>';
+    h+='<td class="token">'+escapeHtml(k)+'</td><td>'+escapeHtml(l.pack||'—')+'</td>';
     h+='<td><span class="badge '+(l.active?'badge-on':'badge-off')+'">'+(l.active?'ACTIVA':'INACTIVA')+'</span></td>';
-    h+='<td class="'+expClass+'">'+escapeHtml(l.expires||'—')+expBadge+'</td>';
-    h+='<td style="color:#06b6d4">'+rc+'</td>';
+    h+='<td class="'+ec+'">'+escapeHtml(l.expires||'—')+eb+'</td><td style="color:#06b6d4">'+rc+'</td>';
     h+='<td class="flex">';
-    h+=l.active
-      ?'<button class="btn btn-r btn-xs" onclick="tog(\''+escapeHtml(k)+'\',false)" title="Desactivar chatbot">Desactivar</button>'
-      :'<button class="btn btn-g btn-xs" onclick="tog(\''+escapeHtml(k)+'\',true)" title="Reactivar chatbot">Activar</button>';
-    h+='<button class="btn btn-c btn-xs" onclick="edit(\''+escapeHtml(k)+'\')" title="Editar">✎</button>';
-    h+='<button class="btn btn-o btn-xs" onclick="code(\''+escapeHtml(k)+'\')" title="Ver código">&lt;/&gt;</button>';
-    h+='<button class="btn btn-y btn-xs" onclick="dupl(\''+escapeHtml(k)+'\')" title="Duplicar">⎘</button>';
-    h+='<button class="btn btn-xs" style="background:rgba(239,68,68,.06);color:#ef4444;border:1px solid rgba(239,68,68,.12)" onclick="del(\''+escapeHtml(k)+'\')" title="Eliminar">✕</button>';
+    h+=l.active?'<button class="btn btn-r btn-xs" onclick="tog(\''+escapeHtml(k)+'\',false)">Desactivar</button>':'<button class="btn btn-g btn-xs" onclick="tog(\''+escapeHtml(k)+'\',true)">Activar</button>';
+    h+='<button class="btn btn-c btn-xs" onclick="edit(\''+escapeHtml(k)+'\')">✎</button>';
+    h+='<button class="btn btn-o btn-xs" onclick="code(\''+escapeHtml(k)+'\')"><\/></button>';
+    h+='<button class="btn btn-y btn-xs" onclick="dupl(\''+escapeHtml(k)+'\')">⎘</button>';
+    h+='<button class="btn btn-xs" style="background:rgba(239,68,68,.06);color:#ef4444;border:1px solid rgba(239,68,68,.12)" onclick="del(\''+escapeHtml(k)+'\')">✕</button>';
     h+='</td></tr>';
   });
   h+='</tbody></table>';
   $('tbl').innerHTML=h;
 }
+function sortBy(col){if(currentSort.col===col){currentSort.dir=currentSort.dir==='asc'?'desc':'asc'}else{currentSort.col=col;currentSort.dir='asc'}render()}
 
-function sortBy(col){
-  if(currentSort.col===col){
-    currentSort.dir=currentSort.dir==='asc'?'desc':'asc';
-  } else {
-    currentSort.col=col;
-    currentSort.dir='asc';
-  }
-  render();
-}
-
-/* ============================================================
-   PAGOS PENDIENTES
-   ============================================================ */
 function showPendingPayments(){
-  var ks=Object.keys(lics);
-  var items=[];
-
-  ks.forEach(function(k){
-    var l=lics[k];
-    if(l.pendingPayments&&l.pendingPayments.length){
-      l.pendingPayments.forEach(function(p,idx){
-        if(!p.paid){
-          items.push({
-            token:k,
-            biz:l.biz,
-            phone:l.phone,
-            concept:p.concept,
-            amount:p.amount,
-            dueDate:p.dueDate,
-            idx:idx
-          });
-        }
-      });
-    }
-  });
-
-  // ordenar por fecha
+  var ks=Object.keys(lics),items=[];
+  ks.forEach(function(k){var l=lics[k];if(l.pendingPayments&&l.pendingPayments.length)l.pendingPayments.forEach(function(p,idx){if(!p.paid)items.push({token:k,biz:l.biz,phone:l.phone,concept:p.concept,amount:p.amount,dueDate:p.dueDate,idx:idx})})});
   items.sort(function(a,b){return(a.dueDate||'').localeCompare(b.dueDate||'')});
-
   var container=$('pendingList');
-  if(!items.length){
-    container.innerHTML='<div class="empty">No tienes pagos pendientes. 🎉</div>';
-  } else {
+  if(!items.length){container.innerHTML='<div class="empty">No tienes pagos pendientes. 🎉</div>'}
+  else{
     var h='';
     items.forEach(function(it){
-      var d=daysUntil(it.dueDate);
-      var cls='',lbl='';
-      if(d!==null){
-        if(d<0){cls='overdue';lbl='⚠ Vencido hace '+Math.abs(d)+' días'}
-        else if(d===0){cls='soon';lbl='🔴 HOY'}
-        else if(d<=7){cls='soon';lbl='🟡 En '+d+' días'}
-        else if(d<=30){lbl='📅 En '+d+' días'}
-        else{lbl='📅 En '+d+' días'}
-      }
-      h+='<div class="pay-item '+cls+'">';
-      h+='<div>';
-      h+='<div class="pi-biz">'+escapeHtml(it.biz)+'</div>';
-      h+='<div class="pi-d">'+escapeHtml(it.concept)+' · '+escapeHtml(it.dueDate||'sin fecha')+' · '+lbl+'</div>';
-      if(it.phone)h+='<div class="pi-d">📞 <a href="tel:'+escapeHtml(it.phone)+'" style="color:#a78bfa;text-decoration:none">'+escapeHtml(it.phone)+'</a></div>';
-      h+='</div>';
-      h+='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
-      h+='<span class="pi-amt">'+it.amount.toFixed(2)+'€</span>';
-      h+='<button class="btn btn-xs btn-g" onclick="markPaid(\''+escapeHtml(it.token)+'\','+it.idx+')" title="Marcar como cobrado">✓ Cobrado</button>';
-      h+='</div>';
-      h+='</div>';
+      var d=daysUntil(it.dueDate),cls='',lbl='';
+      if(d!==null){if(d<0){cls='overdue';lbl='⚠ Vencido hace '+Math.abs(d)+' días'}else if(d===0){cls='soon';lbl='🔴 HOY'}else if(d<=7){cls='soon';lbl='🟡 En '+d+' días'}else{lbl='📅 En '+d+' días'}}
+      h+='<div class="pay-item '+cls+'"><div><div class="pi-biz">'+escapeHtml(it.biz)+'</div><div class="pi-d">'+escapeHtml(it.concept)+' · '+escapeHtml(it.dueDate||'sin fecha')+' · '+lbl+'</div>'+(it.phone?'<div class="pi-d">📞 <a href="tel:'+escapeHtml(it.phone)+'" style="color:#a78bfa;text-decoration:none">'+escapeHtml(it.phone)+'</a></div>':'')+'</div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span class="pi-amt">'+it.amount.toFixed(2)+'€</span><button class="btn btn-xs btn-g" onclick="markPaid(\''+escapeHtml(it.token)+'\','+it.idx+')">✓ Cobrado</button></div></div>';
     });
     container.innerHTML=h;
   }
-  $('pendingCard').style.display='block';
-  $('pendingCard').scrollIntoView({behavior:'smooth'});
+  $('pendingCard').style.display='block';$('pendingCard').scrollIntoView({behavior:'smooth'});
 }
 
 function markPaid(token,idx){
   if(!lics[token]||!lics[token].pendingPayments||!lics[token].pendingPayments[idx])return;
   var p=lics[token].pendingPayments[idx];
-  confirmAction(
-    '¿Marcar como cobrado?',
-    'Vas a marcar como COBRADO el pago: "'+p.concept+'" de '+p.amount+'€ para '+lics[token].biz+'. ¿Confirmar?',
-    function(){
-      // Guardamos histórico: en lugar de borrar, marcamos paid=true
-      lics[token].pendingPayments[idx].paid=true;
-      lics[token].pendingPayments[idx].paidDate=new Date().toISOString().split('T')[0];
-      save('Pago cobrado: '+p.concept+' ('+lics[token].biz+')').then(function(){
-        toast('Pago marcado como cobrado ✅');
-        showPendingPayments();
-      });
-    }
-  );
-}
-
-/* ============================================================
-   CONFIRMACIÓN MODAL
-   ============================================================ */
-function confirmAction(title,text,onOk){
-  $('cmTitle').textContent=title;
-  $('cmText').textContent=text;
-  $('confirmModal').classList.add('show');
-  $('cmOk').onclick=function(){closeCm();onOk()};
-}
-function closeCm(){$('confirmModal').classList.remove('show')}
-
-/* ============================================================
-   ACCIONES: ACTIVAR / DESACTIVAR / ELIMINAR / DUPLICAR
-   ============================================================ */
-function tog(k,a){
-  if(!lics[k])return;
-  var action=a?'activar':'desactivar';
-  confirmAction(
-    '¿'+(a?'Reactivar':'Desactivar')+' cliente?',
-    (a?'El chatbot volverá a funcionar en la web del cliente.':'El chatbot dejará de funcionar inmediatamente en la web del cliente. Úsalo para impagos.'),
-    function(){
-      lics[k].active=a;
-      save((a?'Activar':'Desactivar')+': '+lics[k].biz).then(function(){
-        toast(lics[k].biz+(a?' activado ✅':' desactivado 🚫'));
-      });
-    }
-  );
-}
-
-function del(k){
-  if(!lics[k])return;
-  var n=lics[k].biz;
-  confirmAction(
-    '¿Eliminar cliente definitivamente?',
-    'Se borrará "'+n+'" ('+k+') del sistema. Esta acción NO se puede deshacer. El chatbot dejará de funcionar.',
-    function(){
-      delete lics[k];
-      save('Eliminar: '+n).then(function(){toast(n+' eliminado')});
-    }
-  );
-}
-
-function dupl(k){
-  if(!lics[k])return;
-  var orig=lics[k];
-  var newTk=genTkValue();
-  lics[newTk]=JSON.parse(JSON.stringify(orig));
-  lics[newTk].biz=orig.biz+' (copia)';
-  lics[newTk].domain='';
-  lics[newTk].active=false;
-  lics[newTk].created=new Date().toISOString().split('T')[0];
-  save('Duplicar: '+orig.biz).then(function(){
-    toast('Cliente duplicado. Edítalo para personalizar.','info');
-    edit(newTk);
+  confirmAction('¿Marcar como cobrado?','Vas a marcar "'+p.concept+'" de '+p.amount+'€ para '+lics[token].biz+' como cobrado.',function(){
+    lics[token].pendingPayments[idx].paid=true;lics[token].pendingPayments[idx].paidDate=new Date().toISOString().split('T')[0];
+    save('Pago cobrado: '+p.concept+' ('+lics[token].biz+')').then(function(){toast('Pago marcado como cobrado ✅');showPendingPayments()});
   });
 }
 
-/* ============================================================
-   FORMULARIO: MOSTRAR / OCULTAR / GUARDAR
-   ============================================================ */
+function confirmAction(title,text,onOk){$('cmTitle').textContent=title;$('cmText').textContent=text;$('confirmModal').classList.add('show');$('cmOk').onclick=function(){closeCm();onOk()}}
+function closeCm(){$('confirmModal').classList.remove('show')}
+
+function tog(k,a){
+  if(!lics[k])return;
+  confirmAction('¿'+(a?'Reactivar':'Desactivar')+' cliente?',(a?'El chatbot volverá a funcionar.':'El chatbot dejará de funcionar inmediatamente.'),function(){
+    lics[k].active=a;save((a?'Activar':'Desactivar')+': '+lics[k].biz).then(function(){toast(lics[k].biz+(a?' activado ✅':' desactivado 🚫'))});
+  });
+}
+
+function del(k){
+  if(!lics[k])return;var n=lics[k].biz;
+  confirmAction('¿Eliminar cliente definitivamente?','Se borrará "'+n+'" del sistema. Esta acción NO se puede deshacer.',function(){delete lics[k];save('Eliminar: '+n).then(function(){toast(n+' eliminado')})});
+}
+
+function dupl(k){
+  if(!lics[k])return;var orig=lics[k],newTk=genTkValue();
+  lics[newTk]=JSON.parse(JSON.stringify(orig));lics[newTk].biz=orig.biz+' (copia)';lics[newTk].domain='';lics[newTk].active=false;lics[newTk].created=new Date().toISOString().split('T')[0];
+  save('Duplicar: '+orig.biz).then(function(){toast('Cliente duplicado.','info');edit(newTk)});
+}
+
 function showAdd(){
-  $('fMode').value='add';
-  $('fOrig').value='';
-  $('frmTitle').innerHTML='➕ Nuevo cliente';
-  $('fTk').value=genTkValue(); // ⭐ AUTO-GENERAR TOKEN SEGURO
-  $('fTk').readOnly=false;
-  $('fBiz').value='';
-  $('fDom').value='';
-  $('fPk').value='advance';
-  $('fEm').value='';
-  $('fPh').value='';
-  $('fNo').value='';
-  $('fBn').value='Asistente';
-  $('fCo').value='#7c3aed';
-  $('fCal').value='true';
-  $('fGr').value='';
-  $('fBt').value='';
-  $('fAN').value='';
-  $('fAP').value='';
-  $('fSu').value='';
-  $('fBy').value='';
-  $('rList').innerHTML='';
-  $('paysList').innerHTML='';
-  var t=new Date().toISOString().split('T')[0];
-  $('fCr').value=t;
+  $('fMode').value='add';$('fOrig').value='';$('frmTitle').innerHTML='➕ Nuevo cliente';
+  $('fTk').value=genTkValue();$('fTk').readOnly=false;
+  $('fBiz').value='';$('fDom').value='';$('fPk').value='advance';$('fEm').value='';$('fPh').value='';$('fNo').value='';
+  $('fBn').value='Asistente';$('fCo').value='#7c3aed';$('fCal').value='true';$('fGr').value='';$('fBt').value='';
+  $('fAN').value='';$('fAP').value='';$('fSu').value='';$('fBy').value='';
+  $('rList').innerHTML='';$('paysList').innerHTML='';
+  var t=new Date().toISOString().split('T')[0];$('fCr').value=t;
   $('fEx').value=new Date(new Date().setFullYear(new Date().getFullYear()+1)).toISOString().split('T')[0];
-  $('frm').style.display='block';
-  $('frm').scrollIntoView({behavior:'smooth'});
+  $('frm').style.display='block';$('frm').scrollIntoView({behavior:'smooth'});
   setTimeout(function(){$('fBiz').focus()},300);
 }
 
 function edit(k){
-  var l=lics[k];
-  if(!l)return;
-  $('fMode').value='edit';
-  $('fOrig').value=k;
-  $('frmTitle').innerHTML='✏️ '+escapeHtml(l.biz);
-  $('fTk').value=k;
-  $('fTk').readOnly=true;
-  $('fBiz').value=l.biz||'';
-  $('fDom').value=l.domain||'';
-  $('fPk').value=l.pack||'advance';
-  $('fEm').value=l.contact||'';
-  $('fPh').value=l.phone||'';
-  $('fCr').value=l.created||new Date().toISOString().split('T')[0];
-  $('fEx').value=l.expires||'';
-  $('fNo').value=l.notes||'';
-  $('fBn').value=l.botName||'Asistente';
-  $('fCo').value=l.color||'#7c3aed';
-  $('fCal').value=l.calendar===false?'false':'true';
-  $('fGr').value=l.greeting||'';
-  $('fBt').value=(l.serviceButtons||[]).join(', ');
-  $('fAN').value=(l.responses&&l.responses._ask_name)||'';
-  $('fAP').value=(l.responses&&l.responses._ask_phone)||'';
-  $('fSu').value=(l.responses&&l.responses._summary)||'';
-  $('fBy').value=(l.responses&&l.responses._goodbye)||'';
+  var l=lics[k];if(!l)return;
+  $('fMode').value='edit';$('fOrig').value=k;$('frmTitle').innerHTML='✏️ '+escapeHtml(l.biz);
+  $('fTk').value=k;$('fTk').readOnly=true;
+  $('fBiz').value=l.biz||'';$('fDom').value=l.domain||'';$('fPk').value=l.pack||'advance';
+  $('fEm').value=l.contact||'';$('fPh').value=l.phone||'';$('fCr').value=l.created||new Date().toISOString().split('T')[0];
+  $('fEx').value=l.expires||'';$('fNo').value=l.notes||'';$('fBn').value=l.botName||'Asistente';
+  $('fCo').value=l.color||'#7c3aed';$('fCal').value=l.calendar===false?'false':'true';
+  $('fGr').value=l.greeting||'';$('fBt').value=(l.serviceButtons||[]).join(', ');
+  $('fAN').value=(l.responses&&l.responses._ask_name)||'';$('fAP').value=(l.responses&&l.responses._ask_phone)||'';
+  $('fSu').value=(l.responses&&l.responses._summary)||'';$('fBy').value=(l.responses&&l.responses._goodbye)||'';
   $('rList').innerHTML='';
-  if(l.responses){
-    Object.keys(l.responses).forEach(function(x){
-      if(!x.startsWith('_'))addR(x,l.responses[x]);
-    });
-  }
+  if(l.responses)Object.keys(l.responses).forEach(function(x){if(!x.startsWith('_'))addR(x,l.responses[x])});
   $('paysList').innerHTML='';
-  if(l.pendingPayments&&l.pendingPayments.length){
-    l.pendingPayments.forEach(function(p){
-      if(!p.paid)addPay(p.concept,p.amount,p.dueDate,p.paid);
-    });
-  }
-  $('frm').style.display='block';
-  $('frm').scrollIntoView({behavior:'smooth'});
+  if(l.pendingPayments&&l.pendingPayments.length)l.pendingPayments.forEach(function(p){if(!p.paid)addPay(p.concept,p.amount,p.dueDate)});
+  $('frm').style.display='block';$('frm').scrollIntoView({behavior:'smooth'});
 }
 
-function hideF(){
-  $('frm').style.display='none';
-}
+function hideF(){$('frm').style.display='none'}
 
 function addR(k,v){
-  var d=document.createElement('div');
-  d.className='resp-row';
+  var d=document.createElement('div');d.className='resp-row';
   d.innerHTML='<input type="text" class="rk" placeholder="Palabras clave (coma)" value="'+escapeHtml(k||'').replace(/"/g,'&quot;')+'" maxlength="150"><textarea class="rv" rows="2" placeholder="Respuesta del chatbot..." maxlength="500">'+escapeHtml(v||'')+'</textarea><button class="resp-del" onclick="this.parentElement.remove()" title="Eliminar">×</button>';
   $('rList').appendChild(d);
 }
 
-/* Pagos pendientes en el formulario */
 function addPay(concept,amount,dueDate,paid){
-  var d=document.createElement('div');
-  d.className='pay-row';
-  var defaultDate=new Date();
-  defaultDate.setMonth(defaultDate.getMonth()+6);
-  var defaultDateStr=defaultDate.toISOString().split('T')[0];
-  d.innerHTML=
-    '<input type="text" class="pay-concept" placeholder="Concepto (ej: 2º pago setup Pyme)" value="'+escapeHtml(concept||'').replace(/"/g,'&quot;')+'" maxlength="100">'+
-    '<input type="number" class="pay-amount" placeholder="€" value="'+escapeHtml(String(amount||''))+'" min="0" step="0.01">'+
-    '<input type="date" class="pay-date" value="'+escapeHtml(dueDate||defaultDateStr)+'">'+
-    '<button class="resp-del" onclick="this.parentElement.remove()" title="Eliminar">×</button>';
+  var d=document.createElement('div');d.className='pay-row';
+  var dd=new Date();dd.setMonth(dd.getMonth()+6);var dds=dd.toISOString().split('T')[0];
+  d.innerHTML='<input type="text" class="pay-concept" placeholder="Concepto" value="'+escapeHtml(concept||'').replace(/"/g,'&quot;')+'" maxlength="100"><input type="number" class="pay-amount" placeholder="€" value="'+escapeHtml(String(amount||''))+'" min="0" step="0.01"><input type="date" class="pay-date" value="'+escapeHtml(dueDate||dds)+'"><button class="resp-del" onclick="this.parentElement.remove()">×</button>';
   $('paysList').appendChild(d);
 }
 
-/* Auto-sugerencia según el pack elegido */
 function suggestPayments(){
-  var pack=$('fPk').value;
-  var mode=$('fMode').value;
-  if(mode!=='add')return;// solo en alta nueva
-  // solo sugerir si no hay pagos ya añadidos
-  if($('paysList').children.length>0)return;
-
-  var altaDate=$('fCr').value||new Date().toISOString().split('T')[0];
-  var base=new Date(altaDate);
-
-  if(pack==='pyme'){
-    // 2º pago setup a los 6 meses
-    var d=new Date(base);d.setMonth(d.getMonth()+6);
-    addPay('2º pago setup Pyme (50%)',900,d.toISOString().split('T')[0]);
-    // Mantenimiento a los 12 meses
-    var d2=new Date(base);d2.setFullYear(d2.getFullYear()+1);
-    addPay('Renovación mantenimiento anual',599,d2.toISOString().split('T')[0]);
-    toast('Pagos sugeridos para Pyme añadidos','info');
-  } else if(pack==='enterprise'){
-    // Mantenimiento a los 12 meses
-    var d3=new Date(base);d3.setFullYear(d3.getFullYear()+1);
-    addPay('Renovación mantenimiento anual',1399,d3.toISOString().split('T')[0]);
-    toast('Pago sugerido para Enterprise añadido','info');
-  } else if(pack==='basic'){
-    var d4=new Date(base);d4.setFullYear(d4.getFullYear()+1);
-    addPay('Renovación mantenimiento anual',89,d4.toISOString().split('T')[0]);
-  } else if(pack==='advance'){
-    var d5=new Date(base);d5.setFullYear(d5.getFullYear()+1);
-    addPay('Renovación mantenimiento anual',199,d5.toISOString().split('T')[0]);
-  }
+  var pack=$('fPk').value,mode=$('fMode').value;
+  if(mode!=='add')return;if($('paysList').children.length>0)return;
+  var base=new Date($('fCr').value||new Date().toISOString().split('T')[0]);
+  if(pack==='pyme'){var d=new Date(base);d.setMonth(d.getMonth()+6);addPay('2º pago setup Pyme (50%)',900,d.toISOString().split('T')[0]);var d2=new Date(base);d2.setFullYear(d2.getFullYear()+1);addPay('Renovación mantenimiento anual',599,d2.toISOString().split('T')[0]);toast('Pagos sugeridos para Pyme','info')}
+  else if(pack==='enterprise'){var d3=new Date(base);d3.setFullYear(d3.getFullYear()+1);addPay('Renovación mantenimiento anual',1399,d3.toISOString().split('T')[0]);toast('Pago sugerido para Enterprise','info')}
+  else if(pack==='basic'){var d4=new Date(base);d4.setFullYear(d4.getFullYear()+1);addPay('Renovación mantenimiento anual',89,d4.toISOString().split('T')[0])}
+  else if(pack==='advance'){var d5=new Date(base);d5.setFullYear(d5.getFullYear()+1);addPay('Renovación mantenimiento anual',199,d5.toISOString().split('T')[0])}
 }
 
 function saveF(){
-  var tk=sanitizeToken($('fTk').value.trim());
-  var biz=$('fBiz').value.trim();
-  if(!tk||!biz){
-    toast('Token y nombre del negocio son obligatorios','err');
-    return;
-  }
-  if(tk.length<5){
-    toast('El token debe tener al menos 5 caracteres','err');
-    return;
-  }
-  // advertencia si el token es predecible
-  if(/^WM-(cliente|test|demo|prueba|taller|pelu|dental|abogado|gestoria|cursos)-?\d*$/i.test(tk)){
-    if(!confirm('⚠️ ATENCIÓN: Ese token es predecible y un competidor podría adivinarlo.\n\nRecomendado: usa el botón 🎲 Generar para crear uno aleatorio seguro.\n\n¿Continuar de todas formas?'))return;
-  }
+  var tk=sanitizeToken($('fTk').value.trim()),biz=$('fBiz').value.trim();
+  if(!tk||!biz){toast('Token y nombre obligatorios','err');return}
+  if(tk.length<5){toast('Token mínimo 5 caracteres','err');return}
+  if(/^WM-(cliente|test|demo|prueba|taller|pelu|dental|abogado|gestoria|cursos)-?\d*$/i.test(tk)){if(!confirm('⚠️ Token predecible. ¿Continuar?'))return}
   var mode=$('fMode').value;
-  if(mode==='add'&&lics[tk]){
-    toast('Ya existe un cliente con ese token','err');
-    return;
-  }
-
-  // recopilar respuestas personalizadas
+  if(mode==='add'&&lics[tk]){toast('Ya existe ese token','err');return}
   var resp={};
-  document.querySelectorAll('.resp-row').forEach(function(r){
-    var k=r.querySelector('.rk').value.trim();
-    var v=r.querySelector('.rv').value.trim();
-    if(k&&v)resp[k]=v;
-  });
+  document.querySelectorAll('.resp-row').forEach(function(r){var k=r.querySelector('.rk').value.trim(),v=r.querySelector('.rv').value.trim();if(k&&v)resp[k]=v});
   if($('fAN').value.trim())resp._ask_name=$('fAN').value.trim();
   if($('fAP').value.trim())resp._ask_phone=$('fAP').value.trim();
   if($('fSu').value.trim())resp._summary=$('fSu').value.trim();
   if($('fBy').value.trim())resp._goodbye=$('fBy').value.trim();
-
-  // recopilar pagos pendientes
-  var pendingPayments=[];
-  document.querySelectorAll('.pay-row').forEach(function(r){
-    var concept=r.querySelector('.pay-concept').value.trim();
-    var amount=parseFloat(r.querySelector('.pay-amount').value)||0;
-    var dueDate=r.querySelector('.pay-date').value;
-    if(concept&&amount>0&&dueDate){
-      pendingPayments.push({concept:concept,amount:amount,dueDate:dueDate,paid:false});
-    }
-  });
-
+  var pp=[];
+  document.querySelectorAll('.pay-row').forEach(function(r){var c=r.querySelector('.pay-concept').value.trim(),a=parseFloat(r.querySelector('.pay-amount').value)||0,d=r.querySelector('.pay-date').value;if(c&&a>0&&d)pp.push({concept:c,amount:a,dueDate:d,paid:false})});
   var bt=$('fBt').value.trim();
-  lics[tk]={
-    biz:biz,
-    domain:$('fDom').value.trim(),
-    pack:$('fPk').value,
-    active:mode==='edit'?(lics[$('fOrig').value]?lics[$('fOrig').value].active:true):true,
-    created:$('fCr').value,
-    expires:$('fEx').value,
-    contact:$('fEm').value.trim(),
-    phone:$('fPh').value.trim(),
-    notes:$('fNo').value.trim(),
-    botName:$('fBn').value.trim()||'Asistente',
-    color:$('fCo').value.trim()||'#7c3aed',
-    calendar:$('fCal').value!=='false',
-    greeting:$('fGr').value.trim(),
-    serviceButtons:bt?bt.split(',').map(function(s){return s.trim()}).filter(function(s){return s}):[],
-    responses:Object.keys(resp).length?resp:undefined,
-    pendingPayments:pendingPayments.length?pendingPayments:undefined,
-    updated:new Date().toISOString()
-  };
-
-  save((mode==='add'?'Alta':'Editar')+': '+biz).then(function(){
-    toast(biz+(mode==='add'?' dado de alta ✅':' actualizado ✅'));
-    hideF();
-    if(mode==='add')code(tk);
-  });
+  lics[tk]={biz:biz,domain:$('fDom').value.trim(),pack:$('fPk').value,active:mode==='edit'?(lics[$('fOrig').value]?lics[$('fOrig').value].active:true):true,created:$('fCr').value,expires:$('fEx').value,contact:$('fEm').value.trim(),phone:$('fPh').value.trim(),notes:$('fNo').value.trim(),botName:$('fBn').value.trim()||'Asistente',color:$('fCo').value.trim()||'#7c3aed',calendar:$('fCal').value!=='false',greeting:$('fGr').value.trim(),serviceButtons:bt?bt.split(',').map(function(s){return s.trim()}).filter(function(s){return s}):[],responses:Object.keys(resp).length?resp:undefined,pendingPayments:pp.length?pp:undefined,updated:new Date().toISOString()};
+  save((mode==='add'?'Alta':'Editar')+': '+biz).then(function(){toast(biz+(mode==='add'?' dado de alta ✅':' actualizado ✅'));hideF();if(mode==='add')code(tk)});
 }
 
-/* ============================================================
-   SNIPPET DE CÓDIGO PARA EL CLIENTE
-   ============================================================ */
 function code(k){
-  var l=lics[k];
-  if(!l)return;
+  var l=lics[k];if(!l)return;
   var sv=l.serviceButtons&&l.serviceButtons.length?'\n  data-services="'+l.serviceButtons.join(',')+'"':'';
-  var c='<!-- WhiteMoon Chatbot IA · '+l.biz+' -->\n<script src="'+CDN_BASE+'/chat.js"\n  data-token="'+k+'"'
-    +(l.color&&l.color!=='#7c3aed'?'\n  data-color="'+l.color+'"':'')
-    +sv
-    +(l.botName&&l.botName!=='Asistente'?'\n  data-bot-name="'+l.botName+'"':'')
-    +'><\/script>';
+  var c='<!-- WhiteMoon Chatbot IA · '+l.biz+' -->\n<script src="'+CDN_BASE+'/chat.js"\n  data-token="'+k+'"'+(l.color&&l.color!=='#7c3aed'?'\n  data-color="'+l.color+'"':'')+sv+(l.botName&&l.botName!=='Asistente'?'\n  data-bot-name="'+l.botName+'"':'')+'><\/script>';
   $('codeO').textContent=c;
   $('codeC').style.display='block';
+  var ic=$('installContent');if(ic){ic.style.display='none';ic.innerHTML=''}
   $('codeC').scrollIntoView({behavior:'smooth'});
 }
 
-function cpCode(){
-  navigator.clipboard.writeText($('codeO').textContent).then(function(){
-    toast('Código copiado al portapapeles');
-  }).catch(function(){
-    toast('No se pudo copiar. Selecciónalo manualmente.','err');
-  });
-}
+function cpCode(){navigator.clipboard.writeText($('codeO').textContent).then(function(){toast('Código copiado al portapapeles')}).catch(function(){toast('No se pudo copiar. Selecciónalo manualmente.','err')})}
 
 function emailCode(){
-  var code=$('codeO').textContent;
-  var subject='Tu chatbot WhiteMoon está listo';
-  var body='Hola,\n\nTu chatbot IA ya está configurado y listo para instalar en tu web.\n\nSolo tienes que pegar este código antes de la etiqueta </body> en tu web:\n\n'+code+'\n\nSi no tienes acceso al código de tu web, envíaselo a tu diseñador web o contáctanos y te ayudamos a instalarlo.\n\nUn saludo,\nEquipo WhiteMoon\nhttps://whitemoon.es';
-  window.location.href='mailto:?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+  var c=$('codeO').textContent;
+  var sub='Tu chatbot WhiteMoon está listo';
+  var bod='Hola,\n\nTu chatbot IA ya está configurado y listo para instalar en tu web.\n\nPega este código antes de la etiqueta </body>:\n\n'+c+'\n\nSi necesitas ayuda para instalarlo, contáctanos.\n\nUn saludo,\nEquipo WhiteMoon\nhttps://whitemoon.es';
+  window.location.href='mailto:?subject='+encodeURIComponent(sub)+'&body='+encodeURIComponent(bod);
 }
 
-/* ============================================================
-   EXPORTAR
-   ============================================================ */
+/* INSTRUCCIONES INSTALACIÓN */
+function showInstall(p){
+  var instrucciones={
+    wp:[
+      '<b>WordPress — Plugin Insert Headers and Footers (recomendado)</b>',
+      '<div class="install-step"><div class="install-num">1</div><div>Instala el plugin gratuito <b>Insert Headers and Footers</b> desde Plugins → Añadir nuevo</div></div>',
+      '<div class="install-step"><div class="install-num">2</div><div>Ve a <b>Ajustes → Insert Headers and Footers</b></div></div>',
+      '<div class="install-step"><div class="install-num">3</div><div>Pega el código en el campo <b>Scripts in Footer</b></div></div>',
+      '<div class="install-step"><div class="install-num">4</div><div>Guarda los cambios ✅ El chatbot aparece en toda la web</div></div>',
+      '<br><b>Alternativa — Theme Editor</b>',
+      '<div class="install-step"><div class="install-num">1</div><div>Ve a <b>Apariencia → Editor de temas → footer.php</b></div></div>',
+      '<div class="install-step"><div class="install-num">2</div><div>Pega el código justo antes de <code>&lt;/body&gt;</code> y guarda</div></div>'
+    ].join(''),
+    joomla:[
+      '<b>Joomla — Módulo HTML personalizado (recomendado)</b>',
+      '<div class="install-step"><div class="install-num">1</div><div>Ve a <b>Extensiones → Módulos → Nuevo</b></div></div>',
+      '<div class="install-step"><div class="install-num">2</div><div>Selecciona tipo <b>HTML personalizado</b></div></div>',
+      '<div class="install-step"><div class="install-num">3</div><div>Pega el código en el campo de contenido</div></div>',
+      '<div class="install-step"><div class="install-num">4</div><div>Posición: <b>debug</b> o <b>bottom</b> · Asignación: <b>Todas las páginas</b></div></div>',
+      '<div class="install-step"><div class="install-num">5</div><div>Guarda y publica ✅</div></div>',
+      '<br><b>Alternativa — Editor de plantilla</b>',
+      '<div class="install-step"><div class="install-num">1</div><div><b>Extensiones → Plantillas → Estilos → Editor → index.php</b></div></div>',
+      '<div class="install-step"><div class="install-num">2</div><div>Pega el código antes de <code>&lt;/body&gt;</code> y guarda</div></div>'
+    ].join(''),
+    html:[
+      '<b>HTML puro</b>',
+      '<div class="install-step"><div class="install-num">1</div><div>Abre el archivo HTML de tu web</div></div>',
+      '<div class="install-step"><div class="install-num">2</div><div>Busca la etiqueta de cierre <code>&lt;/body&gt;</code></div></div>',
+      '<div class="install-step"><div class="install-num">3</div><div>Pega el código justo antes de esa etiqueta</div></div>',
+      '<div class="install-step"><div class="install-num">4</div><div>Guarda y sube el archivo al servidor ✅</div></div>',
+      '<br><span style="color:#888">Si la web tiene varias páginas, pega el código en cada una o en el archivo de footer que se incluye en todas.</span>'
+    ].join(''),
+    shopify:[
+      '<b>Shopify</b>',
+      '<div class="install-step"><div class="install-num">1</div><div>Ve a <b>Tienda Online → Temas → Editar código</b></div></div>',
+      '<div class="install-step"><div class="install-num">2</div><div>Abre el archivo <b>theme.liquid</b></div></div>',
+      '<div class="install-step"><div class="install-num">3</div><div>Busca <code>&lt;/body&gt;</code> y pega el código justo antes</div></div>',
+      '<div class="install-step"><div class="install-num">4</div><div>Guarda ✅ El chatbot aparece en toda la tienda</div></div>'
+    ].join(''),
+    wix:[
+      '<b>Wix</b>',
+      '<div class="install-step"><div class="install-num">1</div><div>En el Editor ve a <b>Añadir → Más → HTML personalizado</b></div></div>',
+      '<div class="install-step"><div class="install-num">2</div><div>Pega el código en el widget HTML y acepta</div></div>',
+      '<div class="install-step"><div class="install-num">3</div><div>Publica los cambios ✅</div></div>',
+      '<br><b>Alternativa — Wix Dev Mode</b>',
+      '<div class="install-step"><div class="install-num">1</div><div>Activa Wix Velo → <b>Configuración del sitio → Código personalizado</b></div></div>',
+      '<div class="install-step"><div class="install-num">2</div><div>Añade el código en <b>Body - end</b> → Aplica a <b>Todas las páginas</b></div></div>'
+    ].join('')
+  };
+  var el=$('installContent');
+  if(el){el.innerHTML=instrucciones[p]||'';el.style.display='block';}
+}
+
 function exportCSV(){
-  var ks=Object.keys(lics);
-  if(!ks.length){toast('No hay clientes para exportar','err');return}
+  var ks=Object.keys(lics);if(!ks.length){toast('No hay clientes','err');return}
   var rows=[['Token','Negocio','Dominio','Pack','Estado','Alta','Expira','Email','Teléfono','Pagos pendientes (€)','Notas']];
-  ks.forEach(function(k){
-    var l=lics[k];
-    var pend=0;
-    if(l.pendingPayments){
-      l.pendingPayments.forEach(function(p){if(!p.paid)pend+=parseFloat(p.amount)||0});
-    }
-    rows.push([k,l.biz||'',l.domain||'',l.pack||'',l.active?'Activa':'Inactiva',l.created||'',l.expires||'',l.contact||'',l.phone||'',pend.toFixed(2),l.notes||'']);
-  });
+  ks.forEach(function(k){var l=lics[k],pt=0;if(l.pendingPayments)l.pendingPayments.forEach(function(p){if(!p.paid)pt+=parseFloat(p.amount)||0});rows.push([k,l.biz||'',l.domain||'',l.pack||'',l.active?'Activa':'Inactiva',l.created||'',l.expires||'',l.contact||'',l.phone||'',pt.toFixed(2),l.notes||''])});
   var csv=rows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"'}).join(',')}).join('\n');
-  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');
-  a.href=url;
-  a.download='whitemoon-clientes-'+new Date().toISOString().split('T')[0]+'.csv';
-  a.click();
-  URL.revokeObjectURL(url);
-  toast('CSV descargado');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='whitemoon-clientes-'+new Date().toISOString().split('T')[0]+'.csv';a.click();URL.revokeObjectURL(url);toast('CSV descargado');
 }
 
 function exportPaymentsCSV(){
-  var ks=Object.keys(lics);
-  var rows=[['Cliente','Token','Teléfono','Concepto','Importe (€)','Fecha vencimiento','Días restantes','Estado']];
-  var count=0;
-  ks.forEach(function(k){
-    var l=lics[k];
-    if(l.pendingPayments&&l.pendingPayments.length){
-      l.pendingPayments.forEach(function(p){
-        if(!p.paid){
-          var d=daysUntil(p.dueDate);
-          var est=d!==null?(d<0?'VENCIDO':(d===0?'HOY':(d<=7?'URGENTE':(d<=30?'PRÓXIMO':'FUTURO')))):'-';
-          rows.push([l.biz||'',k,l.phone||'',p.concept||'',(parseFloat(p.amount)||0).toFixed(2),p.dueDate||'',d!==null?d:'-',est]);
-          count++;
-        }
-      });
-    }
-  });
+  var ks=Object.keys(lics),rows=[['Cliente','Token','Teléfono','Concepto','Importe (€)','Fecha vencimiento','Días restantes','Estado']],count=0;
+  ks.forEach(function(k){var l=lics[k];if(l.pendingPayments&&l.pendingPayments.length)l.pendingPayments.forEach(function(p){if(!p.paid){var d=daysUntil(p.dueDate),est=d!==null?(d<0?'VENCIDO':(d===0?'HOY':(d<=7?'URGENTE':(d<=30?'PRÓXIMO':'FUTURO')))):'-';rows.push([l.biz||'',k,l.phone||'',p.concept||'',(parseFloat(p.amount)||0).toFixed(2),p.dueDate||'',d!==null?d:'-',est]);count++}})});
   if(!count){toast('No hay pagos pendientes','err');return}
-  // ordenar por fecha (más próximos primero) - ignorar cabecera
-  var header=rows[0];
-  var data=rows.slice(1).sort(function(a,b){return(a[5]||'').localeCompare(b[5]||'')});
-  rows=[header].concat(data);
+  var h=rows[0],data=rows.slice(1).sort(function(a,b){return(a[5]||'').localeCompare(b[5]||'')});rows=[h].concat(data);
   var csv=rows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"'}).join(',')}).join('\n');
-  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');
-  a.href=url;
-  a.download='whitemoon-pagos-pendientes-'+new Date().toISOString().split('T')[0]+'.csv';
-  a.click();
-  URL.revokeObjectURL(url);
-  toast(count+' pagos pendientes exportados');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='whitemoon-pagos-pendientes-'+new Date().toISOString().split('T')[0]+'.csv';a.click();URL.revokeObjectURL(url);toast(count+' pagos exportados');
 }
 
 function exportJSON(){
-  var data={exported:new Date().toISOString(),licenses:lics};
-  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');
-  a.href=url;
-  a.download='whitemoon-backup-'+new Date().toISOString().split('T')[0]+'.json';
-  a.click();
-  URL.revokeObjectURL(url);
-  toast('Backup JSON descargado');
+  var blob=new Blob([JSON.stringify({exported:new Date().toISOString(),licenses:lics},null,2)],{type:'application/json'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='whitemoon-backup-'+new Date().toISOString().split('T')[0]+'.json';a.click();URL.revokeObjectURL(url);toast('Backup JSON descargado');
 }
 
-/* ============================================================
-   ATAJOS DE TECLADO
-   ============================================================ */
 document.addEventListener('keydown',function(e){
-  // Ctrl/Cmd + N: nuevo cliente
-  if((e.ctrlKey||e.metaKey)&&e.key==='n'&&$('panelView').style.display!=='none'){
-    e.preventDefault();
-    showAdd();
-  }
-  // Ctrl/Cmd + S: guardar formulario
-  if((e.ctrlKey||e.metaKey)&&e.key==='s'&&$('frm').style.display!=='none'){
-    e.preventDefault();
-    saveF();
-  }
-  // Esc: cerrar formulario o modal
-  if(e.key==='Escape'){
-    if($('confirmModal').classList.contains('show'))closeCm();
-    else if($('frm').style.display!=='none')hideF();
-  }
+  if((e.ctrlKey||e.metaKey)&&e.key==='n'&&$('panelView').style.display!=='none'){e.preventDefault();showAdd()}
+  if((e.ctrlKey||e.metaKey)&&e.key==='s'&&$('frm').style.display!=='none'){e.preventDefault();saveF()}
+  if(e.key==='Escape'){if($('confirmModal').classList.contains('show'))closeCm();else if($('frm').style.display!=='none')hideF()}
 });
 </script>
 </body>

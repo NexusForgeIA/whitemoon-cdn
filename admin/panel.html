@@ -42,7 +42,7 @@ tr:hover td{background:#0a0a14}
 .badge{padding:3px 10px;border-radius:12px;font-size:.66rem;font-weight:600;display:inline-block;white-space:nowrap}
 .badge-on{background:rgba(34,197,94,.15);color:#22c55e}
 .badge-off{background:rgba(239,68,68,.15);color:#ef4444}
-.badge-warn{background:rgba(245,158,11,.15);color:#f59e0b}
+.badge-itp{background:rgba(6,182,212,.15);color:#06b6d4}
 .empty{text-align:center;padding:40px;color:#555;font-size:.88rem}
 .flex{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -52,9 +52,7 @@ tr:hover td{background:#0a0a14}
 .warn{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:8px;padding:12px;font-size:.78rem;color:#f59e0b;margin:12px 0}
 .err{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:8px;padding:12px;font-size:.78rem;color:#ef4444;margin:12px 0}
 .toast{position:fixed;top:20px;right:20px;padding:12px 20px;border-radius:10px;font-size:.82rem;font-weight:600;display:none;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.3);color:#fff;max-width:320px}
-.toast.ok{background:#22c55e}
-.toast.err{background:#ef4444}
-.toast.info{background:#7c3aed}
+.toast.ok{background:#22c55e}.toast.err{background:#ef4444}.toast.info{background:#7c3aed}
 .resp-row{display:flex;gap:8px;margin-bottom:8px;align-items:flex-start}
 .resp-row input{flex:1}.resp-row textarea{flex:2}
 .resp-del{background:none;border:none;color:#ef4444;cursor:pointer;font-size:1.1rem;padding:8px}
@@ -67,7 +65,6 @@ tr:hover td{background:#0a0a14}
 .pay-item.overdue{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.2)}
 .pay-item.overdue .pi-amt{color:#ef4444}
 .pay-item.soon{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.3)}
-@media(max-width:600px){.pay-row{grid-template-columns:1fr 1fr 40px}.pay-row input:first-child{grid-column:1 / span 2}}
 code{background:#1a1a2e;padding:2px 6px;border-radius:4px;font-size:.78rem;color:#a78bfa}
 pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font-size:.76rem;color:#e0e0e0;overflow-x:auto;white-space:pre-wrap;margin:8px 0}
 .stitle{font-size:.78rem;font-weight:700;color:#fff;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid #1a1a2e}
@@ -80,8 +77,7 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
 .stat-card{flex:1;min-width:120px;text-align:center}
 .stat-card .v{font-size:1.6rem;font-weight:700}
 .stat-card .l{font-size:.68rem;color:#888;margin-top:2px}
-.expire-soon{color:#f59e0b!important}
-.expired{color:#ef4444!important}
+.expire-soon{color:#f59e0b!important}.expired{color:#ef4444!important}
 .modal-bg{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
 .modal-bg.show{display:flex}
 .modal{background:#111;border:1px solid #1a1a2e;border-radius:12px;padding:24px;max-width:450px;width:100%;text-align:center}
@@ -95,12 +91,20 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
 .dmenu a:last-child{border:none}
 .pw-toggle{position:relative}
 .pw-toggle .eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#666;cursor:pointer;font-size:1rem;padding:4px}
-/* INSTALACIÓN */
 .install-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
 .install-content{font-size:.78rem;color:#ccc;line-height:1.9;background:#0a0a14;border:1px solid #1a1a2e;border-radius:8px;padding:14px;display:none;margin-top:4px}
 .install-step{display:flex;gap:8px;align-items:flex-start;margin-bottom:6px}
 .install-num{background:#7c3aed;color:#fff;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;flex-shrink:0;margin-top:1px}
-@media(max-width:700px){.g2,.g3{grid-template-columns:1fr}table{font-size:.75rem}.wrap{padding:12px}.search-bar input,.search-bar select{min-width:120px}}
+/* === MÓDULO CALCULADORA ITP === */
+.itp-wrap{background:rgba(6,182,212,.04);border:1px solid rgba(6,182,212,.18);border-radius:10px;padding:16px;margin-top:4px}
+.itp-header{display:flex;align-items:center;gap:10px}
+.itp-header input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:#06b6d4;flex-shrink:0}
+.itp-header label{font-size:.82rem;color:#06b6d4;font-weight:600;cursor:pointer;margin:0}
+.itp-body{display:none;margin-top:14px;border-top:1px solid rgba(6,182,212,.12);padding-top:14px}
+.itp-body.show{display:block}
+.itp-info{background:rgba(6,182,212,.06);border:1px solid rgba(6,182,212,.15);border-radius:8px;padding:10px 12px;font-size:.76rem;color:#06b6d4;margin-bottom:12px}
+@media(max-width:700px){.g2,.g3{grid-template-columns:1fr}table{font-size:.75rem}.wrap{padding:12px}}
+@media(max-width:600px){.pay-row{grid-template-columns:1fr 1fr 40px}.pay-row input:first-child{grid-column:1 / span 2}}
 </style>
 </head>
 <body>
@@ -151,7 +155,7 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
       <div class="card stat-card"><div class="v" style="color:#ef4444" id="sI">0</div><div class="l">Inactivos</div></div>
       <div class="card stat-card"><div class="v" style="color:#f59e0b" id="sE">0</div><div class="l">Expiran ≤30d</div></div>
       <div class="card stat-card"><div class="v" style="color:#06b6d4" id="sR">0€</div><div class="l">Ingreso/mes</div></div>
-      <div class="card stat-card" style="cursor:pointer" onclick="showPendingPayments()" title="Click para ver detalle"><div class="v" style="color:#f59e0b" id="sP">0€</div><div class="l">💸 Pendiente cobrar</div></div>
+      <div class="card stat-card" style="cursor:pointer" onclick="showPendingPayments()"><div class="v" style="color:#f59e0b" id="sP">0€</div><div class="l">💸 Pendiente cobrar</div></div>
     </div>
 
     <div class="card" id="pendingCard" style="display:none">
@@ -197,25 +201,14 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
           <label>Token <span style="color:#f59e0b">*</span></label>
           <div class="token-gen">
             <input type="text" id="fTk" placeholder="WM-..." maxlength="60">
-            <button type="button" onclick="genTk()" title="Generar token aleatorio seguro">🎲 Generar</button>
+            <button type="button" onclick="genTk()">🎲 Generar</button>
           </div>
         </div>
-        <div>
-          <label>Nombre negocio <span style="color:#f59e0b">*</span></label>
-          <input type="text" id="fBiz" placeholder="Clínica Dental Sonríe" maxlength="100">
-        </div>
+        <div><label>Nombre negocio <span style="color:#f59e0b">*</span></label><input type="text" id="fBiz" placeholder="Clínica Dental Sonríe" maxlength="100"></div>
       </div>
       <div class="g2 mb">
         <div><label>Dominio</label><input type="text" id="fDom" placeholder="clinicasonrie.es" maxlength="100"></div>
-        <div>
-          <label>Pack</label>
-          <select id="fPk" onchange="suggestPayments()">
-            <option value="basic">Basic 49€/mes</option>
-            <option value="advance" selected>Advance 99€/mes</option>
-            <option value="pyme">Pyme 1.800€</option>
-            <option value="enterprise">Enterprise 3.599€</option>
-          </select>
-        </div>
+        <div><label>Pack</label><select id="fPk" onchange="suggestPayments()"><option value="basic">Basic 49€/mes</option><option value="advance" selected>Advance 99€/mes</option><option value="pyme">Pyme 1.800€</option><option value="enterprise">Enterprise 3.599€</option></select></div>
       </div>
       <div class="g2 mb">
         <div><label>Email contacto</label><input type="email" id="fEm" placeholder="info@cliente.es" maxlength="100"></div>
@@ -228,7 +221,7 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
       <div class="mb"><label>Notas internas</label><input type="text" id="fNo" placeholder="Observaciones..." maxlength="300"></div>
 
       <div class="stitle">💸 Pagos pendientes (opcional)</div>
-      <div class="info">Para Pyme (2º pago 900€ a los 6 meses) o cualquier pago futuro que tengas que cobrar a este cliente.</div>
+      <div class="info">Para Pyme (2º pago 900€ a los 6 meses) o cualquier pago futuro.</div>
       <div id="paysList"></div>
       <button class="btn btn-sm btn-y" onclick="addPay()" style="margin:8px 0 16px">+ Añadir pago pendiente</button>
 
@@ -249,10 +242,31 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
       <div class="stitle">Mensajes del flujo</div>
       <div class="mb"><label>Pedir nombre</label><textarea id="fAN" rows="2" placeholder="¿Me dices tu nombre y apellidos?"></textarea></div>
       <div class="mb"><label>Pedir teléfono (usa {nombre})</label><textarea id="fAP" rows="2" placeholder="Perfecto {nombre}. ¿Un teléfono móvil?"></textarea></div>
-      <div class="mb"><label>Resumen cita (usa {nombre} {telefono} {servicio} {fecha} {hora})</label><textarea id="fSu" rows="4" placeholder="Perfecto {nombre}. He tomado nota:&#10;• Nombre: {nombre}&#10;• Teléfono: {telefono}&#10;• Servicio: {servicio}&#10;&#10;Nuestro equipo confirmará por WhatsApp. ¡Saludos!"></textarea></div>
-      <div class="mb"><label>Despedida</label><textarea id="fBy" rows="2" placeholder="Nuestro equipo te contactará por WhatsApp. ¡Saludos y gracias! 😊"></textarea></div>
+      <div class="mb"><label>Resumen cita</label><textarea id="fSu" rows="4" placeholder="Perfecto {nombre}. He tomado nota..."></textarea></div>
+      <div class="mb"><label>Despedida</label><textarea id="fBy" rows="2" placeholder="Nuestro equipo te contactará por WhatsApp. ¡Saludos!"></textarea></div>
 
-      <div class="flex" style="margin-top:12px;justify-content:space-between">
+      <!-- MÓDULO ITP -->
+      <div class="stitle">🧮 Calculadora ITP (white label)</div>
+      <div class="itp-wrap">
+        <div class="itp-header">
+          <input type="checkbox" id="fItp" onchange="toggleItp()">
+          <label for="fItp">Activar calculadora ITP white label para este cliente</label>
+        </div>
+        <div class="itp-body" id="itpBody">
+          <div class="itp-info">Se generará un bloque HTML personalizado con la marca del cliente, listo para instalar en su web. El cliente usa la calculadora con su imagen de marca.</div>
+          <div class="g2 mb">
+            <div><label>Nombre gestoría (en el HTML)</label><input type="text" id="fItpNombre" placeholder="Gestoría Martínez" maxlength="80"></div>
+            <div><label>Color principal</label><input type="color" id="fItpColor" value="#1565C0"></div>
+          </div>
+          <div class="g2 mb">
+            <div><label>Teléfono / WhatsApp</label><input type="tel" id="fItpTel" placeholder="612345678" maxlength="20"></div>
+            <div><label>Logo URL (opcional)</label><input type="text" id="fItpLogo" placeholder="https://sugestoria.es/logo.png" maxlength="200"></div>
+          </div>
+          <div class="mb"><label>Texto botón WhatsApp</label><input type="text" id="fItpCta" placeholder="Solicitar gestión del ITP" maxlength="60" value="Solicitar gestión del ITP"></div>
+        </div>
+      </div>
+
+      <div class="flex" style="margin-top:16px;justify-content:space-between">
         <div class="flex">
           <button class="btn btn-p" onclick="saveF()" id="saveBtn">Guardar</button>
           <button class="btn btn-o" onclick="hideF()">Cancelar</button>
@@ -261,17 +275,15 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
       </div>
     </div>
 
-    <!-- CÓDIGO — CON INSTRUCCIONES DE INSTALACIÓN -->
+    <!-- CÓDIGO -->
     <div class="card" id="codeC" style="display:none">
-      <h2 style="margin-top:0">📋 Código para el cliente</h2>
-      <p style="font-size:.78rem;color:#888;margin-bottom:8px">Pegar antes de <code>&lt;/body&gt;</code> en la web del cliente:</p>
+      <h2 style="margin-top:0" id="codeCTitle">📋 Código para el cliente</h2>
+      <p style="font-size:.78rem;color:#888;margin-bottom:8px" id="codeCDesc">Pegar antes de <code>&lt;/body&gt;</code> en la web del cliente:</p>
       <pre id="codeO"></pre>
       <div class="flex" style="margin-top:8px">
         <button class="btn btn-sm btn-o" onclick="cpCode()">📋 Copiar código</button>
         <button class="btn btn-sm btn-c" onclick="emailCode()">✉️ Email al cliente</button>
       </div>
-
-      <!-- INSTRUCCIONES INSTALACIÓN -->
       <div style="margin-top:20px;border-top:1px solid #1a1a2e;padding-top:16px">
         <div style="font-size:.78rem;font-weight:700;color:#fff;margin-bottom:10px">📖 ¿Cómo instalarlo en la web del cliente?</div>
         <div class="install-tabs">
@@ -330,6 +342,51 @@ function toggleMenu(e){e.stopPropagation();$('dmenu').classList.toggle('show')}
 document.addEventListener('click',function(){$('dmenu').classList.remove('show')});
 function daysUntil(d){if(!d)return null;var dt=new Date(d);if(isNaN(dt))return null;var n=new Date();n.setHours(0,0,0,0);return Math.floor((dt-n)/(1000*60*60*24))}
 
+// === MÓDULO ITP ===
+function toggleItp(){
+  var cb=$('fItp');
+  var body=$('itpBody');
+  if(cb&&body)body.className='itp-body'+(cb.checked?' show':'');
+}
+
+function codeItp(k){
+  var l=lics[k];if(!l||!l.itp)return;
+  var itp=l.itp;
+  var color=itp.color||'#1565C0';
+  var nombre=itp.nombre||l.biz||'Gestoría';
+  var tel=(itp.tel||l.phone||'').replace(/[^0-9]/g,'');
+  var logo=itp.logo||'';
+  var cta=itp.cta||'Solicitar gestión del ITP';
+  var waLink=tel?'https://wa.me/34'+tel+'?text=Hola%2C%20quiero%20gestionar%20el%20ITP%20de%20mi%20veh%C3%ADculo':'#';
+
+  var h='<!-- Calculadora ITP · '+nombre+' -->\n';
+  h+='<style>\n';
+  h+='.itp-wl{font-family:system-ui,sans-serif;text-align:center;padding:2rem 1rem;}\n';
+  h+='.itp-wl h2{font-size:1.4rem;margin-bottom:.5rem;color:#1a1a2e;}\n';
+  h+='.itp-wl p{color:#666;font-size:.9rem;margin-bottom:1.5rem;}\n';
+  h+='.itp-btn-calc{display:inline-block;background:'+color+';color:white;padding:.875rem 2rem;border-radius:4px;text-decoration:none;font-weight:600;font-size:.9rem;margin-bottom:.75rem;}\n';
+  h+='.itp-btn-calc:hover{opacity:.85;}\n';
+  h+='.itp-btn-wa{display:inline-flex;align-items:center;gap:8px;background:#25D366;color:white;padding:.75rem 1.75rem;border-radius:4px;text-decoration:none;font-weight:500;font-size:.875rem;}\n';
+  h+='</style>\n';
+  h+='<div class="itp-wl">\n';
+  if(logo)h+='  <img src="'+logo+'" alt="'+nombre+'" style="height:44px;display:block;margin:0 auto 1.25rem;">\n';
+  h+='  <h2>Calculadora ITP Vehículos 2026</h2>\n';
+  h+='  <p>Calcula el impuesto de tu vehículo de segunda mano. BOE 2026 actualizado.</p>\n';
+  h+='  <a href="https://nexusforgeia.github.io/WHITEMOON-CRM-SAAS-GESTORIAS-ITP/" target="_blank" class="itp-btn-calc">Calcular mi ITP gratis</a><br>\n';
+  if(tel)h+='  <a href="'+waLink+'" target="_blank" class="itp-btn-wa"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>'+cta+'</a>\n';
+  h+='</div>\n';
+  h+='<!-- Fin Calculadora ITP · '+nombre+' -->';
+
+  $('codeCTitle').innerHTML='🧮 Código Calculadora ITP — '+escapeHtml(nombre);
+  $('codeCDesc').innerHTML='Pegar donde quieras mostrar la calculadora en la web del cliente:';
+  $('codeO').textContent=h;
+  $('codeC').style.display='block';
+  var ic=$('installContent');if(ic){ic.style.display='none';ic.innerHTML=''}
+  $('codeC').scrollIntoView({behavior:'smooth'});
+  toast('Código ITP generado para '+nombre,'info');
+}
+// === FIN MÓDULO ITP ===
+
 function doLogin(){
   var t=$('ghToken').value.trim();
   if(!t){toast('Introduce un token','err');return}
@@ -362,7 +419,6 @@ function save(msg){
 
 function render(){
   var ks=Object.keys(lics),ac=0,ex=0,rev=0,pt=0;
-  var now=new Date();now.setHours(0,0,0,0);
   ks.forEach(function(k){
     var l=lics[k];
     if(l.active){ac++;rev+=PACK_PRICES[l.pack]||0;var d=daysUntil(l.expires);if(d!==null&&d>=0&&d<=30)ex++}
@@ -388,7 +444,7 @@ function render(){
     var l=lics[k],rc=l.responses?Object.keys(l.responses).filter(function(x){return!x.startsWith('_')}).length:0;
     var d=daysUntil(l.expires),ec='',eb='';
     if(d!==null){if(d<0){ec='expired';eb='<br><small style="color:#ef4444">⚠ Expirada hace '+Math.abs(d)+'d</small>'}else if(d<=30){ec='expire-soon';eb='<br><small style="color:#f59e0b">⏰ En '+d+'d</small>'}}
-    h+='<tr><td><span class="biz">'+escapeHtml(l.biz)+'</span>'+(l.domain?'<br><span class="domain">'+escapeHtml(l.domain)+'</span>':'')+'</td>';
+    h+='<tr><td><span class="biz">'+escapeHtml(l.biz)+'</span>'+(l.domain?'<br><span class="domain">'+escapeHtml(l.domain)+'</span>':'')+(l.itp?'<br><span class="badge badge-itp" style="margin-top:4px">🧮 ITP</span>':'')+'</td>';
     h+='<td class="token">'+escapeHtml(k)+'</td><td>'+escapeHtml(l.pack||'—')+'</td>';
     h+='<td><span class="badge '+(l.active?'badge-on':'badge-off')+'">'+(l.active?'ACTIVA':'INACTIVA')+'</span></td>';
     h+='<td class="'+ec+'">'+escapeHtml(l.expires||'—')+eb+'</td><td style="color:#06b6d4">'+rc+'</td>';
@@ -396,6 +452,7 @@ function render(){
     h+=l.active?'<button class="btn btn-r btn-xs" onclick="tog(\''+escapeHtml(k)+'\',false)">Desactivar</button>':'<button class="btn btn-g btn-xs" onclick="tog(\''+escapeHtml(k)+'\',true)">Activar</button>';
     h+='<button class="btn btn-c btn-xs" onclick="edit(\''+escapeHtml(k)+'\')">✎</button>';
     h+='<button class="btn btn-o btn-xs" onclick="code(\''+escapeHtml(k)+'\')"><\/></button>';
+    if(l.itp)h+='<button class="btn btn-xs" style="background:rgba(6,182,212,.1);color:#06b6d4;border:1px solid rgba(6,182,212,.2)" onclick="codeItp(\''+escapeHtml(k)+'\')">🧮</button>';
     h+='<button class="btn btn-y btn-xs" onclick="dupl(\''+escapeHtml(k)+'\')">⎘</button>';
     h+='<button class="btn btn-xs" style="background:rgba(239,68,68,.06);color:#ef4444;border:1px solid rgba(239,68,68,.12)" onclick="del(\''+escapeHtml(k)+'\')">✕</button>';
     h+='</td></tr>';
@@ -411,15 +468,7 @@ function showPendingPayments(){
   items.sort(function(a,b){return(a.dueDate||'').localeCompare(b.dueDate||'')});
   var container=$('pendingList');
   if(!items.length){container.innerHTML='<div class="empty">No tienes pagos pendientes. 🎉</div>'}
-  else{
-    var h='';
-    items.forEach(function(it){
-      var d=daysUntil(it.dueDate),cls='',lbl='';
-      if(d!==null){if(d<0){cls='overdue';lbl='⚠ Vencido hace '+Math.abs(d)+' días'}else if(d===0){cls='soon';lbl='🔴 HOY'}else if(d<=7){cls='soon';lbl='🟡 En '+d+' días'}else{lbl='📅 En '+d+' días'}}
-      h+='<div class="pay-item '+cls+'"><div><div class="pi-biz">'+escapeHtml(it.biz)+'</div><div class="pi-d">'+escapeHtml(it.concept)+' · '+escapeHtml(it.dueDate||'sin fecha')+' · '+lbl+'</div>'+(it.phone?'<div class="pi-d">📞 <a href="tel:'+escapeHtml(it.phone)+'" style="color:#a78bfa;text-decoration:none">'+escapeHtml(it.phone)+'</a></div>':'')+'</div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span class="pi-amt">'+it.amount.toFixed(2)+'€</span><button class="btn btn-xs btn-g" onclick="markPaid(\''+escapeHtml(it.token)+'\','+it.idx+')">✓ Cobrado</button></div></div>';
-    });
-    container.innerHTML=h;
-  }
+  else{var h='';items.forEach(function(it){var d=daysUntil(it.dueDate),cls='',lbl='';if(d!==null){if(d<0){cls='overdue';lbl='⚠ Vencido hace '+Math.abs(d)+' días'}else if(d===0){cls='soon';lbl='🔴 HOY'}else if(d<=7){cls='soon';lbl='🟡 En '+d+' días'}else{lbl='📅 En '+d+' días'}}h+='<div class="pay-item '+cls+'"><div><div class="pi-biz">'+escapeHtml(it.biz)+'</div><div class="pi-d">'+escapeHtml(it.concept)+' · '+escapeHtml(it.dueDate||'sin fecha')+' · '+lbl+'</div>'+(it.phone?'<div class="pi-d">📞 <a href="tel:'+escapeHtml(it.phone)+'" style="color:#a78bfa;text-decoration:none">'+escapeHtml(it.phone)+'</a></div>':'')+'</div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span class="pi-amt">'+it.amount.toFixed(2)+'€</span><button class="btn btn-xs btn-g" onclick="markPaid(\''+escapeHtml(it.token)+'\','+it.idx+')">✓ Cobrado</button></div></div>';});container.innerHTML=h;}
   $('pendingCard').style.display='block';$('pendingCard').scrollIntoView({behavior:'smooth'});
 }
 
@@ -460,6 +509,8 @@ function showAdd(){
   $('fBn').value='Asistente';$('fCo').value='#7c3aed';$('fCal').value='true';$('fGr').value='';$('fBt').value='';
   $('fAN').value='';$('fAP').value='';$('fSu').value='';$('fBy').value='';
   $('rList').innerHTML='';$('paysList').innerHTML='';
+  $('fItp').checked=false;$('itpBody').className='itp-body';
+  $('fItpNombre').value='';$('fItpColor').value='#1565C0';$('fItpTel').value='';$('fItpLogo').value='';$('fItpCta').value='Solicitar gestión del ITP';
   var t=new Date().toISOString().split('T')[0];$('fCr').value=t;
   $('fEx').value=new Date(new Date().setFullYear(new Date().getFullYear()+1)).toISOString().split('T')[0];
   $('frm').style.display='block';$('frm').scrollIntoView({behavior:'smooth'});
@@ -481,6 +532,11 @@ function edit(k){
   if(l.responses)Object.keys(l.responses).forEach(function(x){if(!x.startsWith('_'))addR(x,l.responses[x])});
   $('paysList').innerHTML='';
   if(l.pendingPayments&&l.pendingPayments.length)l.pendingPayments.forEach(function(p){if(!p.paid)addPay(p.concept,p.amount,p.dueDate)});
+  // ITP
+  var itp=l.itp||{};
+  $('fItp').checked=!!l.itp;$('itpBody').className='itp-body'+(l.itp?' show':'');
+  $('fItpNombre').value=itp.nombre||'';$('fItpColor').value=itp.color||'#1565C0';
+  $('fItpTel').value=itp.tel||'';$('fItpLogo').value=itp.logo||'';$('fItpCta').value=itp.cta||'Solicitar gestión del ITP';
   $('frm').style.display='block';$('frm').scrollIntoView({behavior:'smooth'});
 }
 
@@ -488,11 +544,11 @@ function hideF(){$('frm').style.display='none'}
 
 function addR(k,v){
   var d=document.createElement('div');d.className='resp-row';
-  d.innerHTML='<input type="text" class="rk" placeholder="Palabras clave (coma)" value="'+escapeHtml(k||'').replace(/"/g,'&quot;')+'" maxlength="150"><textarea class="rv" rows="2" placeholder="Respuesta del chatbot..." maxlength="500">'+escapeHtml(v||'')+'</textarea><button class="resp-del" onclick="this.parentElement.remove()" title="Eliminar">×</button>';
+  d.innerHTML='<input type="text" class="rk" placeholder="Palabras clave (coma)" value="'+escapeHtml(k||'').replace(/"/g,'&quot;')+'" maxlength="150"><textarea class="rv" rows="2" placeholder="Respuesta del chatbot..." maxlength="500">'+escapeHtml(v||'')+'</textarea><button class="resp-del" onclick="this.parentElement.remove()">×</button>';
   $('rList').appendChild(d);
 }
 
-function addPay(concept,amount,dueDate,paid){
+function addPay(concept,amount,dueDate){
   var d=document.createElement('div');d.className='pay-row';
   var dd=new Date();dd.setMonth(dd.getMonth()+6);var dds=dd.toISOString().split('T')[0];
   d.innerHTML='<input type="text" class="pay-concept" placeholder="Concepto" value="'+escapeHtml(concept||'').replace(/"/g,'&quot;')+'" maxlength="100"><input type="number" class="pay-amount" placeholder="€" value="'+escapeHtml(String(amount||''))+'" min="0" step="0.01"><input type="date" class="pay-date" value="'+escapeHtml(dueDate||dds)+'"><button class="resp-del" onclick="this.parentElement.remove()">×</button>';
@@ -513,7 +569,6 @@ function saveF(){
   var tk=sanitizeToken($('fTk').value.trim()),biz=$('fBiz').value.trim();
   if(!tk||!biz){toast('Token y nombre obligatorios','err');return}
   if(tk.length<5){toast('Token mínimo 5 caracteres','err');return}
-  if(/^WM-(cliente|test|demo|prueba|taller|pelu|dental|abogado|gestoria|cursos)-?\d*$/i.test(tk)){if(!confirm('⚠️ Token predecible. ¿Continuar?'))return}
   var mode=$('fMode').value;
   if(mode==='add'&&lics[tk]){toast('Ya existe ese token','err');return}
   var resp={};
@@ -525,7 +580,18 @@ function saveF(){
   var pp=[];
   document.querySelectorAll('.pay-row').forEach(function(r){var c=r.querySelector('.pay-concept').value.trim(),a=parseFloat(r.querySelector('.pay-amount').value)||0,d=r.querySelector('.pay-date').value;if(c&&a>0&&d)pp.push({concept:c,amount:a,dueDate:d,paid:false})});
   var bt=$('fBt').value.trim();
-  lics[tk]={biz:biz,domain:$('fDom').value.trim(),pack:$('fPk').value,active:mode==='edit'?(lics[$('fOrig').value]?lics[$('fOrig').value].active:true):true,created:$('fCr').value,expires:$('fEx').value,contact:$('fEm').value.trim(),phone:$('fPh').value.trim(),notes:$('fNo').value.trim(),botName:$('fBn').value.trim()||'Asistente',color:$('fCo').value.trim()||'#7c3aed',calendar:$('fCal').value!=='false',greeting:$('fGr').value.trim(),serviceButtons:bt?bt.split(',').map(function(s){return s.trim()}).filter(function(s){return s}):[],responses:Object.keys(resp).length?resp:undefined,pendingPayments:pp.length?pp:undefined,updated:new Date().toISOString()};
+  // Guardar datos ITP
+  var itpData=null;
+  if($('fItp').checked){
+    itpData={
+      nombre:$('fItpNombre').value.trim()||biz,
+      color:$('fItpColor').value||'#1565C0',
+      tel:$('fItpTel').value.trim(),
+      logo:$('fItpLogo').value.trim(),
+      cta:$('fItpCta').value.trim()||'Solicitar gestión del ITP'
+    };
+  }
+  lics[tk]={biz:biz,domain:$('fDom').value.trim(),pack:$('fPk').value,active:mode==='edit'?(lics[$('fOrig').value]?lics[$('fOrig').value].active:true):true,created:$('fCr').value,expires:$('fEx').value,contact:$('fEm').value.trim(),phone:$('fPh').value.trim(),notes:$('fNo').value.trim(),botName:$('fBn').value.trim()||'Asistente',color:$('fCo').value.trim()||'#7c3aed',calendar:$('fCal').value!=='false',greeting:$('fGr').value.trim(),serviceButtons:bt?bt.split(',').map(function(s){return s.trim()}).filter(function(s){return s}):[],responses:Object.keys(resp).length?resp:undefined,pendingPayments:pp.length?pp:undefined,itp:itpData||undefined,updated:new Date().toISOString()};
   save((mode==='add'?'Alta':'Editar')+': '+biz).then(function(){toast(biz+(mode==='add'?' dado de alta ✅':' actualizado ✅'));hideF();if(mode==='add')code(tk)});
 }
 
@@ -533,6 +599,8 @@ function code(k){
   var l=lics[k];if(!l)return;
   var sv=l.serviceButtons&&l.serviceButtons.length?'\n  data-services="'+l.serviceButtons.join(',')+'"':'';
   var c='<!-- WhiteMoon Chatbot IA · '+l.biz+' -->\n<script src="'+CDN_BASE+'/chat.js"\n  data-token="'+k+'"'+(l.color&&l.color!=='#7c3aed'?'\n  data-color="'+l.color+'"':'')+sv+(l.botName&&l.botName!=='Asistente'?'\n  data-bot-name="'+l.botName+'"':'')+'><\/script>';
+  $('codeCTitle').innerHTML='📋 Código para el cliente';
+  $('codeCDesc').innerHTML='Pegar antes de <code>&lt;/body&gt;</code> en la web del cliente:';
   $('codeO').textContent=c;
   $('codeC').style.display='block';
   var ic=$('installContent');if(ic){ic.style.display='none';ic.innerHTML=''}
@@ -548,63 +616,22 @@ function emailCode(){
   window.location.href='mailto:?subject='+encodeURIComponent(sub)+'&body='+encodeURIComponent(bod);
 }
 
-/* INSTRUCCIONES INSTALACIÓN */
 function showInstall(p){
-  var instrucciones={
-    wp:[
-      '<b>WordPress — Plugin Insert Headers and Footers (recomendado)</b>',
-      '<div class="install-step"><div class="install-num">1</div><div>Instala el plugin gratuito <b>Insert Headers and Footers</b> desde Plugins → Añadir nuevo</div></div>',
-      '<div class="install-step"><div class="install-num">2</div><div>Ve a <b>Ajustes → Insert Headers and Footers</b></div></div>',
-      '<div class="install-step"><div class="install-num">3</div><div>Pega el código en el campo <b>Scripts in Footer</b></div></div>',
-      '<div class="install-step"><div class="install-num">4</div><div>Guarda los cambios ✅ El chatbot aparece en toda la web</div></div>',
-      '<br><b>Alternativa — Theme Editor</b>',
-      '<div class="install-step"><div class="install-num">1</div><div>Ve a <b>Apariencia → Editor de temas → footer.php</b></div></div>',
-      '<div class="install-step"><div class="install-num">2</div><div>Pega el código justo antes de <code>&lt;/body&gt;</code> y guarda</div></div>'
-    ].join(''),
-    joomla:[
-      '<b>Joomla — Módulo HTML personalizado (recomendado)</b>',
-      '<div class="install-step"><div class="install-num">1</div><div>Ve a <b>Extensiones → Módulos → Nuevo</b></div></div>',
-      '<div class="install-step"><div class="install-num">2</div><div>Selecciona tipo <b>HTML personalizado</b></div></div>',
-      '<div class="install-step"><div class="install-num">3</div><div>Pega el código en el campo de contenido</div></div>',
-      '<div class="install-step"><div class="install-num">4</div><div>Posición: <b>debug</b> o <b>bottom</b> · Asignación: <b>Todas las páginas</b></div></div>',
-      '<div class="install-step"><div class="install-num">5</div><div>Guarda y publica ✅</div></div>',
-      '<br><b>Alternativa — Editor de plantilla</b>',
-      '<div class="install-step"><div class="install-num">1</div><div><b>Extensiones → Plantillas → Estilos → Editor → index.php</b></div></div>',
-      '<div class="install-step"><div class="install-num">2</div><div>Pega el código antes de <code>&lt;/body&gt;</code> y guarda</div></div>'
-    ].join(''),
-    html:[
-      '<b>HTML puro</b>',
-      '<div class="install-step"><div class="install-num">1</div><div>Abre el archivo HTML de tu web</div></div>',
-      '<div class="install-step"><div class="install-num">2</div><div>Busca la etiqueta de cierre <code>&lt;/body&gt;</code></div></div>',
-      '<div class="install-step"><div class="install-num">3</div><div>Pega el código justo antes de esa etiqueta</div></div>',
-      '<div class="install-step"><div class="install-num">4</div><div>Guarda y sube el archivo al servidor ✅</div></div>',
-      '<br><span style="color:#888">Si la web tiene varias páginas, pega el código en cada una o en el archivo de footer que se incluye en todas.</span>'
-    ].join(''),
-    shopify:[
-      '<b>Shopify</b>',
-      '<div class="install-step"><div class="install-num">1</div><div>Ve a <b>Tienda Online → Temas → Editar código</b></div></div>',
-      '<div class="install-step"><div class="install-num">2</div><div>Abre el archivo <b>theme.liquid</b></div></div>',
-      '<div class="install-step"><div class="install-num">3</div><div>Busca <code>&lt;/body&gt;</code> y pega el código justo antes</div></div>',
-      '<div class="install-step"><div class="install-num">4</div><div>Guarda ✅ El chatbot aparece en toda la tienda</div></div>'
-    ].join(''),
-    wix:[
-      '<b>Wix</b>',
-      '<div class="install-step"><div class="install-num">1</div><div>En el Editor ve a <b>Añadir → Más → HTML personalizado</b></div></div>',
-      '<div class="install-step"><div class="install-num">2</div><div>Pega el código en el widget HTML y acepta</div></div>',
-      '<div class="install-step"><div class="install-num">3</div><div>Publica los cambios ✅</div></div>',
-      '<br><b>Alternativa — Wix Dev Mode</b>',
-      '<div class="install-step"><div class="install-num">1</div><div>Activa Wix Velo → <b>Configuración del sitio → Código personalizado</b></div></div>',
-      '<div class="install-step"><div class="install-num">2</div><div>Añade el código en <b>Body - end</b> → Aplica a <b>Todas las páginas</b></div></div>'
-    ].join('')
+  var i={
+    wp:'<b>WordPress — Insert Headers and Footers</b><div class="install-step"><div class="install-num">1</div><div>Instala el plugin <b>Insert Headers and Footers</b></div></div><div class="install-step"><div class="install-num">2</div><div>Ajustes → Insert Headers and Footers → <b>Scripts in Footer</b></div></div><div class="install-step"><div class="install-num">3</div><div>Pega el código y guarda ✅</div></div>',
+    joomla:'<b>Joomla — Módulo HTML personalizado</b><div class="install-step"><div class="install-num">1</div><div>Extensiones → Módulos → Nuevo → <b>HTML personalizado</b></div></div><div class="install-step"><div class="install-num">2</div><div>Pega el código · Posición: bottom · Todas las páginas</div></div><div class="install-step"><div class="install-num">3</div><div>Guardar y publicar ✅</div></div>',
+    html:'<b>HTML puro</b><div class="install-step"><div class="install-num">1</div><div>Abre el archivo HTML de la web</div></div><div class="install-step"><div class="install-num">2</div><div>Pega el código justo antes de <code>&lt;/body&gt;</code></div></div><div class="install-step"><div class="install-num">3</div><div>Guarda y sube al servidor ✅</div></div>',
+    shopify:'<b>Shopify</b><div class="install-step"><div class="install-num">1</div><div>Tienda Online → Temas → Editar código → <b>theme.liquid</b></div></div><div class="install-step"><div class="install-num">2</div><div>Pega el código antes de <code>&lt;/body&gt;</code> y guarda ✅</div></div>',
+    wix:'<b>Wix — Custom Code</b><div class="install-step"><div class="install-num">1</div><div>Settings → Advanced → <b>Custom Code</b></div></div><div class="install-step"><div class="install-num">2</div><div>Añadir código → Body end → Todas las páginas ✅</div></div>'
   };
   var el=$('installContent');
-  if(el){el.innerHTML=instrucciones[p]||'';el.style.display='block';}
+  if(el){el.innerHTML=i[p]||'';el.style.display='block';}
 }
 
 function exportCSV(){
   var ks=Object.keys(lics);if(!ks.length){toast('No hay clientes','err');return}
-  var rows=[['Token','Negocio','Dominio','Pack','Estado','Alta','Expira','Email','Teléfono','Pagos pendientes (€)','Notas']];
-  ks.forEach(function(k){var l=lics[k],pt=0;if(l.pendingPayments)l.pendingPayments.forEach(function(p){if(!p.paid)pt+=parseFloat(p.amount)||0});rows.push([k,l.biz||'',l.domain||'',l.pack||'',l.active?'Activa':'Inactiva',l.created||'',l.expires||'',l.contact||'',l.phone||'',pt.toFixed(2),l.notes||''])});
+  var rows=[['Token','Negocio','Dominio','Pack','Estado','Alta','Expira','Email','Teléfono','ITP activo','Pagos pendientes (€)','Notas']];
+  ks.forEach(function(k){var l=lics[k],pt=0;if(l.pendingPayments)l.pendingPayments.forEach(function(p){if(!p.paid)pt+=parseFloat(p.amount)||0});rows.push([k,l.biz||'',l.domain||'',l.pack||'',l.active?'Activa':'Inactiva',l.created||'',l.expires||'',l.contact||'',l.phone||'',l.itp?'Sí':'No',pt.toFixed(2),l.notes||''])});
   var csv=rows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"'}).join(',')}).join('\n');
   var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='whitemoon-clientes-'+new Date().toISOString().split('T')[0]+'.csv';a.click();URL.revokeObjectURL(url);toast('CSV descargado');
 }
@@ -613,7 +640,6 @@ function exportPaymentsCSV(){
   var ks=Object.keys(lics),rows=[['Cliente','Token','Teléfono','Concepto','Importe (€)','Fecha vencimiento','Días restantes','Estado']],count=0;
   ks.forEach(function(k){var l=lics[k];if(l.pendingPayments&&l.pendingPayments.length)l.pendingPayments.forEach(function(p){if(!p.paid){var d=daysUntil(p.dueDate),est=d!==null?(d<0?'VENCIDO':(d===0?'HOY':(d<=7?'URGENTE':(d<=30?'PRÓXIMO':'FUTURO')))):'-';rows.push([l.biz||'',k,l.phone||'',p.concept||'',(parseFloat(p.amount)||0).toFixed(2),p.dueDate||'',d!==null?d:'-',est]);count++}})});
   if(!count){toast('No hay pagos pendientes','err');return}
-  var h=rows[0],data=rows.slice(1).sort(function(a,b){return(a[5]||'').localeCompare(b[5]||'')});rows=[h].concat(data);
   var csv=rows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"'}).join(',')}).join('\n');
   var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='whitemoon-pagos-pendientes-'+new Date().toISOString().split('T')[0]+'.csv';a.click();URL.revokeObjectURL(url);toast(count+' pagos exportados');
 }

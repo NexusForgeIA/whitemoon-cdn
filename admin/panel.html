@@ -177,6 +177,7 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
           <option value="">Todos los packs</option>
           <option value="basic">Basic</option>
           <option value="advance">Advance</option>
+          <option value="itp">Calculadora ITP</option>
           <option value="pyme">Pyme</option>
           <option value="enterprise">Enterprise</option>
         </select>
@@ -208,7 +209,7 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
       </div>
       <div class="g2 mb">
         <div><label>Dominio</label><input type="text" id="fDom" placeholder="clinicasonrie.es" maxlength="100"></div>
-        <div><label>Pack</label><select id="fPk" onchange="suggestPayments()"><option value="basic">Basic 49€/mes</option><option value="advance" selected>Advance 99€/mes</option><option value="pyme">Pyme 1.800€</option><option value="enterprise">Enterprise 3.599€</option></select></div>
+        <div><label>Pack</label><select id="fPk" onchange="suggestPayments()"><option value="basic">Basic 49€/mes</option><option value="advance" selected>Advance 99€/mes</option><option value="itp">Calculadora ITP 99€/mes</option><option value="pyme">Pyme 1.800€</option><option value="enterprise">Enterprise 3.599€</option></select></div>
       </div>
       <div class="g2 mb">
         <div><label>Email contacto</label><input type="email" id="fEm" placeholder="info@cliente.es" maxlength="100"></div>
@@ -315,7 +316,7 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
 var REPO='NexusForgeIA/whitemoon-cdn';
 var FILE='licenses.json';
 var CDN_BASE='https://nexusforgeia.github.io/whitemoon-cdn';
-var PACK_PRICES={basic:49+(89/12),advance:99+(199/12),pyme:(599/12),enterprise:(1399/12)};
+var PACK_PRICES={basic:49+(89/12),advance:99+(199/12),pyme:(599/12),enterprise:(1399/12),itp:99+(199/12)};
 var ghToken='';
 var lics={};
 var sha='';
@@ -561,6 +562,12 @@ function suggestPayments(){
   var base=new Date($('fCr').value||new Date().toISOString().split('T')[0]);
   if(pack==='pyme'){var d=new Date(base);d.setMonth(d.getMonth()+6);addPay('2º pago setup Pyme (50%)',900,d.toISOString().split('T')[0]);var d2=new Date(base);d2.setFullYear(d2.getFullYear()+1);addPay('Renovación mantenimiento anual',599,d2.toISOString().split('T')[0]);toast('Pagos sugeridos para Pyme','info')}
   else if(pack==='enterprise'){var d3=new Date(base);d3.setFullYear(d3.getFullYear()+1);addPay('Renovación mantenimiento anual',1399,d3.toISOString().split('T')[0]);toast('Pago sugerido para Enterprise','info')}
+  else if(pack==='itp'){
+    addPay('Setup inicial Calculadora ITP',299,base.toISOString().split('T')[0]);
+    var d6=new Date(base);d6.setFullYear(d6.getFullYear()+1);
+    addPay('Renovación mantenimiento anual ITP',199,d6.toISOString().split('T')[0]);
+    toast('Pagos sugeridos para Calculadora ITP','info');
+  }
   else if(pack==='basic'){var d4=new Date(base);d4.setFullYear(d4.getFullYear()+1);addPay('Renovación mantenimiento anual',89,d4.toISOString().split('T')[0])}
   else if(pack==='advance'){var d5=new Date(base);d5.setFullYear(d5.getFullYear()+1);addPay('Renovación mantenimiento anual',199,d5.toISOString().split('T')[0])}
 }

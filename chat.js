@@ -1,171 +1,114 @@
 /**
- * WHITEMOON CHATBOT IA — Widget con Licencia + Respuestas Personalizadas
- * <script src="https://nexusforgeia.github.io/whitemoon-cdn/chat.js" data-token="WM-XXXX-NNN"></script>
+ * WHITEMOON CALCULADORA ITP — Widget con Licencia White Label
+ * <script src="https://nexusforgeia.github.io/whitemoon-cdn/itp.js" data-token="WM-XXXX"></script>
  * © WhiteMoon · whitemoon.es
  */
 (function(){
-  var script=document.currentScript||document.querySelector('script[data-token]');
-  if(!script)return;
-  var token=script.getAttribute('data-token');
-  if(!token){console.warn('[WM] Sin token');return}
-  var BASE=script.src.replace(/\/chat\.js.*$/,'');
+  var script = document.currentScript || document.querySelector('script[data-token][src*="itp.js"]');
+  if(!script) return;
+  var token = script.getAttribute('data-token');
+  if(!token){ console.warn('[WM-ITP] Sin token'); return; }
+  var BASE = script.src.replace(/\/itp\.js.*$/, '');
 
-  fetch(BASE+'/licenses.json?_='+Date.now()).then(function(r){
-    if(!r.ok)throw new Error('Sin conexión');return r.json()
+  fetch(BASE + '/licenses.json?_=' + Date.now()).then(function(r){
+    if(!r.ok) throw new Error('Sin conexión');
+    return r.json();
   }).then(function(data){
-    var lic=data.licenses[token];
-    if(!lic){console.warn('[WM] Token inválido');return}
-    if(!lic.active){console.warn('[WM] Licencia inactiva');return}
-    var host=window.location.hostname;
-    var local=host==='localhost'||host==='127.0.0.1'||host===''||host.includes('github.io');
-    if(!local&&lic.domain&&!host.includes(lic.domain)){console.warn('[WM] Dominio no autorizado');return}
-    if(lic.expires&&new Date(lic.expires)<new Date()){console.warn('[WM] Licencia expirada');return}
-    initChat(script,lic);
-  }).catch(function(e){console.error('[WM]',e)});
+    var lic = data.licenses[token];
+    if(!lic){ console.warn('[WM-ITP] Token inválido'); return; }
+    if(!lic.active){ console.warn('[WM-ITP] Licencia inactiva'); return; }
+    if(!lic.itp){ console.warn('[WM-ITP] Módulo ITP no activado para esta licencia'); return; }
 
-  function initChat(el,lic){
-    // Config from script attributes or license
-    var cfg={
-      biz:el.getAttribute('data-biz')||lic.biz||'Negocio',
-      color:el.getAttribute('data-color')||lic.color||'#7c3aed',
-      phone:el.getAttribute('data-phone')||lic.phone||'',
-      services:(el.getAttribute('data-services')?el.getAttribute('data-services').split(',').map(function(s){return s.trim()}):null)||lic.serviceButtons||['Información','Pedir cita','Contactar'],
-      botName:el.getAttribute('data-bot-name')||lic.botName||'Asistente',
-      position:el.getAttribute('data-position')||'right',
-      greeting:el.getAttribute('data-greeting')||lic.greeting||'',
-      calendar:el.getAttribute('data-calendar')!=='false'&&lic.calendar!==false
-    };
-    if(!cfg.greeting)cfg.greeting='¡Hola! 👋 Bienvenido/a a '+cfg.biz+'. ¿En qué puedo ayudarte?';
-
-    // Custom responses from license
-    var responses=lic.responses||{};
-    // responses format: { "keyword or button text": "response text", ... }
-    // Special keys: _welcome, _ask_name, _ask_phone, _ask_date, _summary, _goodbye, _default
-
-    var r=parseInt(cfg.color.slice(1,3),16),g=parseInt(cfg.color.slice(3,5),16),b=parseInt(cfg.color.slice(5,7),16);
-    var light='rgba('+r+','+g+','+b+',.1)',mid='rgba('+r+','+g+','+b+',.2)';
-    var dark='rgba('+Math.max(0,r-30)+','+Math.max(0,g-30)+','+Math.max(0,b-30)+',1)';
-    var pos=cfg.position==='left'?'left:22px':'right:22px';
-
-    // CSS
-    var sty=document.createElement('style');
-    sty.textContent='#wm-chat-toggle{position:fixed;bottom:22px;'+pos+';width:58px;height:58px;border-radius:50%;background:'+cfg.color+';cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px rgba(0,0,0,.2);z-index:99999;border:none;transition:all .2s;font-family:inherit}#wm-chat-toggle:hover{transform:scale(1.06)}#wm-chat-toggle svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:2}#wm-chat-box{position:fixed;bottom:90px;'+pos+';width:370px;max-height:520px;background:#fff;border-radius:18px;box-shadow:0 12px 48px rgba(0,0,0,.15);z-index:99999;display:none;flex-direction:column;overflow:hidden;border:1px solid #e5e5e5;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif}#wm-chat-box.wm-open{display:flex}.wm-head{background:'+cfg.color+';padding:16px 18px;color:#fff;display:flex;justify-content:space-between;align-items:center}.wm-head-name{font-weight:700;font-size:.9rem}.wm-head-sub{font-size:.68rem;opacity:.8}.wm-close{background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer;opacity:.8}.wm-close:hover{opacity:1}.wm-msgs{flex:1;padding:14px;overflow-y:auto;background:#f9fafb;min-height:300px}.wm-msg{max-width:85%;margin-bottom:9px;padding:10px 14px;font-size:.84rem;line-height:1.5;word-wrap:break-word;white-space:pre-line}.wm-msg.wm-bot{background:'+light+';border:1px solid '+mid+';color:#333;border-radius:14px 14px 14px 4px}.wm-msg.wm-user{background:'+cfg.color+';color:#fff;margin-left:auto;border-radius:14px 14px 4px 14px}.wm-btns{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px}.wm-btn{background:#fff;border:1px solid '+cfg.color+';color:'+cfg.color+';border-radius:20px;padding:6px 14px;font-size:.74rem;cursor:pointer;font-family:inherit;font-weight:500;transition:all .15s}.wm-btn:hover{background:'+cfg.color+';color:#fff}.wm-input-area{padding:10px;border-top:1px solid #eee;display:flex;gap:8px;background:#fff}.wm-input{flex:1;border:1px solid #e0e0e0;border-radius:22px;padding:9px 16px;font-size:.84rem;outline:none;font-family:inherit}.wm-input:focus{border-color:'+cfg.color+'}.wm-send{width:38px;height:38px;border-radius:50%;background:'+cfg.color+';border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}.wm-send:hover{background:'+dark+'}.wm-send svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2}.wm-cal{background:#fff;border:1px solid #eee;border-radius:12px;padding:12px;margin-bottom:8px;max-width:280px}.wm-cal-title{text-align:center;font-weight:700;font-size:.82rem;color:#333;margin-bottom:8px}.wm-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;font-size:.68rem}.wm-cal-day{font-weight:700;color:#aaa;padding:4px 0}.wm-cal-num{padding:5px 2px;border-radius:6px;font-size:.72rem;cursor:pointer;border:1px solid transparent;transition:all .15s}.wm-cal-num:hover{background:'+light+';border-color:'+cfg.color+'}.wm-cal-num.wm-sel{background:'+cfg.color+';color:#fff;border-color:'+cfg.color+'}.wm-cal-off{padding:5px 2px;color:#ccc;font-size:.72rem}.wm-times{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;max-width:300px}.wm-time{padding:5px 11px;border-radius:6px;font-size:.72rem;background:'+light+';color:'+cfg.color+';border:1px solid '+mid+';cursor:pointer;font-family:inherit;transition:all .15s}.wm-time:hover,.wm-time.wm-sel{background:'+cfg.color+';color:#fff}.wm-time-off{padding:5px 11px;border-radius:6px;font-size:.72rem;background:#f0f0f0;color:#bbb;text-decoration:line-through}.wm-pw{text-align:center;padding:6px;font-size:.58rem;color:#bbb;background:#fff;border-top:1px solid #f5f5f5}.wm-pw a{color:#aaa}@media(max-width:480px){#wm-chat-box{width:calc(100% - 24px);right:12px;bottom:84px}}';
-    document.head.appendChild(sty);
-
-    // HTML
-    var btns=cfg.services.map(function(s){return'<button class="wm-btn" onclick="wmChatBtn(this)">'+s+'</button>'}).join('');
-    var c=document.createElement('div');c.id='wm-widget';
-    c.innerHTML='<button id="wm-chat-toggle" onclick="wmToggle()"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button><div id="wm-chat-box"><div class="wm-head"><div><div class="wm-head-name">\ud83e\udd16 '+cfg.botName+' \u00b7 '+cfg.biz+'</div><div class="wm-head-sub">En l\u00ednea</div></div><button class="wm-close" onclick="wmToggle()">\u2715</button></div><div class="wm-msgs" id="wmMsgs"><div class="wm-msg wm-bot">'+cfg.greeting+'</div><div class="wm-btns" id="wmInitBtns">'+btns+'</div></div><div class="wm-input-area"><input type="text" class="wm-input" id="wmInput" placeholder="Escribe tu mensaje..." onkeydown="if(event.key===\'Enter\')wmSend()"><button class="wm-send" onclick="wmSend()"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button></div><div class="wm-pw">Powered by <a href="https://whitemoon.es" target="_blank">WhiteMoon</a></div></div>';
-    document.body.appendChild(c);
-
-    // State
-    window._wmS={step:0,name:'',tel:'',service:'',date:'',time:'',cfg:cfg,resp:responses,infoGiven:false};
-
-    // Find matching response for a message
-    function findResponse(msg){
-      var m=msg.toLowerCase();
-      var keys=Object.keys(responses);
-      for(var i=0;i<keys.length;i++){
-        var k=keys[i];
-        if(k.startsWith('_'))continue; // skip special keys
-        var keywords=k.toLowerCase().split(',').map(function(x){return x.trim()});
-        for(var j=0;j<keywords.length;j++){
-          if(m.includes(keywords[j]))return responses[k];
-        }
-      }
-      return null;
+    var host = window.location.hostname;
+    var local = host === 'localhost' || host === '127.0.0.1' || host === '' || host.includes('github.io');
+    if(!local && lic.domain && !host.includes(lic.domain)){
+      console.warn('[WM-ITP] Dominio no autorizado');
+      return;
+    }
+    if(lic.expires && new Date(lic.expires) < new Date()){
+      console.warn('[WM-ITP] Licencia expirada');
+      return;
     }
 
-    window.wmToggle=function(){document.getElementById('wm-chat-box').classList.toggle('wm-open')};
-    window.wmAddMsg=function(t,u){var c=document.getElementById('wmMsgs');var d=document.createElement('div');d.className='wm-msg '+(u?'wm-user':'wm-bot');d.textContent=t;c.appendChild(d);c.scrollTop=c.scrollHeight};
-    window.wmAddHtml=function(h){var c=document.getElementById('wmMsgs');var d=document.createElement('div');d.innerHTML=h;c.appendChild(d);c.scrollTop=c.scrollHeight};
+    initITP(script, lic);
+  }).catch(function(e){ console.error('[WM-ITP]', e); });
 
-    window.wmChatBtn=function(el){
-      var s=window._wmS;
-      var text=el.textContent;
-      wmAddMsg(text,true);
-      var b=document.getElementById('wmInitBtns');if(b)b.remove();
-      s.service=text;
-
-      // Check if there's a custom response for this button
-      var customResp=findResponse(text);
-      if(customResp){
-        s.infoGiven=true;
-        setTimeout(function(){
-          wmAddMsg(customResp,false);
-          // After giving info, ask for contact details
-          setTimeout(function(){
-            var askName=s.resp._ask_name||'\u00bfTe gustar\u00eda reservar cita o que te contactemos? Dime tu nombre y apellidos.';
-            wmAddMsg(askName,false);
-            s.step=1;
-          },1200);
-        },800);
-      } else {
-        s.step=1;
-        var askName=s.resp._ask_name||'Para darte la mejor atenci\u00f3n sobre '+text+', \u00bfme dices tu nombre y apellidos?';
-        setTimeout(function(){wmAddMsg(askName,false)},800);
-      }
+  function initITP(el, lic){
+    var itp = lic.itp;
+    var cfg = {
+      nombre:   el.getAttribute('data-nombre')  || itp.nombre  || lic.biz || 'Gestoría',
+      color:    el.getAttribute('data-color')   || itp.color   || '#1565C0',
+      tel:      el.getAttribute('data-tel')     || itp.tel     || lic.phone || '',
+      logo:     el.getAttribute('data-logo')    || itp.logo    || '',
+      cta:      el.getAttribute('data-cta')     || itp.cta     || 'Solicitar gestión del ITP',
+      target:   el.getAttribute('data-target')  || 'wm-itp-widget'
     };
 
-    window.wmSend=function(){
-      var inp=document.getElementById('wmInput');var m=inp.value.trim();if(!m)return;inp.value='';
-      wmAddMsg(m,true);var s=window._wmS;
+    var waNum = cfg.tel.replace(/[^0-9]/g, '');
+    var waLink = waNum
+      ? 'https://wa.me/34' + waNum + '?text=Hola%2C%20quiero%20gestionar%20el%20ITP%20de%20mi%20veh%C3%ADculo'
+      : '#';
 
-      if(s.step===0){
-        // Check for custom response first
-        var customResp=findResponse(m);
-        if(customResp&&!s.infoGiven){
-          s.service=m;s.infoGiven=true;
-          setTimeout(function(){
-            wmAddMsg(customResp,false);
-            setTimeout(function(){
-              var askName=s.resp._ask_name||'\u00bfTe gustar\u00eda que te contactemos? Dime tu nombre y apellidos.';
-              wmAddMsg(askName,false);
-              s.step=1;
-            },1200);
-          },800);
-        } else {
-          s.service=m;s.step=1;
-          var askName=s.resp._ask_name||'Para ayudarte, \u00bfme dices tu nombre y apellidos?';
-          setTimeout(function(){wmAddMsg(askName,false)},800);
-        }
-      }
-      else if(s.step===1){
-        s.name=m;s.step=2;
-        var askPhone=s.resp._ask_phone||'Perfecto '+s.name.split(' ')[0]+'. \u00bfY un tel\u00e9fono m\u00f3vil para contactarte?';
-        setTimeout(function(){wmAddMsg(askPhone,false)},800);
-      }
-      else if(s.step===2){
-        s.tel=m;s.step=3;
-        if(s.cfg.calendar){
-          setTimeout(function(){wmAddMsg('Genial. Elige el d\u00eda que prefieras:',false);setTimeout(wmShowCal,400)},800);
-        } else {
-          var askDate=s.resp._ask_date||'\u00bfPara qu\u00e9 d\u00eda te vendr\u00eda bien?';
-          setTimeout(function(){wmAddMsg(askDate,false)},800);
-        }
-      }
-      else if(s.step===3){
-        s.date=m;s.step=99;
-        var summary=s.resp._summary||'Perfecto '+s.name.split(' ')[0]+'. He tomado nota:\n\u2022 Nombre: '+s.name+'\n\u2022 Tel\u00e9fono: '+s.tel+'\n\u2022 Servicio: '+s.service+'\n\u2022 Cita: '+m+'\n\nNuestro equipo revisar\u00e1 los datos y confirmar\u00e1 la cita por WhatsApp. Si no hubiera disponibilidad, te propondremos la alternativa m\u00e1s cercana. \u00a1Saludos y gracias! \ud83d\ude0a';
-        summary=summary.replace(/\{nombre\}/g,s.name.split(' ')[0]).replace(/\{telefono\}/g,s.tel).replace(/\{servicio\}/g,s.service);
-        setTimeout(function(){wmAddMsg(summary,false)},1000);
-      }
-      else{
-        var bye=s.resp._goodbye||'Nuestro equipo te contactar\u00e1 por WhatsApp para confirmar. \u00a1Saludos y gracias! \ud83d\ude0a';
-        setTimeout(function(){wmAddMsg(bye,false)},800);
-      }
-    };
+    // Color derivado
+    var r = parseInt(cfg.color.slice(1,3),16);
+    var g = parseInt(cfg.color.slice(3,5),16);
+    var b = parseInt(cfg.color.slice(5,7),16);
+    var colorLight = 'rgba('+r+','+g+','+b+',.08)';
+    var colorMid   = 'rgba('+r+','+g+','+b+',.15)';
+    var colorDark  = 'rgba('+Math.max(0,r-30)+','+Math.max(0,g-30)+','+Math.max(0,b-30)+',1)';
 
-    window.wmShowCal=function(){var today=new Date(),mo=today.getMonth(),yr=today.getFullYear();var dim=new Date(yr,mo+1,0).getDate(),fd=new Date(yr,mo,1).getDay();var off=fd===0?6:fd-1;var mn=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];var dn=['L','M','X','J','V','S','D'];var h='<div class="wm-cal"><div class="wm-cal-title">'+mn[mo]+' '+yr+'</div><div class="wm-cal-grid">';dn.forEach(function(d){h+='<div class="wm-cal-day">'+d+'</div>'});for(var i=0;i<off;i++)h+='<div></div>';for(var d=1;d<=dim;d++){var dt=new Date(yr,mo,d),dw=dt.getDay();var past=dt<new Date(today.getFullYear(),today.getMonth(),today.getDate());if(past||dw===0){h+='<div class="wm-cal-off">'+d+'</div>'}else{var ds=d+'/'+(mo+1)+'/'+yr;h+='<div class="wm-cal-num" onclick="wmPickDate(this,\''+ds+'\')">'+d+'</div>'}}h+='</div></div>';wmAddHtml(h)};
+    // CSS
+    var sty = document.createElement('style');
+    sty.textContent = [
+      '#wm-itp-widget{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;text-align:center;padding:2rem 1rem;max-width:520px;margin:0 auto;}',
+      '#wm-itp-widget .itp-logo{height:48px;display:block;margin:0 auto 1.25rem;object-fit:contain;}',
+      '#wm-itp-widget .itp-title{font-size:1.4rem;font-weight:700;color:#1a1a2e;margin-bottom:.4rem;line-height:1.2;}',
+      '#wm-itp-widget .itp-sub{color:#666;font-size:.88rem;margin-bottom:1.5rem;line-height:1.5;}',
+      '#wm-itp-widget .itp-badges{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.5rem;}',
+      '#wm-itp-widget .itp-badge{font-size:.68rem;padding:3px 10px;border-radius:20px;background:'+colorLight+';color:'+cfg.color+';border:1px solid '+colorMid+';}',
+      '#wm-itp-widget .itp-btn-calc{display:inline-block;background:'+cfg.color+';color:#fff;padding:.875rem 2rem;border-radius:4px;text-decoration:none;font-weight:600;font-size:.9rem;transition:opacity .2s;margin-bottom:.75rem;}',
+      '#wm-itp-widget .itp-btn-calc:hover{opacity:.85;}',
+      '#wm-itp-widget .itp-btn-wa{display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#fff;padding:.75rem 1.75rem;border-radius:4px;text-decoration:none;font-weight:500;font-size:.875rem;transition:opacity .2s;}',
+      '#wm-itp-widget .itp-btn-wa:hover{opacity:.88;}',
+      '#wm-itp-widget .itp-btn-wa svg{width:18px;height:18px;fill:#fff;flex-shrink:0;}',
+      '#wm-itp-widget .itp-divider{font-size:.72rem;color:#bbb;margin:.5rem 0;}',
+      '#wm-itp-widget .itp-pw{font-size:.6rem;color:#ccc;margin-top:1rem;}',
+      '#wm-itp-widget .itp-pw a{color:#aaa;text-decoration:none;}'
+    ].join('');
+    document.head.appendChild(sty);
 
-    window.wmPickDate=function(el,ds){el.closest('.wm-cal-grid').querySelectorAll('.wm-cal-num').forEach(function(x){x.classList.remove('wm-sel')});el.classList.add('wm-sel');window._wmS.date=ds;wmAddMsg(ds,true);setTimeout(function(){wmAddMsg('D\u00eda '+ds+'. \u00bfQu\u00e9 hora te viene mejor?',false);setTimeout(wmShowTimes,400)},500)};
+    // Buscar o crear contenedor
+    var container = document.getElementById(cfg.target);
+    if(!container){
+      container = document.createElement('div');
+      container.id = 'wm-itp-widget';
+      script.parentNode.insertBefore(container, script.nextSibling);
+    } else {
+      container.id = 'wm-itp-widget';
+    }
 
-    window.wmShowTimes=function(){var ts=['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30'];var occ={};for(var i=0;i<4;i++)occ[ts[Math.floor(Math.random()*ts.length)]]=1;var h='<div class="wm-times">';ts.forEach(function(t){h+=occ[t]?'<div class="wm-time-off">'+t+'</div>':'<button class="wm-time" onclick="wmPickTime(this,\''+t+'\')">'+t+'</button>'});h+='</div>';wmAddHtml(h)};
+    // HTML del widget
+    var html = '';
+    if(cfg.logo){
+      html += '<img src="' + cfg.logo + '" alt="' + cfg.nombre + '" class="itp-logo">';
+    }
+    html += '<div class="itp-title">Calculadora ITP Vehículos 2026</div>';
+    html += '<div class="itp-sub">Calcula el Impuesto de Transmisiones Patrimoniales<br>de tu vehículo de segunda mano. BOE 2026 actualizado.</div>';
+    html += '<div class="itp-badges">';
+    html += '<span class="itp-badge">BOE 2026</span>';
+    html += '<span class="itp-badge">Todas las CCAA</span>';
+    html += '<span class="itp-badge">Gratuito</span>';
+    html += '</div>';
+    html += '<a href="https://nexusforgeia.github.io/WHITEMOON-CRM-SAAS-GESTORIAS-ITP/" target="_blank" class="itp-btn-calc">Calcular mi ITP gratis</a>';
+    if(waNum){
+      html += '<div class="itp-divider">o</div>';
+      html += '<a href="' + waLink + '" target="_blank" class="itp-btn-wa">';
+      html += '<svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>';
+      html += cfg.cta;
+      html += '</a>';
+    }
+    html += '<div class="itp-pw">Powered by <a href="https://whitemoon.es" target="_blank">WhiteMoon</a></div>';
 
-    window.wmPickTime=function(el,t){el.parentElement.querySelectorAll('.wm-time').forEach(function(x){x.classList.remove('wm-sel')});el.classList.add('wm-sel');var s=window._wmS;s.time=t;s.step=99;wmAddMsg(s.date+' a las '+t,true);
-      var summary=s.resp._summary||'Perfecto '+s.name.split(' ')[0]+'. He tomado nota:\n\u2022 Nombre: '+s.name+'\n\u2022 Tel\u00e9fono: '+s.tel+'\n\u2022 Servicio: '+s.service+'\n\u2022 Fecha: '+s.date+'\n\u2022 Hora: '+s.time+'\n\nNuestro equipo revisar\u00e1 los datos y confirmar\u00e1 la cita por WhatsApp. Si no hubiera disponibilidad, te propondremos la alternativa m\u00e1s cercana. \u00a1Saludos y gracias! \ud83d\ude0a';
-      summary=summary.replace(/\{nombre\}/g,s.name.split(' ')[0]).replace(/\{telefono\}/g,s.tel).replace(/\{servicio\}/g,s.service).replace(/\{fecha\}/g,s.date).replace(/\{hora\}/g,s.time);
-      setTimeout(function(){wmAddMsg(summary,false)},1000);
-    };
+    container.innerHTML = html;
   }
 })();

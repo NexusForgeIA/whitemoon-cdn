@@ -1,0 +1,24 @@
+{
+  "id": "_dummy",
+  "version": "1.0",
+  "name": "Test dummy (verificación CDN)",
+  "sector": "generic",
+  "description": "Plantilla funcional de prueba. Seleccionarla en el panel debe mostrar '✅ Plantilla cargada' y prerellenar los campos de abajo.",
+
+  "botName": "TestBot",
+  "color": "#7c3aed",
+  "calendar": false,
+
+  "greeting": "¡Hola! Soy el bot de prueba 🤖 ¿En qué puedo ayudarte?",
+
+  "serviceButtons": ["Opción A", "Opción B", "Contactar"],
+
+  "responses": {
+    "prueba,test,dummy": "Sistema de plantillas funcionando correctamente ✅",
+    "hola,buenas": "¡Hola! Plantilla dummy cargada desde el CDN.",
+    "_ask_name": "¿Me dices tu nombre para continuar?",
+    "_ask_phone": "Gracias {nombre}. ¿Tu teléfono de contacto?",
+    "_summary": "Perfecto {nombre}. Solicitud de prueba recibida correctamente.",
+    "_goodbye": "¡Hasta pronto! (modo test — plantilla dummy)"
+  }
+}

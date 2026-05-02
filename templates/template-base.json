@@ -1,0 +1,41 @@
+{
+  "id": "template-base",
+  "version": "1.0",
+  "name": "Esquema universal de referencia",
+  "sector": "generic",
+  "description": "Todos los campos disponibles para una plantilla sectorial WhiteMoon. Usar como punto de partida al crear nuevas plantillas.",
+
+  "botName": "Asistente",
+  "color": "#7c3aed",
+  "calendar": true,
+
+  "greeting": "¡Hola! 👋 Bienvenido/a. ¿En qué puedo ayudarte hoy?",
+
+  "serviceButtons": [],
+
+  "responses": {
+    "_ask_name": "¿Me dices tu nombre y apellidos?",
+    "_ask_phone": "Perfecto {nombre}. ¿Un teléfono de contacto?",
+    "_summary": "Perfecto {nombre}. He tomado nota y nuestro equipo te contactará pronto.",
+    "_goodbye": "Gracias por contactarnos. ¡Hasta pronto!",
+    "palabra clave,sinónimo": "Respuesta de ejemplo para esta palabra clave."
+  },
+
+  "_schema_notes": {
+    "id": "Identificador único. Debe coincidir con el nombre del archivo (sin .json).",
+    "version": "Versión de la plantilla. Usar '1.0' al crear.",
+    "name": "Nombre visible en logs y mensajes de carga. Ej: 'Clínica dental'.",
+    "sector": "Sector del negocio. Valor libre, solo informativo.",
+    "description": "Descripción interna. No se muestra al usuario final.",
+    "botName": "Nombre del asistente virtual. Se carga en el campo 'Nombre asistente' del panel.",
+    "color": "Color principal en hex. Se carga en el selector de color del panel.",
+    "calendar": "true = mostrar flujo de cita, false = solo información.",
+    "greeting": "Mensaje de bienvenida. Se carga en el campo 'Saludo inicial' del panel.",
+    "serviceButtons": "Array de strings. Se une con coma y se carga en 'Botones rápidos'.",
+    "responses._ask_name": "Mensaje para pedir el nombre al usuario.",
+    "responses._ask_phone": "Mensaje para pedir el teléfono. Usa {nombre} como placeholder.",
+    "responses._summary": "Resumen de cita. Usa {nombre} como placeholder.",
+    "responses._goodbye": "Mensaje de despedida.",
+    "responses.<otras>": "Clave = palabras clave separadas por coma. Valor = respuesta del bot."
+  }
+}

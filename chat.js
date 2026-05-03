@@ -63,6 +63,22 @@
     return null;
   }
 
+  function matchTriage(text, triage){
+    if(!triage) return null;
+    var t = text.toLowerCase().trim();
+    var levels = ['urgent', 'medium', 'low'];
+    for(var i = 0; i < levels.length; i++){
+      var level = triage[levels[i]];
+      if(!level || !level.keywords) continue;
+      var kws = level.keywords.split(',');
+      for(var j = 0; j < kws.length; j++){
+        var kw = kws[j].trim().toLowerCase();
+        if(kw && t.indexOf(kw) !== -1) return level;
+      }
+    }
+    return null;
+  }
+
   function replaceVars(text, vars){
     return text.replace(/\{(\w+)\}/g, function(_, k){ return vars[k] !== undefined ? vars[k] : '{' + k + '}'; });
   }
@@ -94,7 +110,8 @@
       goodbye:  (licResp && licResp._goodbye)   || (tplResp && tplResp._goodbye)   || '¡Hasta pronto! 👋',
       hasCalendar: lic.calendar !== false,
       whatsapp:   (lic.phone || '').replace(/[^0-9]/g, ''),
-      waTemplate: (tpl && tpl.whatsapp && tpl.whatsapp.messageTemplate) || null
+      waTemplate: (tpl && tpl.whatsapp && tpl.whatsapp.messageTemplate) || null,
+      triage:     (tpl && tpl.triage) || null
     };
 
     var rgb = hexToRgb(cfg.color);
@@ -203,6 +220,7 @@
     var userPhone = '';
     var lastService = '';
     var lastShownResponse = '';
+    var lastPriority = '';
     var buttonsShown = false;
     var CAPTURE_TRIGGERS = 'cita,reserva,contacto,llamar,llamada,precio,presupuesto,quiero,información,info,consulta';
 
@@ -247,7 +265,7 @@
           servicio:      servicio || 'Consulta general',
           consulta:      servicio || 'Consulta general',
           area:          servicio || 'Consulta general',
-          prioridad:     'CONSULTA',
+          prioridad:     lastPriority || 'CONSULTA',
           vehiculo:      servicio || '',
           mascota:       '',
           disponibilidad:'',
@@ -390,7 +408,15 @@
         return;
       }
 
-      // STATE 1: conversación
+      // STATE 1: triage primero, luego conversación
+      var triageMatch = matchTriage(text, cfg.triage);
+      if(triageMatch){
+        lastPriority = triageMatch.priority || '';
+        lastService  = text;
+        showTyping(function(){ addMsg(escapeHtml(triageMatch.message), 'bot'); });
+        return;
+      }
+
       var match = matchKeyword(text, cfg.responses);
       if(match){
         if(match === lastShownResponse){

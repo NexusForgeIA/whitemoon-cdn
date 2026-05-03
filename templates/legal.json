@@ -28,7 +28,7 @@
 
   "triage": {
     "urgent": {
-      "keywords": "urgente,urgencia,hoy,ahora,detenido,detenida,arrestado,guardia civil,policía,juzgado,mañana,plazo,vencimiento,embargo,desahucio,lanzamiento,despido hoy,detención,guardia",
+      "keywords": "urgente,urgencia,hoy,ahora,detenido,detenida,arrestado,guardia civil,policía,juzgado,mañana,plazo,vencimiento,embargo,desahucio,lanzamiento,despido hoy,detención,guardia,despedido,despido urgente,me han despedido,echado,finiquito urgente",
       "label": "🔴 URGENTE",
       "message": "🔴 *CASO URGENTE detectado.* Le conectamos con un abogado ahora mismo. Por favor indíquenos brevemente su situación:",
       "priority": "URGENTE"
@@ -81,6 +81,7 @@
   },
 
   "whatsapp": {
+    "fallbackPhone": "643199580",
     "messageTemplate": "⚖️ *NUEVA CONSULTA LEGAL*\n\n👤 *Cliente:* {nombre}\n📞 *Tel:* +34{telefono}\n🏷️ *Prioridad:* {prioridad}\n⚖️ *Área:* {area}\n💬 *Consulta:* {consulta}\n\n_Vía chatbot WhiteMoon_"
   }
 }

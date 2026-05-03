@@ -116,7 +116,7 @@
       summary:  (licResp && licResp._summary)   || (tplResp && tplResp._summary)   || 'Perfecto {nombre}. He tomado nota y nuestro equipo te contactará pronto.',
       goodbye:  (licResp && licResp._goodbye)   || (tplResp && tplResp._goodbye)   || '¡Hasta pronto! 👋',
       hasCalendar: lic.calendar !== false,
-      whatsapp:   (lic.phone || '').replace(/[^0-9]/g, ''),
+      whatsapp:   (lic.phone || (tpl && tpl.whatsapp && tpl.whatsapp.fallbackPhone) || '').replace(/[^0-9]/g, ''),
       waTemplate: (tpl && tpl.whatsapp && tpl.whatsapp.messageTemplate) || null,
       triage:     (tpl && tpl.triage) || null
     };

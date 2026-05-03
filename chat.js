@@ -143,7 +143,7 @@
       '@keyframes wm-dot{0%,80%,100%{transform:scale(.7);opacity:.4}40%{transform:scale(1);opacity:1}}',
       /* botones rápidos */
       '#wm-chat-modal .wm-btns{padding:4px 12px 8px;display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0;}',
-      '#wm-chat-modal .wm-btns button{background:'+colorLight+';color:'+cfg.color+';border:1px solid '+colorMid+';border-radius:20px;padding:6px 13px;font-size:.75rem;font-family:inherit;cursor:pointer;white-space:nowrap;transition:background .15s;}',
+      '#wm-chat-modal .wm-btns button{background:'+colorLight+';color:#ffffff;border:1px solid '+colorMid+';border-radius:20px;padding:6px 13px;font-size:.75rem;font-family:inherit;cursor:pointer;white-space:nowrap;transition:background .15s;}',
       '#wm-chat-modal .wm-btns button:hover{background:'+colorMid+';}',
       /* input */
       '#wm-chat-modal .wm-input-wrap{padding:10px 12px;background:#111827;display:flex;gap:8px;flex-shrink:0;border-top:1px solid #2a2a4e;}',

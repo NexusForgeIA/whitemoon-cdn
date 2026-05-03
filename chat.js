@@ -50,13 +50,20 @@
     return out;
   }
 
+  function normalize(s){
+    return String(s||'').toLowerCase().trim()
+      .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e')
+      .replace(/[íìï]/g,'i').replace(/[óòö]/g,'o')
+      .replace(/[úùü]/g,'u').replace(/ñ/g,'n');
+  }
+
   function matchKeyword(text, responses){
-    var t = text.toLowerCase().trim();
+    var t = normalize(text);
     var keys = Object.keys(responses);
     for(var i = 0; i < keys.length; i++){
       var parts = keys[i].split(',');
       for(var j = 0; j < parts.length; j++){
-        var kw = parts[j].trim().toLowerCase();
+        var kw = normalize(parts[j]);
         if(kw && t.indexOf(kw) !== -1) return responses[keys[i]];
       }
     }
@@ -65,14 +72,14 @@
 
   function matchTriage(text, triage){
     if(!triage) return null;
-    var t = text.toLowerCase().trim();
+    var t = normalize(text);
     var levels = ['urgent', 'medium', 'low'];
     for(var i = 0; i < levels.length; i++){
       var level = triage[levels[i]];
       if(!level || !level.keywords) continue;
       var kws = level.keywords.split(',');
       for(var j = 0; j < kws.length; j++){
-        var kw = kws[j].trim().toLowerCase();
+        var kw = normalize(kws[j]);
         if(kw && t.indexOf(kw) !== -1) return level;
       }
     }
@@ -348,7 +355,7 @@
     }
 
     function isCaptureIntent(text){
-      var t = text.toLowerCase();
+      var t = normalize(text);
       var triggers = CAPTURE_TRIGGERS.split(',');
       for(var i = 0; i < triggers.length; i++){
         if(t.indexOf(triggers[i].trim()) !== -1) return true;

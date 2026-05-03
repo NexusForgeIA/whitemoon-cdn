@@ -93,7 +93,8 @@
       summary:  (licResp && licResp._summary)   || (tplResp && tplResp._summary)   || 'Perfecto {nombre}. He tomado nota y nuestro equipo te contactará pronto.',
       goodbye:  (licResp && licResp._goodbye)   || (tplResp && tplResp._goodbye)   || '¡Hasta pronto! 👋',
       hasCalendar: lic.calendar !== false,
-      whatsapp:  (lic.phone || '').replace(/[^0-9]/g, '')
+      whatsapp:   (lic.phone || '').replace(/[^0-9]/g, ''),
+      waTemplate: (tpl && tpl.whatsapp && tpl.whatsapp.messageTemplate) || null
     };
 
     var rgb = hexToRgb(cfg.color);
@@ -238,11 +239,29 @@
 
     function buildWaLink(nombre, telefono, servicio){
       var num = '34' + cfg.whatsapp;
-      var msg = '🔔 *Nueva consulta - ' + cfg.biz + '*\n\n' +
-                '👤 *Nombre:* ' + nombre + '\n' +
-                '📞 *Tel:* +34' + telefono + '\n' +
-                '💬 *Servicio:* ' + (servicio || 'Consulta general') + '\n\n' +
-                '_Via chatbot WhiteMoon_';
+      var msg;
+      if(cfg.waTemplate){
+        msg = replaceVars(cfg.waTemplate, {
+          nombre:        nombre,
+          telefono:      telefono,
+          servicio:      servicio || 'Consulta general',
+          consulta:      servicio || 'Consulta general',
+          area:          servicio || 'Consulta general',
+          prioridad:     'CONSULTA',
+          vehiculo:      servicio || '',
+          mascota:       '',
+          disponibilidad:'',
+          personas:      '',
+          fecha:         '',
+          notas:         servicio || ''
+        });
+      } else {
+        msg = '🔔 *Nueva consulta - ' + cfg.biz + '*\n\n' +
+              '👤 *Nombre:* ' + nombre + '\n' +
+              '📞 *Tel:* +34' + telefono + '\n' +
+              '💬 *Servicio:* ' + (servicio || 'Consulta general') + '\n\n' +
+              '_Via chatbot WhiteMoon_';
+      }
       return 'https://wa.me/' + num + '?text=' + encodeURIComponent(msg);
     }
 
@@ -259,7 +278,7 @@
         a.target = '_blank';
         a.rel = 'noopener';
         a.innerHTML = '<svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>' +
-                      'Escríbenos por WhatsApp';
+                      '📲 Enviar consulta por WhatsApp';
         d.appendChild(a);
         msgsEl.appendChild(d);
         msgsEl.scrollTop = msgsEl.scrollHeight;

@@ -1,0 +1,72 @@
+{
+  "id": "dental",
+  "version": "1.0",
+  "name": "Clínica Dental",
+  "sector": "dental",
+  "icon": "🦷",
+  "color": "#0ea5e9",
+
+  "botName": "Asistente Dental",
+  "calendar": true,
+  "greeting": "¡Hola! 🦷 Bienvenido/a a nuestra clínica dental. ¿En qué puedo ayudarle hoy?",
+
+  "serviceButtons": [
+    "🦷 Implantes",
+    "😁 Ortodoncia",
+    "✨ Blanqueamiento",
+    "🔍 Revisión/Limpieza",
+    "🚨 Urgencia dental",
+    "📅 Pedir cita"
+  ],
+
+  "specialFeatures": {
+    "triage": false,
+    "calendar": true,
+    "vehicleCapture": false,
+    "priceQuote": true
+  },
+
+  "responses": {
+    "implante,implantes,implantología,diente perdido,falta diente,falta un diente,muela perdida,corona,coronas,pieza dental": "Los implantes dentales son la solución más natural para sustituir dientes perdidos. 🦷\n\n• Implante + corona desde 800€\n• Titanio de grado médico, duración de por vida\n• Proceso indoloro con anestesia local\n• Resultado idéntico a un diente natural\n• Financiación sin intereses disponible\n\n¿Quiere que le informemos de un presupuesto personalizado sin compromiso?",
+
+    "ortodoncia,brackets,invisalign,alineadores,dientes torcidos,corregir dientes,maloclusión,mordida,apiñamiento": "Corregimos su sonrisa con las opciones más avanzadas 😁\n\n• *Invisalign / Alineadores* — transparentes e invisibles desde 1.800€\n• *Brackets metálicos* — la opción más económica desde 1.200€\n• *Brackets estéticos* (zafiro/cerámica) — discretos desde 1.600€\n• *Ortodoncia lingual* — brackets por dentro, totalmente invisible\n• Para adultos y niños desde 7 años\n\n¿Quiere una primera valoración gratuita?",
+
+    "blanqueamiento,blanquear,dientes blancos,manchas dientes,amarillo,color dientes,aclarar": "Consiga una sonrisa radiante en poco tiempo ✨\n\n• *Blanqueamiento en clínica* (1 sesión ~1h) — resultados inmediatos desde 150€\n• *Blanqueamiento domiciliario* (férulas personalizadas) — desde 120€\n• *Combinado* clínica + casa — resultado óptimo desde 200€\n• Apto para manchas por café, tabaco, tetraciclinas\n• Sin dañar el esmalte dental\n\n¿Le gustaría saber cuál es la mejor opción para usted?",
+
+    "revisión,limpieza,higiene,sarro,profilaxis,tartrectomía,curetaje,periodontia,encías,sangran,gingivitis": "La higiene dental es la base de una boca sana 🔍\n\n• *Revisión + Rx digital* — diagnóstico completo desde 30€ (o gratuita 1ª visita)\n• *Limpieza profesional (ultrasonidos)* — eliminación de sarro desde 60€\n• *Curetaje y alisado radicular* — tratamiento de encías profundo\n• Recomendamos revisión cada 6-12 meses\n• Detección precoz de caries y problemas periodontales\n\n¿Hace cuánto fue su última revisión?",
+
+    "urgencia,urgente,dolor,me duele,me duele el diente,muela,muela rota,diente roto,fractura dental,absceso,infección,hinchado,hinchazón,flemón": "🚨 ¡Entendido, es una urgencia dental!\n\nAtendemos urgencias con la máxima prioridad. Los casos más frecuentes:\n• Dolor agudo o pulpitis\n• Diente o muela rota/fracturada\n• Absceso o flemón dental\n• Corona o empaste caído\n\nPor favor, llámenos directamente o déjenos su número y le llamamos en menos de 30 minutos. ¿Quiere que le contactemos ahora?",
+
+    "caries,empaste,obturación,relleno,picadura,agujero diente": "Las caries tratadas a tiempo evitan problemas mayores 😌\n\n• Exploración y Rx digital para diagnóstico preciso\n• Empaste con composite (mismo color del diente) desde 60€\n• Tratamiento indoloro con anestesia local\n• Selladores de fisuras para prevención en niños\n\n¿Tiene molestias o quiere una revisión preventiva?",
+
+    "endodoncia,matar nervio,nervio,canal,conducto": "La endodoncia salva el diente y elimina el dolor 🦷\n\n• Endodoncia unirradicular (diente) desde 150€\n• Endodoncia multirradicular (muela) desde 200€\n• Tratamiento en 1-2 sesiones con anestesia total\n• El diente tratado dura igual que uno natural\n• Posterior corona de protección recomendada\n\n¿Tiene dolor o le han recomendado una endodoncia?",
+
+    "niños,infantil,pediátrico,pediatría dental,niño,niña,bebé,primer diente,dientes de leche": "Cuidamos la sonrisa de los más pequeños 👶🦷\n\n• *Primera visita gratuita* para niños hasta 6 años\n• Selladores de fisuras para prevenir caries\n• Ortodoncia interceptiva (desde 7 años)\n• Equipo especializado en odontopediatría\n• Ambiente amigable y sin estrés para los niños\n\n¿Qué edad tiene el/la pequeño/a?",
+
+    "precio,coste,cuánto,tarifa,presupuesto,cuánto cuesta,financiación,pagar,cuotas,mensualidades,sin intereses": "Ofrecemos presupuestos personalizados y financiación flexible 💳\n\n• *Revisión + Rx* desde 30€ (primera visita gratuita)\n• *Implantes* desde 800€ (implante + corona)\n• *Ortodoncia* desde 1.200€\n• *Blanqueamiento* desde 120€\n• *Financiación 0% intereses* hasta 24 meses disponible\n• Aceptamos seguros dentales (Adeslas, Sanitas, Mapfre, DKV...)\n\n¿Sobre qué tratamiento necesita presupuesto?",
+
+    "seguro,mutua,adeslas,sanitas,mapfre,dkv,asisa,cigna,generali,seguro dental,mutualidad": "Trabajamos con los principales seguros y mutuas dentales 🏥\n\n• Adeslas, Sanitas, Mapfre, DKV, ASISA, Cigna, Generali y más\n• Consulte si su póliza cubre el tratamiento que necesita\n• Para tratamientos no cubiertos, ofrecemos precios competitivos y financiación\n\n¿Con qué seguro dental cuenta?",
+
+    "estética,carillas,facetas,sonrisa,diseño sonrisa,composite,porcelana": "Diseñamos la sonrisa que siempre soñó ✨\n\n• *Carillas de porcelana* — durables y con aspecto 100% natural desde 350€/ud\n• *Carillas de composite* — sin desgaste dental desde 150€/ud\n• *Diseño de sonrisa digital* — preview del resultado antes del tratamiento\n• Corrección de forma, color, tamaño y posición en pocas sesiones\n\n¿Quiere una consulta de diseño de sonrisa sin compromiso?",
+
+    "horario,horarios,cuándo,cuando abren,cuando cierran,hora,disponibilidad": "Nuestros horarios de atención son 🕐\n\n• Lunes a viernes: 9:00 - 21:00h\n• Sábados: 9:00 - 14:00h\n• Urgencias: atención telefónica 24h\n\n¿Quiere que le llamemos para reservar su cita?",
+
+    "dónde,dirección,ubicación,clínica,local,cómo llegar,parking,aparcamiento": "Le facilitaremos la dirección exacta de nuestra clínica cuando concertemos su cita 📍 Disponemos de fácil acceso y aparcamiento cercano. ¿Quiere reservar y que le enviemos la ubicación?",
+
+    "primera visita,primera vez,nuevo paciente,nunca he ido,empezar": "¡Bienvenido/a como nuevo paciente! 😊\n\n• *Primera revisión gratuita* — exploración completa sin compromiso\n• Radiografía digital incluida\n• Plan de tratamiento personalizado\n• Sin listas de espera, atención en el día o al día siguiente\n\n¿Quiere reservar su primera visita gratuita ahora?",
+
+    "hola,buenos días,buenas tardes,buenas noches,buenas,hey": "¡Hola! 😊 Encantado/a de atenderle. Puedo informarle sobre nuestros tratamientos, precios y ayudarle a reservar cita. ¿En qué le ayudo?",
+
+    "gracias,muchas gracias,perfecto,genial,estupendo,ok,de acuerdo": "¡Con mucho gusto! 😊 Recuerde que estamos aquí para cualquier duda sobre su salud dental. ¡Hasta pronto! 🦷",
+
+    "_ask_name": "¿Me dice su nombre para personalizar su cita? 😊",
+    "_ask_phone": "Perfecto {nombre}! ¿Un teléfono de contacto para confirmarle la cita?",
+    "_ask_availability": "Genial {nombre}. ¿Qué día y franja horaria le viene mejor? (mañanas / tardes / fines de semana)",
+    "_summary": "¡Perfecto {nombre}! 🦷 He anotado su solicitud de cita para {disponibilidad}. Nuestro equipo le llamará al {telefono} para confirmar hora exacta.",
+    "_goodbye": "Gracias por contactar con nuestra clínica. ¡Nos vemos pronto y cuide esa sonrisa! 😁🦷"
+  },
+
+  "whatsapp": {
+    "messageTemplate": "🦷 *NUEVA CITA DENTAL*\n\n👤 *Paciente:* {nombre}\n📞 *Tel:* +34{telefono}\n🦷 *Servicio:* {servicio}\n📅 *Disponibilidad:* {disponibilidad}\n\n_Vía chatbot WhiteMoon_"
+  }
+}

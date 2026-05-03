@@ -36,13 +36,14 @@
         "horario,horarios,cuándo,disponibilidad,cita,hora,cuando abren,cuando cierran": "Atendemos de lunes a viernes de 9:00 a 20:00h. Para urgencias, disponemos de guardia fuera de horario. ¿Quiere que le llamemos para concertar cita?",
         "hola,buenos días,buenas tardes,buenas noches,buenas": "¡Buenas! Estoy aquí para orientarle en cualquier consulta legal. ¿En qué área puedo ayudarle? (Laboral, Familia, Mercantil, Civil, Penal...)",
         "gracias,muchas gracias,de nada,ok,perfecto,entendido": "De nada, es un placer ayudarle. Si tiene cualquier otra duda legal, no dude en consultarnos. ¡Estamos a su disposición! ⚖️",
+        "despido , me han despedido ,": "Lo sentimos cogeremos tus datos urgentemente para poder atender tu solicitud",
         "_ask_name": "Para poder ayudarle mejor, ¿me indica su nombre?",
         "_ask_phone": "Gracias {nombre}. ¿Un teléfono de contacto para que nuestro equipo le llame?",
         "_summary": "Perfecto {nombre}. He registrado su consulta y un abogado especializado le contactará en breve al {telefono}. Confidencialidad garantizada.",
         "_goodbye": "Gracias por contactar con nuestro despacho. Nuestro equipo le atenderá lo antes posible. ¡Hasta pronto! ⚖️"
       },
       "template": "legal",
-      "updated": "2026-05-03T16:00:24.600Z"
+      "updated": "2026-05-03T16:03:53.771Z"
     }
   }
 }

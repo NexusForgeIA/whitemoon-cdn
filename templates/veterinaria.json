@@ -1,0 +1,82 @@
+{
+  "id": "veterinaria",
+  "version": "1.0",
+  "name": "Clínica Veterinaria",
+  "sector": "veterinaria",
+  "icon": "🐾",
+  "color": "#16a34a",
+
+  "botName": "Asistente Veterinario",
+  "calendar": true,
+  "greeting": "¡Hola! 🐾 Bienvenido/a a nuestra clínica veterinaria. ¿En qué puedo ayudarle hoy?",
+
+  "serviceButtons": [
+    "🩺 Consulta general",
+    "💉 Vacunas",
+    "✂️ Peluquería/Estética",
+    "🔬 Análisis/Diagnóstico",
+    "🚨 Urgencia veterinaria",
+    "📅 Pedir cita"
+  ],
+
+  "specialFeatures": {
+    "triage": false,
+    "calendar": true,
+    "vehicleCapture": false,
+    "priceQuote": false,
+    "petCapture": true
+  },
+
+  "captureExtra": {
+    "askPet": "¿Cómo se llama su mascota y qué especie es? (perro, gato, ave...)"
+  },
+
+  "responses": {
+    "consulta,revisión,chequeo,enfermo,enferma,no come,vómito,vomita,diarrea,cojea,letárgico,decaído,cambio comportamiento,perder peso": "Atendemos consultas generales para evaluar el estado de salud de su mascota 🩺\n\n• Exploración física completa\n• Evaluación de síntomas y diagnóstico\n• Analíticas en clínica con resultados en el día\n• Prescripción de tratamiento personalizado\n• Seguimiento post-consulta incluido\n\n¿Cuáles son los síntomas que presenta su mascota?",
+
+    "vacuna,vacunas,vacunación,calendario vacunal,rabia,moquillo,parvovirus,leucemia felina,leptospirosis,bordetella": "Mantenemos el calendario vacunal al día para proteger a su mascota 💉\n\n*Perros:*\n• Vacuna polivalente (moquillo, parvovirus, hepatitis, leptospirosis)\n• Antirrábica (obligatoria en muchas comunidades)\n• Tos de las perreras (Bordetella)\n\n*Gatos:*\n• Trivalente (rinotraqueítis, calicivirus, panleucopenia)\n• Leucemia felina (FeLV)\n• Rabia\n\n¿Cuándo fue la última vacunación de su mascota?",
+
+    "peluquería,corte,pelo,baño,grooming,estética,aseo,corte pelo,higiene pelaje,cepillado,deslanado": "Mantenemos a su mascota limpia y bien cuidada ✂️\n\n• Baño con productos hipoalergénicos\n• Corte de pelo según raza y preferencia\n• Cepillado y deslanado profesional\n• Limpieza de oídos y corte de uñas incluido\n• Servicio disponible con o sin cita previa\n\n¿Qué raza es su mascota para preparar el presupuesto?",
+
+    "urgencia,urgente,accidente,atropello,convulsión,no respira,inconsciente,sangra,sangrado,envenenado,veneno,fractura,hueso roto,desmayado,desmayo,no se mueve,crisis epiléptica": "🚨 *¡URGENCIA VETERINARIA!*\n\nAtendemos urgencias de inmediato. Señales de alarma que requieren atención urgente:\n• Dificultad respiratoria o pérdida de conciencia\n• Convulsiones o temblores severos\n• Sangrado abundante o traumatismo\n• Posible intoxicación o envenenamiento\n• Abdomen muy distendido (dilatación gástrica)\n\nPor favor llámenos ahora o déjenos su número y le llamamos en menos de 5 minutos. ¿Le contactamos urgentemente?",
+
+    "análisis,analítica,radiografía,ecografía,diagnóstico,prueba,laboratorio,hemograma,bioquímica,cultivo,biopsia": "Disponemos de diagnóstico avanzado en clínica 🔬\n\n• *Analíticas completas* — resultados en el mismo día\n• *Radiografía digital* — diagnóstico óseo y torácico\n• *Ecografía abdominal* — órganos internos en tiempo real\n• *Electrocardiograma* — salud cardiaca\n• *Toma de muestras* para laboratorio externo especializado\n\n¿Qué prueba ha recomendado el veterinario?",
+
+    "castrar,castración,esterilizar,esterilización,operación,quirúrgico,cirugía,ovariohisterectomía,orquiectomía": "La castración/esterilización es beneficiosa para la salud y el comportamiento 🏥\n\n*Beneficios:*\n• Previene tumores mamarios y de próstata\n• Elimina embarazos no deseados\n• Reduce comportamientos agresivos y marcajes\n• Mayor esperanza de vida\n\n*Proceso:*\n• Revisión pre-anestésica obligatoria\n• Cirugía ambulatoria (alta el mismo día en la mayoría de casos)\n• Revisión postoperatoria incluida\n\n¿Cuántos años tiene su mascota?",
+
+    "chip,microchip,identificación,registrar,censo,identificar,implante chip,perdido,pérdida": "El microchip es obligatorio por ley para perros y recomendado para gatos 🔖\n\n• Implantación rápida e indolora (como una vacuna)\n• Registro en la base de datos nacional REIAC\n• Obligatorio en perros antes de los 3 meses\n• Imprescindible para viajar al extranjero\n• Coste aproximado: 25-35€ (incluyendo registro)\n\n¿Su mascota ya tiene microchip o necesita implantarlo?",
+
+    "pasaporte,viajar,viaje,cartilla,documentación,europa,extranjero,certificado veterinario": "Le ayudamos con toda la documentación para viajar con su mascota 🌍\n\n• Pasaporte europeo para animales de compañía\n• Cartilla sanitaria actualizada\n• Certificado veterinario oficial para viajes internacionales\n• Tratamiento antiparasitario previo al viaje (obligatorio en algunos países)\n• Tramitación en 24-48h\n\n¿A qué país viaja y cuándo sale?",
+
+    "parásito,parásitos,pulgas,garrapatas,desparasitar,desparasitación,lombrices,gusanos,antiparasitario,pipeta,collar antiparásitos": "La prevención antiparasitaria protege a su mascota y a su familia 🛡️\n\n*Parásitos externos (pulgas y garrapatas):*\n• Pipetas, collares o comprimidos mensuales\n• Tratamiento del entorno del hogar\n\n*Parásitos internos (lombrices, giardia):*\n• Desparasitación interna cada 3 meses en adultos\n• Más frecuente en cachorros y en zonas de riesgo\n\n¿Cuándo fue la última desparasitación de su mascota?",
+
+    "cachorro,gatito,recién nacido,nuevo,adopción,adoptar,primera visita cachorro": "¡Enhorabuena por su nueva mascota! 🐶🐱\n\n*Primera visita para cachorros incluye:*\n• Exploración física completa\n• Plan de vacunación personalizado\n• Implantación de microchip\n• Consejo de alimentación y comportamiento\n• Desparasitación interna y externa\n• *Primera consulta gratuita para nuevos pacientes*\n\n¿Cuántos meses tiene el cachorro?",
+
+    "perro,can,golden,labrador,pastor,bulldog,poodle,chihuahua,yorkshire,husky,bóxer,rottweiler": "Atendemos a perros de todas las razas y tamaños 🐕\n\nNuestros servicios para perros incluyen consultas, vacunaciones, cirugías, peluquería y urgencias. ¿Qué necesita para su perro?",
+
+    "gato,felino,gatito,siamés,persa,maine coon,bengalí,british,ragdoll,europeo": "Atendemos a gatos con el trato especializado que merecen 🐈\n\nSabemos que los gatos son pacientes especiales. Disponemos de sala de espera separada para reducir el estrés. ¿Qué necesita para su gato?",
+
+    "conejo,ave,pájaro,loro,hamster,cobaya,hurón,reptil,iguana,tortuga,roedor,exótico": "También atendemos animales exóticos y pequeñas mascotas 🐇🦜\n\n• Conejos, cobayas y roedores\n• Aves (loros, canarios, agapornis)\n• Reptiles (tortugas, iguanas, serpientes)\n• Hurones y mustélidos\n\nSi su mascota es exótica, le recomendamos consultar disponibilidad antes de la visita. ¿Qué especie tiene?",
+
+    "precio,coste,cuánto,tarifa,presupuesto,cuánto cuesta": "Nuestros precios orientativos 💳\n\n• *Consulta general* desde 30€\n• *Vacuna* desde 18€\n• *Microchip + registro* desde 25€\n• *Peluquería* desde 20€ (según raza y tamaño)\n• *Analítica básica* desde 45€\n• *Castración perro* desde 150€ / *gato* desde 100€\n\nTodos los presupuestos son orientativos. Le damos precio exacto tras la valoración. ¿Sobre qué servicio necesita más información?",
+
+    "horario,horarios,cuándo,cuando abren,cuando cierran,hora": "Nuestros horarios de atención 🕐\n\n• Lunes a viernes: 9:00 - 21:00h\n• Sábados: 9:00 - 14:00h\n• *Urgencias:* atención 24h (consulte disponibilidad)\n\n¿Quiere que le llamemos para reservar cita?",
+
+    "dónde,dirección,ubicación,clínica,cómo llegar,parking,aparcamiento": "Le facilitaremos la dirección exacta al confirmar su cita 📍 Disponemos de aparcamiento cercano y fácil acceso. ¿Quiere reservar y que le enviemos la ubicación?",
+
+    "hola,buenos días,buenas tardes,buenas noches,buenas,hey": "¡Hola! 😊 Estoy aquí para ayudarle con todo lo relacionado con la salud y el bienestar de su mascota. ¿En qué puedo ayudarle?",
+
+    "gracias,muchas gracias,perfecto,genial,estupendo,ok,de acuerdo": "¡Con mucho gusto! 🐾 Recuerde que estamos aquí para cuidar a su mascota. ¡Hasta pronto!",
+
+    "_ask_name": "¿Me dice su nombre para gestionar la cita? 😊",
+    "_ask_phone": "Perfecto {nombre}. ¿Un teléfono de contacto para confirmarle la cita?",
+    "_ask_pet": "¿Cómo se llama su mascota y qué especie es? (perro, gato, conejo, ave...)",
+    "_ask_availability": "Genial. ¿Qué día y franja horaria le viene mejor? (mañanas / tardes / fines de semana)",
+    "_summary": "¡Perfecto {nombre}! 🐾 He anotado la cita para {mascota}. Nuestro equipo le llamará al {telefono} para confirmar hora exacta.",
+    "_goodbye": "Gracias por confiar en nosotros para el cuidado de su mascota. ¡Hasta pronto! 🐾"
+  },
+
+  "whatsapp": {
+    "messageTemplate": "🐾 *NUEVA CITA VETERINARIA*\n\n👤 *Propietario:* {nombre}\n📞 *Tel:* +34{telefono}\n🐾 *Mascota:* {mascota}\n🩺 *Motivo:* {servicio}\n📅 *Disponibilidad:* {disponibilidad}\n\n_Vía chatbot WhiteMoon_"
+  }
+}

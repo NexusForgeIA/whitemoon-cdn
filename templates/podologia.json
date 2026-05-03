@@ -1,0 +1,72 @@
+{
+  "id": "podologia",
+  "version": "1.0",
+  "name": "Clínica de Podología",
+  "sector": "podologia",
+  "icon": "🦶",
+  "color": "#3b82f6",
+
+  "botName": "Asistente Podológico",
+  "calendar": true,
+  "greeting": "¡Hola! 🦶 Bienvenido/a a nuestra clínica. ¿En qué puedo ayudarte?",
+
+  "serviceButtons": [
+    "🦶 Reflexología Podal",
+    "🦷 Espolón / Fascitis",
+    "🔬 Papilomas",
+    "❤️ Pie Diabético",
+    "✨ Reconstrucción Ungueal",
+    "🔧 Reeducación Ungueal",
+    "💆 Quiropodia",
+    "⚡ Láser Cure",
+    "👴 Podología Geriátrica",
+    "💼 Podología Laboral",
+    "📅 Pedir cita"
+  ],
+
+  "specialFeatures": {
+    "triage": false,
+    "calendar": true,
+    "vehicleCapture": false,
+    "priceQuote": false
+  },
+
+  "responses": {
+    "reflexologia,reflexología,reflex,masaje pies,puntos reflejos": "La reflexología podal es una técnica terapéutica que trabaja sobre los puntos reflejos del pie para favorecer el equilibrio del organismo 🦶\n\n• Estimula la circulación y el sistema linfático\n• Reduce el estrés y la tensión acumulada\n• Mejora el descanso y la calidad del sueño\n• Alivia dolores musculares y articulares\n• Sesiones personalizadas según tus necesidades\n\n¿Quieres que te llamemos para explicarte más y reservar tu cita?",
+
+    "espolon,espolón,fascitis,talon,talón,heel,dolor talon,plantar": "El espolón calcáneo y la fascitis plantar son dos de las causas más frecuentes de dolor en el talón 🦶\n\n• Diagnóstico preciso mediante exploración y pruebas de imagen\n• Tratamiento conservador con plantillas personalizadas\n• Electroterapia y ultrasonidos para reducir la inflamación\n• Ejercicios de estiramiento y reeducación funcional\n• En la mayoría de casos se resuelve sin cirugía\n• Control y seguimiento hasta la recuperación completa\n\n¿Llevas tiempo con dolor en el talón? Pídenos cita y lo valoramos.",
+
+    "papiloma,papilomas,verruga,verrugas,vph,plantar": "Los papilomas plantares son lesiones causadas por el virus del papiloma humano (VPH) y requieren tratamiento especializado 🔬\n\n• Diagnóstico diferencial para distinguirlos de callos y durezas\n• Tratamiento con crioterapia (frío), ácidos o láser según el caso\n• Eliminación efectiva sin dañar el tejido sano circundante\n• Protocolo anticontagio para proteger a tu familia\n• Seguimiento hasta la resolución completa\n\n¿Tienes alguna lesión que te genera dudas? Consúltanos sin compromiso.",
+
+    "diabetico,diabético,diabetes,pie diabetico,pie diabético,neuropatia,neuropatía,ulcera,úlcera": "El cuidado del pie diabético es fundamental para prevenir complicaciones graves ❤️\n\n• Exploración vascular y neurológica completa\n• Cuidado preventivo de la piel y las uñas\n• Detección precoz de úlceras y heridas de difícil cicatrización\n• Descarga y protección de zonas de riesgo con ortesis\n• Plantillas diabéticas a medida para redistribuir presiones\n• Educación para el autocuidado diario en casa\n\nSi eres paciente diabético, te recomendamos revisiones periódicas. ¿Hablamos?",
+
+    "uña,uñas,encarnada,onicocriptosis,ortoniquia,reconstruccion,reconstrucción,uña encarnada,mal formada,reeducacion,reeducación": "Tratamos los problemas ungueales con técnicas modernas y sin dolor 🦶\n\n*Reeducación ungueal (ortoniquia):*\n• Corrección de uñas encarnadas y curvadas sin cirugía\n• Sistemas de grapas o férulas para reconducir el crecimiento\n• Resultados progresivos y duraderos\n\n*Reconstrucción ungueal:*\n• Restauración estética y funcional de uñas dañadas o perdidas\n• Material biocompatible de alta resistencia\n• Aspecto natural desde la primera sesión\n\n¿Tienes molestias con alguna uña? Pide cita y te valoramos.",
+
+    "dureza,durezas,callo,callos,quiropodia,heloma,helomas,hiperqueratosis,rozadura,grieta,grietas": "La quiropodia es el tratamiento de referencia para el cuidado integral del pie 💆\n\n• Eliminación de durezas, callos y helomas con instrumental estéril\n• Tratamiento de grietas y fisuras del talón\n• Cuidado y corte correcto de uñas\n• Hidratación profunda y tratamiento de la piel\n• Detección de alteraciones que requieran seguimiento\n• Recomendada cada 4-6 semanas para un pie sano\n\n¿Quieres reservar tu sesión de quiropodia?",
+
+    "laser,láser,hongo,hongos,onicomicosis,micosis,uña amarilla,uña negra,uña gruesa": "El láser es el tratamiento más eficaz y seguro para eliminar hongos en las uñas ⚡\n\n• Tecnología láser de última generación (sin dolor, sin anestesia)\n• Actúa directamente sobre el hongo sin dañar la uña ni la piel\n• Sin efectos secundarios sistémicos\n• Protocolo de sesiones personalizado según el grado de afectación\n• Compatible con tratamiento tópico complementario\n• Resultados visibles a medida que la uña crece sana\n\n¿Quieres que valoremos el estado de tus uñas? Pide cita.",
+
+    "mayor,mayores,geriatria,geriátrica,geriatrico,geriátrico,domicilio,abuelo,abuela,anciano,tercera edad,residencia": "Ofrecemos una atención podológica especializada para personas mayores 👴\n\n• Servicio a domicilio para pacientes con movilidad reducida\n• Tratamiento de uñas engrosadas, involucradas y difíciles\n• Cuidado de pie diabético y vascular en pacientes de riesgo\n• Coordinación con médicos de cabecera y enfermería\n• Trato cercano, paciente y adaptado a cada persona\n• Visitas a domicilios particulares y residencias de mayores\n\n¿Necesitas que nos desplacemos a domicilio? Cuéntanos.",
+
+    "trabajo,laboral,plantilla,plantillas,ergonomica,ergonómica,ergonomico,ergonómico,bota,calzado laboral,pie plano,pie cavo,biomecánica,biomecánica": "La podología laboral cuida la salud de tus pies frente a la exigencia del trabajo diario 💼\n\n• Estudio biomecánico de la marcha y la pisada\n• Plantillas personalizadas a medida para cada tipo de pie y calzado\n• Adaptación a botas y calzado de seguridad\n• Tratamiento de lesiones derivadas de la bipedestación prolongada\n• Prevención de lesiones musculoesqueléticas\n• Certificado médico podológico si tu empresa lo requiere\n\n¿Pasas muchas horas de pie en el trabajo? Cuéntanos tu caso.",
+
+    "precio,precios,coste,cuanto,cuánto,tarifa,tarifas,presupuesto,vale": "Nuestras tarifas varían según el tratamiento y las necesidades de cada paciente 🦶\n\nConsúltanos sin compromiso y te informamos al detalle. En algunos casos ofrecemos primera valoración gratuita. ¿Quieres que te llamemos para explicarte las opciones?",
+
+    "horario,horarios,cuando,cuándo,cuando abren,cuando cierran,hora,disponibilidad": "Nuestros horarios de atención son 🕐\n\n• Lunes a viernes: 9:00 - 20:00h\n• Sábados: 9:00 - 14:00h\n• Servicio a domicilio: consultar disponibilidad\n\n¿Quieres que te llamemos para reservar tu cita?",
+
+    "dónde,dirección,donde,ubicación,local,clínica,clinica,cómo llegar": "Te facilitamos la dirección exacta al confirmar tu cita 📍 También ofrecemos servicio a domicilio para quienes lo necesiten. ¿Hacemos la reserva?",
+
+    "hola,buenos días,buenas tardes,buenas noches,buenas,hey,ey": "¡Hola! 😊 Encantado/a de atenderte. Puedo informarte sobre nuestros tratamientos y ayudarte a reservar tu cita. ¿En qué puedo ayudarte?",
+
+    "gracias,muchas gracias,perfecto,genial,estupendo,ok,de acuerdo,guay": "¡A ti! 😊 Recuerda que cuidar tus pies es cuidar tu calidad de vida. ¡Hasta pronto! 🦶",
+
+    "_ask_name": "¿Me dices tu nombre para la cita? 😊",
+    "_ask_phone": "Perfecto {nombre}. ¿Tu teléfono de contacto?",
+    "_summary": "¡Todo anotado {nombre}! 🦶 Nuestro equipo te llamará al {telefono} para confirmar la cita. ¡Hasta pronto!",
+    "_goodbye": "Gracias por contactarnos. ¡Cuidamos tus pies con vocación! 🦶"
+  },
+
+  "whatsapp": {
+    "messageTemplate": "🦶 *NUEVA CITA PODOLOGÍA*\n\n👤 *Paciente:* {nombre}\n📞 *Tel:* +34{telefono}\n🦶 *Servicio:* {servicio}\n📅 *Disponibilidad:* {disponibilidad}\n\n_Vía chatbot WhiteMoon_"
+  }
+}

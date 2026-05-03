@@ -226,7 +226,7 @@
     var userName = '';
     var userPhone = '';
     var lastService = '';
-    var lastShownResponse = '';
+    var lastUserText = '';
     var lastPriority = '';
     var buttonsShown = false;
     var CAPTURE_TRIGGERS = 'cita,reserva,contacto,llamar,llamada,precio,presupuesto,quiero,información,info,consulta';
@@ -328,11 +328,12 @@
           hideButtons();
           state = 1;
           var match = matchKeyword(label, cfg.responses);
+          var isDupe = (normalize(label) === lastUserText);
+          lastUserText = normalize(label);
           if(match){
-            if(match === lastShownResponse){
+            if(isDupe){
               showTyping(function(){ addMsg(escapeHtml('¿Hay algo más concreto en lo que pueda ayudar sobre este tema?'), 'bot'); });
             } else {
-              lastShownResponse = match;
               lastService = label;
               showTyping(function(){
                 addMsg(escapeHtml(match), 'bot');
@@ -425,11 +426,12 @@
       }
 
       var match = matchKeyword(text, cfg.responses);
+      var isDupe = (normalize(text) === lastUserText);
+      lastUserText = normalize(text);
       if(match){
-        if(match === lastShownResponse){
+        if(isDupe){
           showTyping(function(){ addMsg(escapeHtml('¿Hay algo más concreto en lo que pueda ayudar sobre este tema?'), 'bot'); });
         } else {
-          lastShownResponse = match;
           lastService = text;
           showTyping(function(){
             addMsg(escapeHtml(match), 'bot');

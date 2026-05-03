@@ -1,0 +1,79 @@
+{
+  "id": "formacion",
+  "version": "1.0",
+  "name": "Centro de Formación",
+  "sector": "formacion",
+  "icon": "📚",
+  "color": "#7c3aed",
+
+  "botName": "Asistente de Formación",
+  "calendar": false,
+  "greeting": "¡Hola! 📚 Bienvenido/a a nuestro centro. ¿En qué puedo ayudarte?",
+
+  "serviceButtons": [
+    "📚 Ver cursos disponibles",
+    "💻 Formación online",
+    "🏢 Formación presencial",
+    "💼 Formación para empresas",
+    "📄 Certificados/Titulaciones",
+    "📞 Hablar con un asesor"
+  ],
+
+  "specialFeatures": {
+    "triage": false,
+    "calendar": false,
+    "vehicleCapture": false,
+    "priceQuote": false
+  },
+
+  "responses": {
+    "cursos,catálogo,oferta formativa,qué cursos,qué ofrecéis,formaciones disponibles,áreas,ámbitos": "Contamos con una amplia oferta formativa en diferentes áreas 📚\n\nAlgunas de las áreas que cubrimos:\n• Tecnología e informática\n• Administración y gestión empresarial\n• Idiomas y comunicación\n• Salud y bienestar\n• Comercio y marketing digital\n• Recursos humanos y habilidades directivas\n• Hostelería y turismo\n\nLa oferta varía según la convocatoria. ¡Consúltanos y te informamos de los cursos activos ahora mismo!",
+
+    "online,a distancia,virtual,telemático,desde casa,e-learning,campus virtual": "¡La formación online te da toda la flexibilidad que necesitas! 💻\n\n• Acceso 24/7 al campus virtual desde cualquier dispositivo\n• Tutores disponibles para resolver dudas\n• Materiales descargables y videoclases\n• Sin desplazamientos, sin horarios fijos\n• Mismo certificado que la modalidad presencial\n• Ideal para compaginar con trabajo u otras obligaciones\n\n¿Quieres que un asesor te cuente más sobre nuestra modalidad online?",
+
+    "presencial,en persona,en el centro,clases presenciales,asistir,aula": "La formación presencial te da la experiencia más completa 🏢\n\n• Clases en instalaciones equipadas\n• Contacto directo con docentes y compañeros\n• Prácticas en entornos reales\n• Acceso a laboratorios y equipamiento especializado\n• Networking con otros profesionales del sector\n\n¿Te gustaría conocer la disponibilidad de grupos presenciales?",
+
+    "híbrido,semipresencial,mixto,combinar,online y presencial,blended": "La modalidad híbrida combina lo mejor de los dos mundos 🔄\n\n• Parte del contenido online, a tu ritmo\n• Sesiones presenciales para prácticas y tutorías\n• Máxima flexibilidad sin renunciar al contacto directo\n• Ideal si tienes disponibilidad parcial\n\n¿Quieres que te expliquemos cómo funciona el formato híbrido en nuestros cursos?",
+
+    "bonificada,bonificado,FUNDAE,tripartita,crédito formativo,formación bonificada,subvencionada,sin coste para empresa,gratuita para empresa": "La formación bonificada te permite formarte sin apenas coste para tu empresa 💼\n\n¿Cómo funciona?\n• Las empresas disponen de un crédito anual para formación a través de FUNDAE\n• Se gestiona mediante la Fundación Estatal para la Formación en el Empleo\n• El importe bonificado se recupera en los seguros sociales\n• Nos encargamos de toda la gestión con FUNDAE\n• Disponible para trabajadores por cuenta ajena\n\n¡Consúltanos si tu empresa tiene crédito disponible y cuánto puede bonificarse!",
+
+    "empresa,empresas,trabajadores,empleados,formación corporativa,in-company,plantilla,equipo": "Diseñamos formación a medida para empresas y equipos 🏢\n\n• Diagnóstico de necesidades formativas\n• Cursos personalizados para tu sector e industria\n• Impartición en tus instalaciones o en el centro\n• Gestión completa de bonificaciones FUNDAE\n• Grupos reducidos para mayor aprovechamiento\n• Informes de seguimiento y evaluación del aprendizaje\n\n¿Quieres que te llamemos para presentarte nuestra propuesta para empresas?",
+
+    "SEPE,desempleo,desempleado,paro,demandante empleo,subsidio,búsqueda empleo,desocupado,sin trabajo": "Tenemos formación especialmente diseñada para personas en búsqueda activa de empleo 🎯\n\n• Cursos homologados y acreditados\n• Formación vinculada a los certificados de profesionalidad del SEPE\n• Posibilidad de formación subvencionada según convocatorias vigentes\n• Orientación profesional incluida\n• Apoyo para actualizar y reforzar tu perfil profesional\n\n¿Quieres que te informemos de las opciones disponibles para tu situación?",
+
+    "certificado,certificados,titulación,título,diploma,acreditación,oficial,reconocido,homologado,certificado de profesionalidad": "Nuestras titulaciones son reconocidas y tienen validez oficial 📄\n\n• Diplomas propios del centro acreditados\n• Certificados de profesionalidad del SEPE (Catálogo Nacional de Cualificaciones)\n• Certificaciones de fabricantes y entidades internacionales (según el curso)\n• Acreditaciones reconocidas por empresas del sector\n\nTodos nuestros títulos incluyen el expediente académico completo. ¿Sobre qué área de formación quieres saber más?",
+
+    "requisitos,requisito,acceso,quién puede,para quién,nivel mínimo,puedo hacer,tengo nivel": "Los requisitos de acceso dependen del tipo de curso 📋\n\nEn general:\n• Cursos de iniciación: sin requisitos previos\n• Cursos intermedios: conocimientos básicos del área\n• Cursos avanzados: experiencia o formación previa en el sector\n• Certificados de profesionalidad: pueden requerir titulación o experiencia laboral acreditada\n\nHacemos una valoración personalizada antes de matricularte para asegurarnos de que el curso se adapta a tu nivel. ¿Quieres que te asesoremos?",
+
+    "financiación,pagar,cuotas,aplazar,facilidades de pago,formas de pago,fraccionado,mensualidades": "Ofrecemos facilidades para que la formación no sea un obstáculo económico 💳\n\n• Pago fraccionado en cuotas mensuales\n• Formación bonificada a través de FUNDAE (sin coste para empresas)\n• Posibilidad de cursos subvencionados según convocatorias\n• Descuentos para desempleados, estudiantes y colectivos específicos\n\nConsúltanos sin compromiso y buscamos la mejor opción para ti. ¿Te llamamos para explicártelo?",
+
+    "bolsa de empleo,salidas,trabajo,empleo,inserción laboral,prácticas,dónde puedo trabajar,salidas profesionales,empleabilidad": "Nos preocupamos por tu empleabilidad desde el primer día 🚀\n\n• Bolsa de empleo activa con empresas colaboradoras\n• Orientación profesional incluida en los cursos\n• Ayuda para actualizar CV y preparar entrevistas\n• Prácticas en empresas del sector (en cursos habilitados)\n• Red de alumni para networking profesional\n\nFormarte con nosotros es invertir en tu futuro. ¿Quieres saber más sobre las salidas del área que te interesa?",
+
+    "horario clases,turnos,flexible,compatibilizar,trabajo y estudiar,cuándo son las clases,mañana,tarde,noche,fin de semana": "Adaptamos los horarios a tu vida, no al revés 🕐\n\n• Turnos de mañana, tarde y noche\n• Clases intensivas entre semana\n• Grupos de fin de semana disponibles en muchos cursos\n• Modalidad online: sin horario fijo, a tu ritmo\n• Clases de recuperación y tutorías flexibles\n\nCuéntanos tu disponibilidad y buscamos el grupo que mejor te encaje. ¿Te llamamos?",
+
+    "duración,cuánto dura,horas,semanas,meses,cuánto tiempo": "La duración depende del tipo de curso y la modalidad 📅\n\n• Cursos cortos: desde 20-40 horas\n• Cursos medios: 60-200 horas\n• Certificados de profesionalidad: 200-600 horas (según nivel)\n• Másteres y programas avanzados: varios meses\n\nEn todos los casos recibirás la información detallada antes de matricularte. ¿Quieres saber la duración del área que te interesa?",
+
+    "inscripción,matricularse,apuntarse,cómo empezar,cómo me apunto,registro,proceso de matriculación,reservar plaza": "¡Empezar es muy sencillo! 🎓\n\n1. Elige el curso o área de tu interés\n2. Contacta con nosotros por aquí o por teléfono\n3. Un asesor te orienta y confirma tu plaza\n4. Formalizas la matrícula con la documentación necesaria\n5. ¡Accedes a los materiales y empiezas!\n\nLas plazas son limitadas. Si tienes interés, te recomendamos consultarnos cuanto antes. ¿Te llamamos para reservar tu plaza?",
+
+    "temario,contenido,qué aprendo,programa,qué se estudia,módulos,materias,asignaturas": "Cada curso tiene un programa detallado que te enviamos antes de matricularte 📖\n\nEn general nuestros programas incluyen:\n• Fundamentos teóricos del área\n• Casos prácticos y ejercicios reales\n• Herramientas y software del sector\n• Evaluaciones continuas y proyecto final\n• Materiales actualizados al mercado laboral actual\n\n¿Sobre qué área de formación quieres conocer el temario?",
+
+    "precio,precios,coste,cuánto,cuánto cuesta,tarifa,cuánto vale": "El precio depende del curso y la modalidad. ¡Consúltanos y te informamos sin compromiso! 📚\n\nRecuerda que muchos cursos pueden bonificarse a través de FUNDAE si eres trabajador por cuenta ajena, lo que puede reducir significativamente el coste. ¿Te llamamos para explicarte las opciones?",
+
+    "horario,horarios,cuándo,cuando abren,cuando cierran,atención,atención al cliente": "Nuestro horario de atención es 🕐\n\n• Lunes a viernes: 9:00 - 20:00h\n• Sábados: 9:00 - 14:00h\n• También puedes contactarnos por este chat en cualquier momento\n\n¿Quieres que un asesor te llame?",
+
+    "dónde,dirección,ubicación,centro,local,cómo llegar,instalaciones": "Te facilitamos la dirección exacta de nuestro centro al contactar contigo 📍 También puedes realizar toda la formación desde casa en modalidad online. ¿Prefieres formación presencial u online?",
+
+    "hola,buenos días,buenas tardes,buenas noches,buenas,hey,ey": "¡Hola! 😊 Encantado/a de atenderte. Puedo informarte sobre nuestros cursos, modalidades y ayudarte a encontrar la formación perfecta para ti. ¿En qué puedo ayudarte?",
+
+    "gracias,muchas gracias,perfecto,genial,estupendo,ok,de acuerdo,guay": "¡A ti! 😊 Recuerda que estamos aquí para ayudarte a dar el siguiente paso en tu formación. ¡Hasta pronto! 📚",
+
+    "_ask_name": "¿Me dices tu nombre para orientarte mejor? 😊",
+    "_ask_phone": "¡Perfecto {nombre}! ¿Un teléfono de contacto para que un asesor te llame?",
+    "_summary": "¡Genial {nombre}! 📚 He registrado tu consulta. Un asesor de formación te contactará en breve al {telefono} para orientarte sin compromiso.",
+    "_goodbye": "Gracias por contactar con nuestro centro, {nombre}. ¡Mucho ánimo y hasta pronto! 📚🎓"
+  },
+
+  "whatsapp": {
+    "messageTemplate": "📚 *NUEVA CONSULTA FORMACIÓN*\n\n👤 *Nombre:* {nombre}\n📞 *Tel:* +34{telefono}\n📚 *Curso/Área:* {servicio}\n💬 *Consulta:* {consulta}\n\n_Vía chatbot WhiteMoon_"
+  }
+}

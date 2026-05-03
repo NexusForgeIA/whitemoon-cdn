@@ -278,8 +278,27 @@
         var b = document.createElement('button');
         b.textContent = label;
         b.addEventListener('click', function(){
-          handleUserInput(label);
+          if(state === 2) return;
+          addMsg(escapeHtml(label), 'usr');
           hideButtons();
+          state = 1;
+          var match = matchKeyword(label, cfg.responses);
+          if(match){
+            lastService = label;
+            showTyping(function(){
+              addMsg(escapeHtml(match), 'bot');
+              if(isCaptureIntent(label)){
+                setTimeout(function(){ startCapture(label); }, 1400);
+              }
+            });
+          } else if(isCaptureIntent(label)){
+            lastService = label;
+            startCapture(label);
+          } else {
+            var fb = '¡Gracias por tu mensaje! 😊 Puedo ayudarte con información sobre nuestros servicios o puedes solicitar que te contactemos directamente.';
+            if(cfg.hasCalendar){ fb += ' ¿Quieres que tomemos nota para contactarte?'; }
+            showTyping(function(){ addMsg(escapeHtml(fb), 'bot'); });
+          }
         });
         btnsEl.appendChild(b);
       });

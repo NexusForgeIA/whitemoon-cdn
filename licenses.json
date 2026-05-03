@@ -8,7 +8,7 @@
       "created": "2026-05-03",
       "expires": "2099-05-03",
       "contact": "",
-      "phone": "",
+      "phone": "64319980",
       "notes": "",
       "botName": "Asistente Legal",
       "color": "#1a3a5c",
@@ -42,7 +42,7 @@
         "_goodbye": "Gracias por contactar con nuestro despacho. Nuestro equipo le atenderá lo antes posible. ¡Hasta pronto! ⚖️"
       },
       "template": "legal",
-      "updated": "2026-05-03T13:14:57.389Z"
+      "updated": "2026-05-03T16:00:24.600Z"
     }
   }
 }

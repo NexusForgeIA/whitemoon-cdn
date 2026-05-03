@@ -81,7 +81,6 @@
   },
 
   "whatsapp": {
-    "fallbackPhone": "643199580",
     "messageTemplate": "⚖️ *NUEVA CONSULTA LEGAL*\n\n👤 *Cliente:* {nombre}\n📞 *Tel:* +34{telefono}\n🏷️ *Prioridad:* {prioridad}\n⚖️ *Área:* {area}\n💬 *Consulta:* {consulta}\n\n_Vía chatbot WhiteMoon_"
   }
 }

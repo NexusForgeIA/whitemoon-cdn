@@ -341,7 +341,10 @@
       if(tm){
         captured.priority = tm.data.priority || '';
         captured.service  = text;
-        showTyping(function(){ addMsg(escapeHtml(tm.data.message), 'bot'); });
+        showTyping(function(){
+          addMsg(escapeHtml(tm.data.message), 'bot');
+          setTimeout(function(){ startCapture(); }, 1400);
+        });
         return;
       }
 

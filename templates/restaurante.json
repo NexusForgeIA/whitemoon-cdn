@@ -1,0 +1,82 @@
+{
+  "id": "restaurante",
+  "version": "1.0",
+  "name": "Restaurante / Hostelería",
+  "sector": "restaurante",
+  "icon": "🍽️",
+  "color": "#ea580c",
+
+  "botName": "Asistente del Restaurante",
+  "calendar": true,
+  "greeting": "¡Hola! 🍽️ Bienvenido/a. ¿En qué puedo ayudarte? Puedo ayudarte a hacer una reserva o resolver cualquier duda.",
+
+  "serviceButtons": [
+    "📅 Hacer reserva",
+    "🍽️ Ver carta",
+    "🥗 Menú del día",
+    "🛵 Comida para llevar",
+    "🎉 Eventos/Grupos",
+    "📞 Hablar con nosotros"
+  ],
+
+  "specialFeatures": {
+    "triage": false,
+    "calendar": true,
+    "vehicleCapture": false,
+    "priceQuote": false
+  },
+
+  "captureExtra": {
+    "askPersons": "¿Para cuántas personas sería la reserva?",
+    "askDate": "¿Qué día y a qué hora?"
+  },
+
+  "captureReserva": {
+    "flow": ["askName", "askPhone", "askPersons", "askDate"]
+  },
+
+  "responses": {
+    "reserva,reservar,mesa,reservar mesa,quiero una mesa,book,tengo reserva,hacer reserva,quiero reservar": "¡Claro que sí! 📅 Estaremos encantados de reservarte mesa.\n\nPara confirmar la reserva necesitamos:\n• Tu nombre\n• Teléfono de contacto\n• Número de comensales\n• Día y hora\n\n¿Empezamos con la reserva?",
+
+    "carta,menú,menu,qué tenéis,qué ofrecéis,platos,especialidad,qué se puede comer,comida,cocina": "Nuestra carta incluye una selección de platos elaborados con productos frescos y de temporada 🍽️\n\nTenemos opciones para todos los gustos:\n• Entrantes y tapas para compartir\n• Platos principales de carne y pescado\n• Opciones vegetarianas\n• Postres caseros\n\nConsúltanos para conocer las especialidades del día o las novedades de temporada. ¿Quieres hacer una reserva?",
+
+    "menú del día,menu del dia,menú diario,menú mediodía,precio menú,almuerzo,comida del día": "Ofrecemos menú del día de lunes a viernes 🥗\n\nNuestro menú incluye:\n• Primer plato a elegir\n• Segundo plato a elegir\n• Postre o café\n• Pan y bebida incluidos\n\nEl menú varía cada día según los productos disponibles. ¡Consúltanos para saber el menú de hoy!",
+
+    "takeaway,para llevar,domicilio,delivery,recoger,recogida,pedido,encargar": "Ofrecemos servicio de comida para llevar 🛵\n\n• Pedido por teléfono o WhatsApp\n• Recogida en local o reparto a domicilio (según zona)\n• Tiempo aproximado: 20-30 minutos\n• Packaging apto para mantener temperatura\n\n¿Quieres hacer un pedido ahora?",
+
+    "evento,eventos,grupo,grupos,celebración empresarial,comida empresa,cena empresa,team building,cumpleaños empresa": "Para grupos de 10 o más personas, te recomendamos llamarnos directamente para organizar todos los detalles 📞\n\nGestionamos:\n• Menús cerrados a medida\n• Espacios privados o reservados\n• Decoración personalizada\n• Coordinación con empresas de catering o servicios adicionales\n\n¿Quieres que te llamemos para hablar de tu evento?",
+
+    "celebración,cumpleaños,aniversario,boda,comunión,bautizo,fiesta,festejo": "¡Nos encanta ser parte de vuestras celebraciones! 🎉\n\n• Menús especiales para celebraciones\n• Decoración personalizada (coordinada con vosotros)\n• Tarta de celebración disponible (consultar)\n• Espacio adaptable según el número de comensales\n\nPara celebraciones, reserva con antelación. ¿Quieres que te llamemos para organizar todos los detalles?",
+
+    "alergia,alergias,intolerancia,celíaco,sin gluten,lactosa,frutos secos,alérgico,vegetariano,vegano": "Tu seguridad alimentaria es nuestra prioridad 🌿\n\nPara cualquier alergia o intolerancia alimentaria, te recomendamos que nos llames directamente antes de tu visita. Así podemos orientarte sobre los platos seguros y preparar opciones adaptadas a tus necesidades.\n\n¿Quieres que te llamemos para hablarlo?",
+
+    "terraza,exterior,jardín,al aire libre,fuera": "Disponemos de zona exterior para disfrutar de la comida al aire libre ☀️\n\nLa terraza está disponible según la meteorología y la época del año. Te recomendamos indicarlo al hacer la reserva para asignarte mesa en esa zona si está disponible. ¿Hacemos la reserva?",
+
+    "parking,aparcamiento,aparcar,dónde aparcar,cómo llegar": "Te facilitaremos la información de acceso y aparcamiento al confirmar tu reserva 📍\n\nSi lo necesitas con antelación, no dudes en llamarnos y te indicamos la mejor opción para llegar cómodo/a. ¿Hacemos la reserva?",
+
+    "accesibilidad,silla de ruedas,movilidad reducida,minusválido,discapacidad,acceso": "Nuestro local es accesible para personas con movilidad reducida ♿\n\nSi tienes alguna necesidad especial, indícanoslo al hacer la reserva para preparar todo con antelación. ¿Te ayudo con la reserva?",
+
+    "precio,precios,coste,cuánto,cuánto cuesta,tarifa": "Los precios varían según los platos y el tipo de menú. ¡Consúltanos sin compromiso y te informamos con detalle! 🍽️\n\n¿Sobre qué servicio tienes dudas o quieres hacer una reserva?",
+
+    "horario,horarios,cuándo,cuando abren,cuando cierran,hora,abierto,cerrado": "Nuestros horarios de atención son 🕐\n\n• Martes a domingo: mediodía y noche\n• Lunes: cerrado (descanso semanal)\n• Festivos: consultar disponibilidad\n\nTe recomendamos reservar mesa para garantizar disponibilidad. ¿Hacemos la reserva?",
+
+    "dónde,dirección,ubicación,local,restaurante,cómo llegar,qué dirección": "Te enviamos la dirección exacta al confirmar tu reserva 📍 También puedes llamarnos y te la indicamos. ¿Quieres hacer la reserva ahora?",
+
+    "wifi,internet,contraseña wifi,clave wifi": "¡Sí, disponemos de WiFi gratuito para nuestros clientes! 📶\n\nTe damos la contraseña cuando llegues al local. ¿Quieres hacer una reserva?",
+
+    "hola,buenos días,buenas tardes,buenas noches,buenas,hey,ey": "¡Hola! 😊 Encantados de atenderte. Puedo ayudarte a hacer una reserva o resolver cualquier duda sobre nuestro restaurante. ¿En qué puedo ayudarte?",
+
+    "gracias,muchas gracias,perfecto,genial,estupendo,ok,de acuerdo,guay": "¡A ti! 😊 Si necesitas cualquier otra cosa, aquí estamos. ¡Hasta pronto y buen provecho! 🍽️",
+
+    "_ask_name": "¿Me dices tu nombre para la reserva? 😊",
+    "_ask_phone": "¡Perfecto {nombre}! ¿Un teléfono de contacto para confirmarte la reserva?",
+    "_ask_persons": "Genial. ¿Para cuántas personas sería la reserva?",
+    "_ask_date": "¿Qué día y a qué hora te viene bien?",
+    "_summary": "¡Todo apuntado {nombre}! 🍽️ Reserva para {personas} personas el {fecha}. Te llamaremos al {telefono} para confirmar todos los detalles.",
+    "_goodbye": "¡Hasta pronto {nombre}! Te esperamos. 🍽️😊"
+  },
+
+  "whatsapp": {
+    "messageTemplate": "🍽️ *NUEVA RESERVA*\n\n👤 *Cliente:* {nombre}\n📞 *Tel:* +34{telefono}\n👥 *Personas:* {personas}\n📅 *Fecha/Hora:* {fecha}\n💬 *Notas:* {notas}\n\n_Vía chatbot WhiteMoon_"
+  }
+}

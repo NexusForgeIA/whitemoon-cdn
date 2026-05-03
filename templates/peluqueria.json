@@ -1,0 +1,74 @@
+{
+  "id": "peluqueria",
+  "version": "1.0",
+  "name": "Peluquería y Estética",
+  "sector": "peluqueria",
+  "icon": "✂️",
+  "color": "#db2777",
+
+  "botName": "Asistente de Estética",
+  "calendar": true,
+  "greeting": "¡Hola! ✂️ Bienvenida/o a nuestro salón. ¿En qué puedo ayudarte hoy?",
+
+  "serviceButtons": [
+    "✂️ Corte de pelo",
+    "🎨 Coloración/Tinte",
+    "💅 Manicura/Pedicura",
+    "💆 Tratamientos",
+    "👰 Peinados especiales",
+    "📅 Reservar cita"
+  ],
+
+  "specialFeatures": {
+    "triage": false,
+    "calendar": true,
+    "vehicleCapture": false,
+    "priceQuote": false
+  },
+
+  "responses": {
+    "corte,corte pelo,cortarme,cortarme el pelo,corte mujer,corte hombre,corte niño,corte niña,flequillo,puntas,despuntar,degradado,rapado": "¡Claro que sí! ✂️ Realizamos todo tipo de cortes:\n\n• Corte y peinado mujer (largo, medio y corto)\n• Corte caballero (clásico, moderno, degradado)\n• Corte infantil (niño y niña)\n• Despuntado y mantenimiento de puntas\n• Flequillos de todo tipo\n\nLos precios varían según el servicio y el largo del cabello. ¡Consúltanos sin compromiso y te informamos encantadas! ¿Quieres reservar tu cita?",
+
+    "tinte,coloración,color,teñir,cambio de color,raíces,raíz,rubio,moreno,pelirrojo,castaño,negro,gris,canas": "¡Dale un giro a tu look con nuestros servicios de color! 🎨\n\n• Tinte completo (raíz + largo)\n• Retoque de raíz\n• Cambio de color total\n• Coloración sin amoníaco (formulaciones suaves)\n• Colores fantasía y tendencia\n\nUsamos tintes de alta gama para un resultado duradero y luminoso. Los precios varían según el largo del cabello. ¡Consúltanos sin compromiso y te informamos encantadas!",
+
+    "mechas,balayage,ombré,californianas,babylights,highlights,iluminación,luces,decoloración,aclarar": "¡Las técnicas de iluminación están de moda! ✨\n\n• *Balayage* — degradado natural efecto sol\n• *Mechas californianas* — iluminación clásica\n• *Babylights* — mechas muy finas ultra-naturales\n• *Ombré* — degradado de raíz a puntas\n• *Decoloración* total o parcial\n\nLos precios varían según la técnica y el largo del cabello. ¡Consúltanos sin compromiso y te informamos encantadas! ¿Te gustaría reservar una valoración?",
+
+    "keratina,alisado,liso,alisar,pelo liso,plancha permanente,botox capilar,nanoplastia,frizz,encrespado": "¡Di adiós al encrespado con nuestros tratamientos alisadores! 💫\n\n• *Keratina brasileña* — alisado duradero 3-5 meses\n• *Botox capilar* — suaviza y nutre sin alisar del todo\n• *Nanoplastia* — alisado sin formaldehído, más seguro\n• *Alisado permanente* (japonés o coreano)\n\nTodos nuestros tratamientos incluyen diagnóstico previo del cabello. Los precios varían según largo y técnica. ¡Consúltanos sin compromiso y te informamos encantadas!",
+
+    "permanente,rizo,ondas,rizado,pelo rizado,permanente ondas": "¡Las ondas y rizos son tendencia! 🌊\n\n• *Permanente clásica* — rizo uniforme y duradero\n• *Ondas suaves* — resultado natural y romántico\n• *Permanente digital* (infrarrojos) — más suave y duradera\n\nLos resultados duran entre 3 y 6 meses. Los precios varían según largo. ¡Consúltanos sin compromiso y te informamos encantadas!",
+
+    "manicura,pedicura,uñas,gel,semipermanente,nail art,decoración uñas,acrílico,uñas acrílicas,esmaltado,cutícula": "¡Manos y pies perfectos! 💅\n\n• *Manicura clásica* — limado, cutículas y esmaltado\n• *Manicura semipermanente (gel)* — dura hasta 3 semanas\n• *Pedicura clásica* — cuidado completo del pie\n• *Pedicura semipermanente*\n• *Nail art* — diseños y decoraciones personalizadas\n• *Uñas acrílicas* — extensiones naturales o fantasía\n\nLos precios varían según el servicio. ¡Consúltanos sin compromiso y te informamos encantadas!",
+
+    "tratamiento,hidratación,mascarilla,nutrición,anticaída,caída pelo,cabello dañado,puntas abiertas,brillo,cabello seco,reparar": "¡Mima tu cabello con nuestros tratamientos profesionales! 💆\n\n• *Hidratación intensiva* — para cabellos secos y apagados\n• *Tratamiento anticaída* — fortalece y estimula el cuero cabelludo\n• *Reparación de puntas* — nutrición profunda\n• *Tratamiento de brillo* — efecto espejo\n• *Mascarilla nutritiva* — complemento de cualquier servicio\n\nDiagnosticamos tu cabello antes de recomendar el tratamiento ideal. Los precios varían. ¡Consúltanos sin compromiso y te informamos encantadas!",
+
+    "novia,novias,boda,peinado boda,recogido,comunión,evento,fiesta,graduación,peinado especial,media melena recogida": "¡Que tu gran día sea perfecto! 👰✨\n\n• Peinados de novia (recogidos, semirecogidos, ondas)\n• Prueba de peinado incluida antes del gran día\n• Maquillaje nupcial (pregunta por disponibilidad)\n• Peinados para madres, damas de honor e invitadas\n• Comuniones, graduaciones y eventos especiales\n\n¡Reserva tu prueba de peinado con antelación! Los precios varían según el peinado. ¡Consúltanos sin compromiso y te informamos encantadas!",
+
+    "extensiones,extensiones pelo,alargamiento,volumen pelo,pelo postizo": "¡Luce el cabello que siempre has querido con nuestras extensiones! 💇\n\n• *Extensiones de keratina (fusion)* — máxima durabilidad\n• *Extensiones de clip* — colocación sin permanente\n• *Extensiones de cinta (tape-in)* — muy naturales\n• Cabello 100% natural Remy\n• Mantenimiento y retirada incluidos\n\nLos precios varían según el método y la cantidad. ¡Consúltanos sin compromiso y te informamos encantadas!",
+
+    "depilación,cejas,labio,depilación con hilo,cera,diseño cejas,microblading,laminado cejas": "¡Cejas y depilación perfectas! 🪄\n\n• Diseño y depilación de cejas (cera / hilo)\n• Depilación labio superior y zona facial\n• *Laminado de cejas* — efecto peinado duradero\n• *Tinte de cejas* — más definición y color\n\nLos precios varían según el servicio. ¡Consúltanos sin compromiso y te informamos encantadas!",
+
+    "precio,precios,coste,cuánto,tarifa,cuánto cuesta,tarifas,presupuesto": "Los precios varían según el servicio y el largo del cabello. ¡Consúltanos sin compromiso y te informamos encantadas! 😊\n\n¿Sobre qué servicio tienes dudas?",
+
+    "productos,marca,champú,acondicionador,mascarilla,loreal,wella,redken,kerastase,schwarzkopf": "Trabajamos con marcas profesionales de primer nivel ✨\n\nUsamos productos de alta gama seleccionados para cada tipo de cabello, garantizando el mejor resultado y el mínimo daño. ¿Tienes alguna sensibilidad o alergia que debamos tener en cuenta?",
+
+    "horario,horarios,cuándo,cuando abren,cuando cierran,hora,abren los sábados,domingo": "Nuestros horarios son 🕐\n\n• Lunes a viernes: 9:00 - 20:00h\n• Sábados: 9:00 - 15:00h\n• Domingos: cerrado\n\n¿Quieres que te llamemos para reservar tu cita?",
+
+    "dónde,dirección,ubicación,salón,cómo llegar,parking": "¡Te decimos dónde estamos al confirmar tu cita! 📍 Estamos bien comunicadas y con aparcamiento cercano. ¿Quieres reservar?",
+
+    "primera vez,nueva clienta,nuevo cliente,nunca he venido,primera visita": "¡Qué ilusión tenerte como nueva clienta/o! 🎉\n\n• Primera visita con diagnóstico capilar gratuito\n• Te asesoramos sobre el servicio más adecuado para tu tipo de cabello\n• Ambiente relajado y sin prisas\n\n¿Quieres reservar tu primera cita?",
+
+    "hola,buenos días,buenas tardes,buenas noches,buenas,hey,ey": "¡Hola! 😊 Encantada de atenderte. ¿En qué puedo ayudarte hoy? Puedo informarte sobre nuestros servicios y ayudarte a reservar tu cita.",
+
+    "gracias,muchas gracias,perfecto,genial,estupendo,ok,de acuerdo,guay": "¡A ti! 😊 Si tienes cualquier otra duda o quieres reservar, aquí estamos. ¡Hasta pronto! ✂️",
+
+    "_ask_name": "¿Me dices tu nombre para la reserva? 😊",
+    "_ask_phone": "¡Perfecto {nombre}! ¿Un teléfono de contacto para confirmarte la cita?",
+    "_ask_availability": "Genial {nombre}. ¿Qué día y a qué hora te viene mejor? (mañanas / tardes / fin de semana)",
+    "_summary": "¡Todo apuntado {nombre}! ✂️ Te hemos reservado para {disponibilidad}. Te llamaremos al {telefono} para confirmar todos los detalles.",
+    "_goodbye": "¡Hasta pronto {nombre}! Nos vemos en el salón. ✂️💕"
+  },
+
+  "whatsapp": {
+    "messageTemplate": "✂️ *NUEVA RESERVA SALÓN*\n\n👤 *Cliente:* {nombre}\n📞 *Tel:* +34{telefono}\n✂️ *Servicio:* {servicio}\n📅 *Disponibilidad:* {disponibilidad}\n\n_Vía chatbot WhiteMoon_"
+  }
+}

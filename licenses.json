@@ -2,7 +2,7 @@
   "licenses": {
     "WM-223ce2cc3ad33c95e218f697": {
       "biz": "TEST PRUEBA PLANTILLAS",
-      "domain": "whitemoon.es",
+      "domain": "",
       "pack": "advance",
       "active": true,
       "created": "2026-05-03",
@@ -42,7 +42,7 @@
         "_goodbye": "Gracias por contactar con nuestro despacho. Nuestro equipo le atenderá lo antes posible. ¡Hasta pronto! ⚖️"
       },
       "template": "legal",
-      "updated": "2026-05-03T12:47:42.852Z"
+      "updated": "2026-05-03T13:12:49.057Z"
     }
   }
 }

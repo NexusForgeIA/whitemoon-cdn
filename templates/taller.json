@@ -1,0 +1,79 @@
+{
+  "id": "taller",
+  "version": "1.0",
+  "name": "Taller de Automoción",
+  "sector": "taller",
+  "icon": "🔧",
+  "color": "#dc2626",
+
+  "botName": "Asistente de Taller",
+  "calendar": true,
+  "greeting": "¡Hola! 🔧 Bienvenido/a a nuestro taller. ¿En qué puedo ayudarte?",
+
+  "serviceButtons": [
+    "🔧 Revisión/Mantenimiento",
+    "🛞 Neumáticos",
+    "🚗 Chapa y Pintura",
+    "⚡ Electricidad/Diagnosis",
+    "🔍 Pasar ITV",
+    "📅 Pedir cita"
+  ],
+
+  "specialFeatures": {
+    "triage": false,
+    "calendar": true,
+    "vehicleCapture": true,
+    "priceQuote": false
+  },
+
+  "captureExtra": {
+    "askVehicle": "Para preparar mejor tu presupuesto, ¿me indicas la matrícula y modelo de tu vehículo?"
+  },
+
+  "responses": {
+    "revisión,revision,mantenimiento,aceite,cambio aceite,filtro,filtros,bujías,bujias,líquidos,liquidos,kit revisión,revisión periódica,mantenimiento programado": "El mantenimiento regular es clave para que tu coche dure muchos años 🔧\n\nEn una revisión completa comprobamos:\n• Cambio de aceite y filtro de aceite\n• Filtro de aire, habitáculo y combustible\n• Líquidos (frenos, dirección, refrigerante, limpiaparabrisas)\n• Bujías y cables de encendido\n• Correas y tensores\n• Sistema de frenos y neumáticos\n\nEl presupuesto depende del vehículo y el trabajo. ¡Tráelo o cuéntanos y te damos precio sin compromiso!",
+
+    "frenos,pastillas,discos,freno de mano,líquido frenos,chirría,chirrido,ruido al frenar,tarda en frenar,frenada": "¡Los frenos son seguridad! No lo dejes para después 🛑\n\nRevisamos y reparamos:\n• Pastillas de freno (delantera y trasera)\n• Discos de freno (rectificado o sustitución)\n• Líquido de frenos (recomendado cada 2 años)\n• Freno de mano (cable y zapatas)\n• Pinzas y bombines\n\nSi notas chirrido, vibración o la frenada es larga, tráelo urgente. ¡Tráelo o cuéntanos y te damos precio sin compromiso!",
+
+    "neumático,neumáticos,rueda,ruedas,pinchado,pinchazo,cambio neumáticos,cambio de ruedas,equilibrado,alineación,presión,desgaste,goma": "Neumáticos en perfecto estado = seguridad y ahorro en combustible 🛞\n\n• Montaje y desmontaje de neumáticos\n• Equilibrado de ruedas\n• Geometría y alineación de dirección\n• Control de presión y nitrogen\n• Reparación de pinchazos (si tiene reparación)\n• Neumáticos de verano, invierno y all-season\n\n¡Tráelo o cuéntanos y te damos precio sin compromiso!",
+
+    "chapa,pintura,abolladura,abolladuras,rayada,rayado,golpe,golpes,reparación carrocería,reparar chapa,pintar coche,pintar parachoques,paragolpes": "¡Dejamos tu coche como nuevo! 🚗✨\n\nNuestro taller de chapa y pintura incluye:\n• Reparación de abolladuras (con y sin pintura)\n• Técnica PDR (sin pintura) para abolladuras pequeñas\n• Pintura en cabina con mezcla computerizada\n• Reparación de arañazos y rayadas\n• Cambio y pintura de paragolpes\n• Trabajamos con todas las aseguradoras\n\n¡Tráelo o cuéntanos y te damos precio sin compromiso! ¿Tienes seguro a todo riesgo?",
+
+    "electricidad,eléctrico,avería eléctrica,diagnosis,batería,alternador,motor de arranque,luces,no arranca,fallo electrónico,testigo,luz avería,OBD,centralita": "¡Las averías eléctricas necesitan diagnóstico profesional! ⚡\n\nNuestro taller de electricidad cubre:\n• Diagnosis electrónica OBD (lectura y borrado de fallos)\n• Batería (comprobación, carga y sustitución)\n• Alternador y motor de arranque\n• Reparación de luces y alumbrado\n• Sistemas de cierre centralizado y alarmas\n• Módulos y centralitas\n\nTenemos equipos de diagnosis multimarca. ¡Tráelo o cuéntanos y te damos precio sin compromiso!",
+
+    "ITV,itv,pasar la ITV,inspección técnica,tarjeta ITV,rechazado ITV,desfavorable,reparación ITV,pre-ITV,caducada": "Te preparamos para pasar la ITV sin problemas 🔍\n\n• Revisión pre-ITV completa: detectamos defectos antes de la inspección\n• Reparación de defectos graves o leves\n• Comprobación de luces, frenos, emisiones y documentación\n• Si la ITV queda desfavorable, la solucionamos y te acompañamos\n\nEvita sorpresas. Pasa primero por nuestro taller. ¡Tráelo o cuéntanos y te damos precio sin compromiso!",
+
+    "aire acondicionado,AC,A/C,no enfría,recarga gas,gas refrigerante,climatizador,ventilación,calefacción,filtro habitáculo": "¡El aire acondicionado también necesita mantenimiento! ❄️\n\n• Recarga de gas refrigerante (R134a / R1234yf)\n• Comprobación de fugas en el circuito\n• Sustitución del filtro de habitáculo\n• Desinfección y limpieza del sistema\n• Reparación del compresor y condensador\n\nSe recomienda revisión cada 2 años. ¡Tráelo o cuéntanos y te damos precio sin compromiso!",
+
+    "motor,ruido motor,humos,humo negro,humo blanco,consume mucho,temperatura alta,sobrerecalentamiento,refrigeración,termostato,radiador,culata": "Un motor con síntomas necesita revisión cuanto antes 🚨\n\nSíntomas habituales y sus causas:\n• *Humo blanco* — posible culata o juntas de agua\n• *Humo negro* — mezcla rica, inyectores o turbos\n• *Temperatura alta* — termostato, bomba de agua o radiador\n• *Ruidos* — distribución, rodamientos o bomba de aceite\n\nNo lo dejes para después: los problemas de motor crecen con el uso. ¡Tráelo o cuéntanos y te damos precio sin compromiso!",
+
+    "distribución,correa distribución,kit distribución,cadena distribución,embrague,cambiar embrague,patina el embrague,kit embrague": "Son reparaciones de fondo importantes para la vida del coche 🔩\n\n• *Kit de distribución* — revisión cada 60.000-120.000 km según fabricante\n• *Cadena de distribución* — cuando empieza a hacer ruido en frío\n• *Kit de embrague* — cuando el embrague patina, cruje o le cuesta engranar\n\nSon trabajos que exigen precisión. Usamos piezas de calidad OEM o equivalentes. ¡Tráelo o cuéntanos y te damos precio sin compromiso!",
+
+    "suspensión,amortiguadores,dirección,rótulas,silentblocks,barra estabilizadora,golpeteo,vibración,tiembla el volante,ruido bache": "Una suspensión en buen estado es seguridad y confort 🚗\n\n• Amortiguadores (delanteros y traseros)\n• Rótulas de dirección y suspensión\n• Silentblocks y bujes\n• Barras estabilizadoras\n• Dirección asistida (eléctrica e hidráulica)\n\nSi sientes golpeteos, vibraciones o el volante tira hacia un lado, tráelo a revisar. ¡Tráelo o cuéntanos y te damos precio sin compromiso!",
+
+    "avería,avería en carretera,auxilio,grúa,coche parado,no arranca,urgente,emergencia": "🚨 Si tienes una avería urgente, llámanos directamente.\n\nSi el coche está parado:\n• Busca un lugar seguro y pon el triángulo\n• Llama a nuestro taller para asistencia\n• Si necesitas grúa, te recomendamos servicio de confianza\n\n¿Quieres que te llamemos ahora?",
+
+    "seguro,aseguradora,parte,accidente,siniestro,perito,reparación con seguro,franquicia": "Trabajamos con todas las aseguradoras 🏢\n\n• Gestionamos el parte directamente con tu aseguradora\n• Vehículo de sustitución disponible (según cobertura)\n• Presupuesto para el perito incluido\n• Reparación garantizada con materiales de calidad\n\n¿Cuál es tu aseguradora y qué cobertura tienes (terceros / todo riesgo)?",
+
+    "precio,precios,coste,cuánto,tarifa,cuánto cuesta,presupuesto,cuánto me va a costar": "El presupuesto depende del vehículo y el trabajo. ¡Tráelo o cuéntanos y te damos precio sin compromiso! 🔧\n\n¿Sobre qué servicio o reparación necesitas información?",
+
+    "horario,horarios,cuándo,cuando abren,cuando cierran,hora,sábado,domingo": "Nuestros horarios son 🕐\n\n• Lunes a viernes: 8:00 - 19:00h\n• Sábados: 9:00 - 14:00h\n• Domingos: cerrado\n\n¿Quieres que te llamemos para reservar tu cita?",
+
+    "dónde,dirección,ubicación,taller,cómo llegar,parking": "¡Te mandamos la ubicación exacta al confirmar tu cita! 📍 Tenemos aparcamiento propio en el taller. ¿Quieres reservar?",
+
+    "hola,buenos días,buenas tardes,buenas noches,buenas,hey": "¡Hola! 😊 Bienvenido/a. Cuéntame qué le pasa a tu coche y te ayudo a solucionarlo. ¿Qué necesitas?",
+
+    "gracias,muchas gracias,perfecto,genial,ok,de acuerdo": "¡A tu disposición! 🔧 Si necesitas cualquier otra cosa, ya sabes dónde estamos. ¡Hasta pronto!",
+
+    "_ask_name": "¿Cómo te llamas para gestionar la cita? 😊",
+    "_ask_phone": "Perfecto {nombre}. ¿Un teléfono de contacto para confirmarte la cita?",
+    "_ask_vehicle": "Para preparar mejor tu presupuesto, ¿me indicas la matrícula y modelo de tu vehículo?",
+    "_ask_availability": "Genial {nombre}. ¿Qué día te viene mejor para traer el coche? (mañanas / tardes)",
+    "_summary": "¡Todo listo {nombre}! 🔧 Hemos anotado la cita para tu {vehiculo} el {disponibilidad}. Te llamamos al {telefono} para confirmar hora exacta.",
+    "_goodbye": "¡Hasta pronto {nombre}! Te esperamos en el taller. 🔧🚗"
+  },
+
+  "whatsapp": {
+    "messageTemplate": "🔧 *NUEVA CITA TALLER*\n\n👤 *Cliente:* {nombre}\n📞 *Tel:* +34{telefono}\n🚗 *Vehículo:* {vehiculo}\n🔧 *Servicio:* {servicio}\n📅 *Disponibilidad:* {disponibilidad}\n\n_Vía chatbot WhiteMoon_"
+  }
+}

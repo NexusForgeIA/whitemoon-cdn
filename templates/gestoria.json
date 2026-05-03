@@ -1,0 +1,71 @@
+{
+  "id": "gestoria",
+  "version": "1.0",
+  "name": "Gestoría y Asesoría",
+  "sector": "gestoria",
+  "icon": "📋",
+  "color": "#7c3aed",
+
+  "botName": "Asistente de Gestoría",
+  "calendar": false,
+  "greeting": "¡Hola! 📋 Bienvenido/a a nuestra gestoría. ¿En qué podemos ayudarle hoy?",
+
+  "serviceButtons": [
+    "🧾 Declaración Renta",
+    "🏢 Autónomos/Empresas",
+    "🚗 Trámites Vehículos",
+    "🏠 Trámites Inmuebles",
+    "📑 Herencias/Sucesiones",
+    "📞 Hablar con gestor"
+  ],
+
+  "specialFeatures": {
+    "triage": false,
+    "calendar": false,
+    "vehicleCapture": false,
+    "priceQuote": false
+  },
+
+  "responses": {
+    "renta,declaración renta,IRPF,hacer la renta,presentar renta,borrador,campaña renta,devolución,a pagar,a devolver,tributación conjunta,tributación individual": "La declaración de la Renta (IRPF) es uno de nuestros servicios principales 🧾\n\nLe ayudamos con:\n• Revisión y confirmación del borrador de la Agencia Tributaria\n• Declaración completa (rendimientos del trabajo, capital, actividades económicas)\n• Optimización fiscal: desgravaciones, deducciones autonómicas y estatales\n• Renta conjunta vs. individual — calculamos qué le conviene más\n• Rentas con inmuebles, fondos de inversión, acciones o actividades económicas\n\nLa campaña de la Renta se desarrolla entre abril y junio. Le recomendamos no esperar al último momento. ¿Quiere que le contactemos para gestionar su declaración?",
+
+    "autónomo,autónomos,alta autónomo,baja autónomo,cuota autónomo,tarifa plana,IVA,modelo 303,modelo 130,IRPF trimestral,pagos fraccionados,módulos,estimación directa": "Gestionamos todos los trámites de autónomos con total garantía 🏢\n\n• Alta y baja en el RETA (Régimen Especial de Trabajadores Autónomos)\n• Presentación trimestral de IVA (Mod. 303) e IRPF (Mod. 130/131)\n• Gestión en régimen de módulos o estimación directa\n• Tramitación de la tarifa plana para nuevos autónomos\n• Facturación, libros contables y obligaciones formales\n• Optimización de gastos deducibles\n\nLos plazos trimestrales son en enero, abril, julio y octubre. Actuar con antelación evita sanciones. ¿Le llamamos para explicarle sus opciones?",
+
+    "empresa,sociedad,SL,SA,constituir empresa,constitución sociedad,impuesto sociedades,modelo 200,contabilidad,balance,cuentas anuales,libro diario,registro mercantil,administrador": "Asesoramos a empresas de todos los tamaños en sus obligaciones fiscales y mercantiles 🏢\n\n• Constitución de sociedades (SL, SA) y trámites de inicio de actividad\n• Contabilidad mensual o trimestral\n• Impuesto de Sociedades (Mod. 200) — presentación en julio\n• Cuentas anuales y depósito en el Registro Mercantil\n• Pagos fraccionados del Impuesto de Sociedades (Mod. 202)\n• Asesoramiento en fusiones, escisiones y liquidaciones\n\n¿Quiere que un gestor le llame para valorar sus necesidades sin compromiso?",
+
+    "vehículo,coche,moto,transferencia,cambio nombre,compraventa coche,ITP vehículo,impuesto vehículo,matriculación,baja vehículo,importar coche,permisos,DGT": "Tramitamos todos los trámites de vehículos ante la DGT y Hacienda 🚗\n\n• Transferencia (cambio de titularidad) de vehículos\n• Liquidación del ITP (Impuesto de Transmisiones Patrimoniales)\n• Matriculación de vehículos nuevos e importados\n• Baja definitiva y temporal de vehículos\n• Importación de vehículos de la UE y extracomunitarios\n• Tarjetas de transporte y permisos especiales\n\nLa liquidación del ITP debe realizarse en el plazo de 30 días hábiles desde la compraventa. No lo deje para el último momento. ¿Le llamamos para gestionarlo?",
+
+    "inmueble,piso,casa,vivienda,ITP inmueble,compraventa inmueble,plusvalía,IIVTNU,IBI,escritura,notaría,hipoteca,arrendamiento,alquiler,declarar alquiler": "Tramitamos todos los impuestos relacionados con inmuebles 🏠\n\n• ITP en compraventa de viviendas de segunda mano\n• IVA y AJD en obra nueva\n• Plusvalía municipal (IIVTNU) al vender o heredar\n• Declaración de rendimientos de alquiler en la Renta\n• Gestión de escrituras ante notaría\n• Tramitación de herencias con inmuebles\n• Beneficios fiscales en vivienda habitual\n\nLos plazos en transmisiones de inmuebles son estrictos. ¿Le llamamos para explicarle los pasos?",
+
+    "herencia,sucesión,impuesto sucesiones,donación,impuesto donaciones,fallecimiento,finado,bienes heredados,partición herencia,testamento,heredero": "Le acompañamos en todos los trámites sucesorios con profesionalidad y discreción 📑\n\n• Liquidación del Impuesto de Sucesiones y Donaciones\n• Aceptación y partición de herencias\n• Tramitación del certificado de últimas voluntades\n• Gestión de bienes inmuebles, cuentas bancarias y vehículos heredados\n• Declaración de la plusvalía municipal en herencias\n• Donaciones en vida con optimización fiscal\n\nEl plazo para liquidar el Impuesto de Sucesiones es de 6 meses desde el fallecimiento (prorrogable). No lo deje para el último momento. ¿Le llamamos para orientarle?",
+
+    "extranjería,NIE,NIF,residencia,empadronamiento,permiso trabajo,permiso residencia,visado,ciudadanía,nacionalidad,reagrupación familiar": "Gestionamos trámites de extranjería con experiencia contrastada 🌍\n\n• Obtención y renovación de NIE\n• Permisos de residencia y trabajo (inicial y renovaciones)\n• Reagrupación familiar\n• Autorización de residencia por circunstancias excepcionales\n• Tramitación de la nacionalidad española\n• Certificado de registro de ciudadano de la UE\n• Empadronamiento y documentación complementaria\n\n¿Le llamamos para informarle sobre los requisitos de su caso concreto?",
+
+    "laboral,nóminas,contrato,alta seguridad social,baja seguridad social,desempleo,prestación,finiquito laboral,cotizaciones,seguridad social": "Gestionamos la administración laboral de autónomos y empresas 📋\n\n• Contratos de trabajo (elaboración y registro)\n• Altas y bajas en la Seguridad Social\n• Elaboración de nóminas mensuales\n• Seguros Sociales (RLC/RNT)\n• Gestión de bajas médicas (IT)\n• Liquidaciones y finiquitos\n• Tramitación de ERTE y ayudas laborales\n\n¿Le llamamos para explicarle cómo podemos gestionar su parte laboral?",
+
+    "certificado,certificados,certificado digital,clave pin,DNI electrónico,certificado AEAT,vida laboral,informe laboral,certificado empadronamiento,registro civil": "Le ayudamos a obtener toda la documentación oficial que necesite 📄\n\n• Certificado digital (FNMT) para personas físicas y empresas\n• Obtención de la Cl@ve PIN\n• Certificados de la AEAT (estar al corriente de pagos)\n• Informe y vida laboral de la Seguridad Social\n• Certificados del Registro Civil (nacimiento, matrimonio, defunción)\n• Certificados de empadronamiento\n\n¿Qué certificado necesita y para qué trámite?",
+
+    "plazo,plazos,fecha límite,cuando hay que presentar,trimestral,vencimiento,sanción,multa,recargo": "Los plazos fiscales son improrrogables y su incumplimiento conlleva recargos y sanciones ⚠️\n\nLos principales plazos a recordar:\n• *Renta (IRPF):* campaña entre abril y junio\n• *IVA e IRPF trimestral:* enero, abril, julio y octubre\n• *Impuesto de Sociedades:* julio (6 meses tras cierre del ejercicio)\n• *ITP / sucesiones:* 30 días hábiles / 6 meses respectivamente\n\nLe recomendamos no esperar al vencimiento. Consúltenos con antelación y evitamos sanciones. ¿Le llamamos para revisar su situación?",
+
+    "precio,precios,honorarios,coste,cuánto,tarifa,cuánto cuesta,presupuesto": "Nuestros honorarios dependen del trámite concreto y de la complejidad de cada caso. Consúltenos sin compromiso y le informamos con detalle 📋\n\n¿Sobre qué gestión necesita información?",
+
+    "online,telemático,por internet,sin venir,a distancia,digital": "Ofrecemos servicio completamente online 💻\n\n• Envío de documentación por email o plataforma segura\n• Firma electrónica de documentos\n• Comunicación por teléfono, email o videollamada\n• Sin necesidad de desplazamiento\n• Mismo servicio y garantías que la atención presencial\n\n¿Le llamamos para explicarle cómo funciona nuestro servicio digital?",
+
+    "horario,horarios,cuándo,cuando abren,cuando cierran,hora": "Nuestros horarios de atención son 🕐\n\n• Lunes a viernes: 9:00 - 19:00h\n• En campaña de Renta ampliamos horario\n• Atención telefónica prioritaria para clientes\n\n¿Quiere que le llamemos para atenderle?",
+
+    "dónde,dirección,ubicación,oficina,cómo llegar": "Le facilitaremos la dirección de nuestra gestoría al contactar con usted 📍 También ofrecemos gestión completamente online para mayor comodidad. ¿Prefiere visita presencial u online?",
+
+    "hola,buenos días,buenas tardes,buenas noches,buenas": "¡Buenas! Bienvenido/a a nuestra gestoría. Estamos aquí para ayudarle con cualquier trámite fiscal, laboral o administrativo. ¿En qué podemos orientarle?",
+
+    "gracias,muchas gracias,de nada,ok,perfecto,entendido": "De nada, es un placer ayudarle. Si tiene cualquier otra consulta, estamos a su disposición. ¡Hasta pronto! 📋",
+
+    "_ask_name": "Para poder atenderle correctamente, ¿me indica su nombre?",
+    "_ask_phone": "Gracias {nombre}. ¿Un teléfono de contacto para que nuestro equipo le llame?",
+    "_summary": "Perfecto {nombre}. He registrado su consulta y un gestor le contactará en breve al {telefono}. Le atenderemos con total confidencialidad.",
+    "_goodbye": "Gracias por contactar con nuestra gestoría. Nuestro equipo le atenderá lo antes posible. ¡Hasta pronto! 📋"
+  },
+
+  "whatsapp": {
+    "messageTemplate": "📋 *NUEVA CONSULTA GESTORÍA*\n\n👤 *Cliente:* {nombre}\n📞 *Tel:* +34{telefono}\n📋 *Trámite:* {servicio}\n💬 *Consulta:* {consulta}\n\n_Vía chatbot WhiteMoon_"
+  }
+}

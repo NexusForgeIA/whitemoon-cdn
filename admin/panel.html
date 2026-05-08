@@ -175,12 +175,12 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
         <input type="text" id="searchQ" placeholder="🔍 Buscar por nombre, token, dominio, email..." oninput="render()">
         <select id="filterPack" onchange="render()">
           <option value="">Todos los packs</option>
-          <option value="spark">Spark 149€/mes</option>
+          <option value="spark">Spark 299€+149€/mes</option>
           <option value="core">Core 1.800€+199€/mes</option>
           <option value="scale">Scale 3.500€+349€/mes</option>
           <option value="elite">Elite 6.500€+599€/mes</option>
+          <option value="scout">Scout IA 299€+199€/mes</option>
           <option value="auditoria">Auditoría IA 899€</option>
-          <option value="itp">Calculadora ITP 99€/mes</option>
         </select>
         <select id="filterStatus" onchange="render()">
           <option value="">Todos los estados</option>
@@ -210,7 +210,7 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
       </div>
       <div class="g2 mb">
         <div><label>Dominio</label><input type="text" id="fDom" placeholder="clinicasonrie.es" maxlength="100"></div>
-        <div><label>Pack</label><select id="fPk" onchange="suggestPayments()"><option value="spark" selected>Spark 149€/mes (chatbot keyword)</option><option value="core">Core 1.800€ + 199€/mes (web + chatbot + SEO)</option><option value="scale">Scale 3.500€ + 349€/mes ⭐</option><option value="elite">Elite 6.500€ + 599€/mes</option><option value="auditoria">Auditoría IA 899€ (pago único)</option><option value="itp">Calculadora ITP white label 99€/mes</option></select></div>
+        <div><label>Pack</label><select id="fPk" onchange="onPackChange()"><option value="spark" selected>Spark 299€ + 149€/mes (chatbot keyword)</option><option value="core">Core 1.800€ + 199€/mes (web + chatbot + SEO)</option><option value="scale">Scale 3.500€ + 349€/mes ⭐ (RAG + automatizaciones)</option><option value="elite">Elite 6.500€ + 599€/mes (RAG premium + CRM)</option><option value="scout">Scout IA 299€ + 199€/mes (herramienta prospección)</option><option value="auditoria">Auditoría IA 899€ (pago único)</option></select></div>
       </div>
       <div class="g2 mb">
         <div><label>Email contacto</label><input type="email" id="fEm" placeholder="info@cliente.es" maxlength="100"></div>
@@ -227,6 +227,11 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
       <div id="paysList"></div>
       <button class="btn btn-sm btn-y" onclick="addPay()" style="margin:8px 0 16px">+ Añadir pago pendiente</button>
 
+      <div id="nonChatbotMsg" style="display:none;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.25);border-radius:8px;padding:14px 16px;margin:10px 0 16px;color:#a78bfa;font-size:.85rem;line-height:1.5">
+        ℹ Este pack no incluye chatbot embebido.<br>
+        El cliente se registra para facturación y seguimiento.
+      </div>
+      <div id="chatbotSection">
       <div class="stitle">Configuración chatbot</div>
       <div class="g3 mb">
         <div><label>Nombre asistente</label><input type="text" id="fBn" placeholder="Lucía" value="Asistente" maxlength="30"></div>
@@ -265,6 +270,7 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
       <div class="mb"><label>Pedir teléfono (usa {nombre})</label><textarea id="fAP" rows="2" placeholder="Perfecto {nombre}. ¿Un teléfono móvil?"></textarea></div>
       <div class="mb"><label>Resumen cita</label><textarea id="fSu" rows="4" placeholder="Perfecto {nombre}. He tomado nota..."></textarea></div>
       <div class="mb"><label>Despedida</label><textarea id="fBy" rows="2" placeholder="Nuestro equipo te contactará por WhatsApp. ¡Saludos!"></textarea></div>
+      </div><!-- /chatbotSection -->
 
       <!-- MÓDULO ITP -->
       <div class="stitle">🧮 Calculadora ITP (white label)</div>
@@ -339,13 +345,14 @@ var CDN_BASE='https://nexusforgeia.github.io/whitemoon-cdn';
 // Ingreso medio mensualizado por pack (para stat 'Ingreso/mes').
 // Para packs RAG, mantenimiento mensual recurrente (setup se cobra aparte vía pendingPayments).
 var PACK_PRICES={
-  spark:149,                  // 149€/mes
+  spark:149,                  // 149€/mes (setup 299€ aparte)
   core:199,                   // 199€/mes (setup 1.800€ aparte)
   scale:349,                  // 349€/mes (setup 3.500€ aparte)
   elite:599,                  // 599€/mes (setup 6.500€ aparte)
-  auditoria:0,                // 899€ pago único, sin recurrente
-  itp:99+(199/12)             // 99€/mes + 199€/año
+  scout:199,                  // 199€/mes (setup 299€ aparte)
+  auditoria:0                 // 899€ pago único, sin recurrente
 };
+var CHATBOT_PACKS={spark:1};
 var ghToken='';
 var lics={};
 var sha='';
@@ -535,7 +542,7 @@ function dupl(k){
 function showAdd(){
   $('fMode').value='add';$('fOrig').value='';$('frmTitle').innerHTML='➕ Nuevo cliente';
   $('fTk').value=genTkValue();$('fTk').readOnly=false;
-  $('fBiz').value='';$('fDom').value='';$('fPk').value='advance';$('fEm').value='';$('fPh').value='';$('fNo').value='';
+  $('fBiz').value='';$('fDom').value='';$('fPk').value='spark';$('fEm').value='';$('fPh').value='';$('fNo').value='';
   $('fBn').value='Asistente';$('fCo').value='#7c3aed';$('fCal').value='true';$('fGr').value='';$('fBt').value='';
   $('fAN').value='';$('fAP').value='';$('fSu').value='';$('fBy').value='';
   $('rList').innerHTML='';$('paysList').innerHTML='';
@@ -545,6 +552,7 @@ function showAdd(){
   var t=new Date().toISOString().split('T')[0];$('fCr').value=t;
   $('fEx').value=new Date(new Date().setFullYear(new Date().getFullYear()+1)).toISOString().split('T')[0];
   $('frm').style.display='block';$('frm').scrollIntoView({behavior:'smooth'});
+  _toggleChatbotSection();
   setTimeout(function(){$('fBiz').focus()},300);
 }
 
@@ -552,7 +560,7 @@ function edit(k){
   var l=lics[k];if(!l)return;
   $('fMode').value='edit';$('fOrig').value=k;$('frmTitle').innerHTML='✏️ '+escapeHtml(l.biz);
   $('fTk').value=k;$('fTk').readOnly=true;
-  $('fBiz').value=l.biz||'';$('fDom').value=l.domain||'';$('fPk').value=l.pack||'advance';
+  $('fBiz').value=l.biz||'';$('fDom').value=l.domain||'';$('fPk').value=l.pack||'spark';
   $('fEm').value=l.contact||'';$('fPh').value=l.phone||'';$('fCr').value=l.created||new Date().toISOString().split('T')[0];
   $('fEx').value=l.expires||'';$('fNo').value=l.notes||'';$('fBn').value=l.botName||'Asistente';
   $('fCo').value=l.color||'#7c3aed';$('fCal').value=l.calendar===false?'false':'true';
@@ -570,6 +578,7 @@ function edit(k){
   $('fItp').checked=!!l.itp;$('itpBody').className='itp-body'+(l.itp?' show':'');
   $('fItpNombre').value=itp.nombre||'';$('fItpColor').value=itp.color||'#1565C0';
   $('fItpTel').value=itp.tel||'';$('fItpLogo').value=itp.logo||'';$('fItpCta').value=itp.cta||'Solicitar gestión del ITP';
+  _toggleChatbotSection();
   $('frm').style.display='block';$('frm').scrollIntoView({behavior:'smooth'});
 }
 
@@ -588,42 +597,50 @@ function addPay(concept,amount,dueDate){
   $('paysList').appendChild(d);
 }
 
+function _toggleChatbotSection(){
+  var pack=$('fPk').value;
+  var isChatbot=!!CHATBOT_PACKS[pack];
+  $('chatbotSection').style.display=isChatbot?'':'none';
+  $('nonChatbotMsg').style.display=isChatbot?'none':'block';
+}
+
+// Defaults (setup + recurrente mensual) por pack
+var PACK_DEFAULTS={
+  spark:    {label:'Spark',       setup:299,  mrr:149},
+  core:     {label:'Core',        setup:1800, mrr:199},
+  scale:    {label:'Scale',       setup:3500, mrr:349},
+  elite:    {label:'Elite',       setup:6500, mrr:599},
+  scout:    {label:'Scout IA',    setup:299,  mrr:199},
+  auditoria:{label:'Auditoría IA',setup:899,  mrr:0}
+};
+
+function onPackChange(){
+  _toggleChatbotSection();
+  suggestPayments();
+}
+
 function suggestPayments(){
   var pack=$('fPk').value,mode=$('fMode').value;
   if(mode!=='add')return;
   if($('paysList').children.length>0)return;
   var base=new Date($('fCr').value||new Date().toISOString().split('T')[0]);
+  var def=PACK_DEFAULTS[pack];
+  if(!def)return;
 
-  if(pack==='spark'){
-    var d=new Date(base);d.setFullYear(d.getFullYear()+1);
-    addPay('Renovación anual Pack Spark',149*12,d.toISOString().split('T')[0]);
-    toast('Renovación anual sugerida para Spark','info');
-  }
-  else if(pack==='core'){
-    var d4=new Date(base);d4.setFullYear(d4.getFullYear()+1);
-    addPay('Renovación anual Pack Core',199*12,d4.toISOString().split('T')[0]);
-    toast('Renovación anual sugerida para Core','info');
-  }
-  else if(pack==='scale'){
-    var d5=new Date(base);d5.setFullYear(d5.getFullYear()+1);
-    addPay('Renovación anual Pack Scale',349*12,d5.toISOString().split('T')[0]);
-    toast('Renovación anual sugerida para Scale','info');
-  }
-  else if(pack==='elite'){
-    var d6=new Date(base);d6.setFullYear(d6.getFullYear()+1);
-    addPay('Renovación anual Pack Elite',599*12,d6.toISOString().split('T')[0]);
-    toast('Renovación anual sugerida para Elite','info');
-  }
-  else if(pack==='auditoria'){
-    addPay('Auditoría IA (pago único)',899,base.toISOString().split('T')[0]);
+  if(pack==='auditoria'){
+    addPay('Auditoría IA (pago único)',def.setup,base.toISOString().split('T')[0]);
     toast('Pago único sugerido para Auditoría IA','info');
+    return;
   }
-  else if(pack==='itp'){
-    addPay('Setup inicial Calculadora ITP',299,base.toISOString().split('T')[0]);
-    var d7=new Date(base);d7.setFullYear(d7.getFullYear()+1);
-    addPay('Renovación mantenimiento anual ITP',199,d7.toISOString().split('T')[0]);
-    toast('Pagos sugeridos para Calculadora ITP','info');
+
+  if(def.setup>0){
+    addPay('Setup inicial Pack '+def.label,def.setup,base.toISOString().split('T')[0]);
   }
+  if(def.mrr>0){
+    var d=new Date(base);d.setFullYear(d.getFullYear()+1);
+    addPay('Renovación anual Pack '+def.label,def.mrr*12,d.toISOString().split('T')[0]);
+  }
+  toast('Pagos sugeridos para '+def.label,'info');
 }
 
 function saveF(){
@@ -658,6 +675,17 @@ function saveF(){
 
 function code(k){
   var l=lics[k];if(!l)return;
+  if(!CHATBOT_PACKS[l.pack]){
+    var def=PACK_DEFAULTS[l.pack];
+    var packLabel=def?def.label:(l.pack||'Pack');
+    $('codeCTitle').innerHTML='ℹ Cliente registrado · '+escapeHtml(l.biz);
+    $('codeCDesc').innerHTML='El pack <b>'+escapeHtml(packLabel)+'</b> no incluye chatbot embebido. El cliente queda registrado para facturación y seguimiento.';
+    $('codeO').textContent='— Sin código embebido para este pack —';
+    $('codeC').style.display='block';
+    var ic2=$('installContent');if(ic2){ic2.style.display='none';ic2.innerHTML=''}
+    $('codeC').scrollIntoView({behavior:'smooth'});
+    return;
+  }
   var sv=l.serviceButtons&&l.serviceButtons.length?'\n  data-services="'+l.serviceButtons.join(',')+'"':'';
   var c='<!-- WhiteMoon Chatbot IA · '+l.biz+' -->\n<script src="'+CDN_BASE+'/chat.js"\n  data-token="'+k+'"'+(l.color&&l.color!=='#7c3aed'?'\n  data-color="'+l.color+'"':'')+sv+(l.botName&&l.botName!=='Asistente'?'\n  data-bot-name="'+l.botName+'"':'')+'><\/script>';
   $('codeCTitle').innerHTML='📋 Código para el cliente';

@@ -305,6 +305,7 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
           <div><label>CCAA por defecto</label><select id="fGiaCcaa"><option value="">— Sin preselección —</option><option value="Andalucía">Andalucía</option><option value="Aragón">Aragón</option><option value="Asturias">Asturias</option><option value="Baleares">Baleares</option><option value="Canarias">Canarias</option><option value="Cantabria">Cantabria</option><option value="Castilla-La Mancha">Castilla-La Mancha</option><option value="Castilla y León">Castilla y León</option><option value="Cataluña">Cataluña</option><option value="C. Valenciana">C. Valenciana</option><option value="Extremadura">Extremadura</option><option value="Galicia">Galicia</option><option value="La Rioja">La Rioja</option><option value="Madrid">Madrid</option><option value="Murcia">Murcia</option><option value="Navarra">Navarra</option><option value="País Vasco">País Vasco</option><option value="Ceuta">Ceuta</option><option value="Melilla">Melilla</option></select></div>
         </div>
         <div class="flex" style="align-items:center;gap:10px"><input type="checkbox" id="fGiaTasas" checked><label for="fGiaTasas" style="text-transform:none;letter-spacing:0;font-size:.82rem;color:#ccc;margin:0">Incluir tasas DGT (55,70 €) en el total estimado</label></div>
+        <div class="mb" style="margin-top:12px"><label>Dirección</label><input type="text" id="fGiaDireccion" placeholder="C/ ejemplo 1, Madrid (opcional)" value=""></div>
       </div>
 
       <div class="flex" style="margin-top:16px;justify-content:space-between">
@@ -457,6 +458,7 @@ function codeGestoriaIA(k){
   var tasas=(itp.tasas!==false);
   var ccaa=itp.ccaa||'';
   var cta=itp.cta||'Solicitar gestión del ITP';
+  var direccion=itp.direccion||'';
 
   function attr(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
@@ -470,6 +472,7 @@ function codeGestoriaIA(k){
   h+='  data-honorarios="'+attr(honorarios)+'"\n';
   h+='  data-tasas="'+(tasas?'true':'false')+'"\n';
   if(ccaa) h+='  data-ccaa="'+attr(ccaa)+'"\n';
+  h+='  data-direccion="'+attr(direccion)+'"\n';
   h+='  data-cta="'+attr(cta)+'"><\/script>\n';
   h+='<!-- Fin Gestoría IA · '+nombre+' -->';
 
@@ -610,7 +613,7 @@ function showAdd(){
   $('fTpl').value='';$('tplWarn').style.display='none';$('tplWarn').innerHTML='';
   $('fItp').checked=false;$('itpBody').className='itp-body';
   $('fItpNombre').value='';$('fItpColor').value='#1565C0';$('fItpTel').value='';$('fItpLogo').value='';$('fItpCta').value='Solicitar gestión del ITP';
-  $('fGiaHonorarios').value='0';$('fGiaTasas').checked=true;$('fGiaCcaa').value='';
+  $('fGiaHonorarios').value='0';$('fGiaTasas').checked=true;$('fGiaCcaa').value='';$('fGiaDireccion').value='';
   var t=new Date().toISOString().split('T')[0];$('fCr').value=t;
   $('fEx').value=new Date(new Date().setFullYear(new Date().getFullYear()+1)).toISOString().split('T')[0];
   $('frm').style.display='block';$('frm').scrollIntoView({behavior:'smooth'});
@@ -643,6 +646,7 @@ function edit(k){
   $('fGiaHonorarios').value=(itp.honorarios!=null?itp.honorarios:0);
   $('fGiaTasas').checked=(itp.tasas!==false);
   $('fGiaCcaa').value=itp.ccaa||'';
+  $('fGiaDireccion').value=itp.direccion||'';
   _toggleChatbotSection();
   $('frm').style.display='block';$('frm').scrollIntoView({behavior:'smooth'});
 }
@@ -757,6 +761,7 @@ function saveF(){
       itpData.honorarios=parseFloat($('fGiaHonorarios').value)||0;
       itpData.tasas=$('fGiaTasas').checked;
       itpData.ccaa=$('fGiaCcaa').value;
+      itpData.direccion=$('fGiaDireccion').value.trim()||'';
     }
   }
   lics[tk]={biz:biz,domain:$('fDom').value.trim(),pack:$('fPk').value,active:mode==='edit'?(lics[$('fOrig').value]?lics[$('fOrig').value].active:true):true,created:$('fCr').value,expires:$('fEx').value,contact:$('fEm').value.trim(),phone:$('fPh').value.trim(),notes:$('fNo').value.trim(),botName:$('fBn').value.trim()||'Asistente',color:$('fCo').value.trim()||'#7c3aed',calendar:$('fCal').value!=='false',greeting:$('fGr').value.trim(),serviceButtons:bt?bt.split(',').map(function(s){return s.trim()}).filter(function(s){return s}):[],responses:Object.keys(resp).length?resp:undefined,pendingPayments:pp.length?pp:undefined,template:$('fTpl').value||undefined,itp:itpData||undefined,updated:new Date().toISOString()};

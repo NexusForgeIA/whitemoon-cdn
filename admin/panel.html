@@ -297,6 +297,16 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
         </div>
       </div>
 
+      <div class="card" id="giaSection" style="display:none;background:#0f1726;border-color:#1e293b;margin-top:14px">
+        <div class="stitle">⚙️ Configuración Gestoría IA</div>
+        <div class="itp-info" style="margin-bottom:12px">Honorarios y tasas que se sumarán al cálculo del ITP en el widget conversacional.</div>
+        <div class="g2 mb">
+          <div><label>Honorarios gestoría (€)</label><input type="number" id="fGiaHonorarios" placeholder="150" min="0" step="0.01" value="0"></div>
+          <div><label>CCAA por defecto</label><select id="fGiaCcaa"><option value="">— Sin preselección —</option><option value="Andalucía">Andalucía</option><option value="Aragón">Aragón</option><option value="Asturias">Asturias</option><option value="Baleares">Baleares</option><option value="Canarias">Canarias</option><option value="Cantabria">Cantabria</option><option value="Castilla-La Mancha">Castilla-La Mancha</option><option value="Castilla y León">Castilla y León</option><option value="Cataluña">Cataluña</option><option value="C. Valenciana">C. Valenciana</option><option value="Extremadura">Extremadura</option><option value="Galicia">Galicia</option><option value="La Rioja">La Rioja</option><option value="Madrid">Madrid</option><option value="Murcia">Murcia</option><option value="Navarra">Navarra</option><option value="País Vasco">País Vasco</option><option value="Ceuta">Ceuta</option><option value="Melilla">Melilla</option></select></div>
+        </div>
+        <div class="flex" style="align-items:center;gap:10px"><input type="checkbox" id="fGiaTasas" checked><label for="fGiaTasas" style="text-transform:none;letter-spacing:0;font-size:.82rem;color:#ccc;margin:0">Incluir tasas DGT (55,70 €) en el total estimado</label></div>
+      </div>
+
       <div class="flex" style="margin-top:16px;justify-content:space-between">
         <div class="flex">
           <button class="btn btn-p" onclick="saveF()" id="saveBtn">Guardar</button>
@@ -443,8 +453,9 @@ function codeGestoriaIA(k){
   var nombre=itp.nombre||l.biz||'Gestoría';
   var color=itp.color||l.color||'#1565C0';
   var tel=(itp.tel||l.phone||'').replace(/[^0-9]/g,'');
-  var honorarios=itp.honorarios||0;
-  var tasas=itp.tasas||0;
+  var honorarios=parseFloat(itp.honorarios)||0;
+  var tasas=(itp.tasas!==false);
+  var ccaa=itp.ccaa||'';
   var cta=itp.cta||'Solicitar gestión del ITP';
 
   function attr(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -457,7 +468,8 @@ function codeGestoriaIA(k){
   h+='  data-color="'+attr(color)+'"\n';
   h+='  data-tel="'+attr(tel)+'"\n';
   h+='  data-honorarios="'+attr(honorarios)+'"\n';
-  h+='  data-tasas="'+attr(tasas)+'"\n';
+  h+='  data-tasas="'+(tasas?'true':'false')+'"\n';
+  if(ccaa) h+='  data-ccaa="'+attr(ccaa)+'"\n';
   h+='  data-cta="'+attr(cta)+'"><\/script>\n';
   h+='<!-- Fin Gestoría IA · '+nombre+' -->';
 
@@ -598,6 +610,7 @@ function showAdd(){
   $('fTpl').value='';$('tplWarn').style.display='none';$('tplWarn').innerHTML='';
   $('fItp').checked=false;$('itpBody').className='itp-body';
   $('fItpNombre').value='';$('fItpColor').value='#1565C0';$('fItpTel').value='';$('fItpLogo').value='';$('fItpCta').value='Solicitar gestión del ITP';
+  $('fGiaHonorarios').value='0';$('fGiaTasas').checked=true;$('fGiaCcaa').value='';
   var t=new Date().toISOString().split('T')[0];$('fCr').value=t;
   $('fEx').value=new Date(new Date().setFullYear(new Date().getFullYear()+1)).toISOString().split('T')[0];
   $('frm').style.display='block';$('frm').scrollIntoView({behavior:'smooth'});
@@ -627,6 +640,9 @@ function edit(k){
   $('fItp').checked=!!l.itp;$('itpBody').className='itp-body'+(l.itp?' show':'');
   $('fItpNombre').value=itp.nombre||'';$('fItpColor').value=itp.color||'#1565C0';
   $('fItpTel').value=itp.tel||'';$('fItpLogo').value=itp.logo||'';$('fItpCta').value=itp.cta||'Solicitar gestión del ITP';
+  $('fGiaHonorarios').value=(itp.honorarios!=null?itp.honorarios:0);
+  $('fGiaTasas').checked=(itp.tasas!==false);
+  $('fGiaCcaa').value=itp.ccaa||'';
   _toggleChatbotSection();
   $('frm').style.display='block';$('frm').scrollIntoView({behavior:'smooth'});
 }
@@ -653,6 +669,7 @@ function _toggleChatbotSection(){
   var isGestoria=!!GESTORIA_IA_PACKS[pack];
   $('chatbotSection').style.display=isChatbot?'':'none';
   $('nonChatbotMsg').style.display=(isChatbot||isItp||isGestoria)?'none':'block';
+  $('giaSection').style.display=isGestoria?'':'none';
   // Para pack ITP o Gestoría IA: auto-activar la sección Calculadora ITP en alta
   if((isItp||isGestoria)&&$('fMode').value==='add'&&!$('fItp').checked){
     $('fItp').checked=true;
@@ -736,6 +753,11 @@ function saveF(){
       logo:$('fItpLogo').value.trim(),
       cta:$('fItpCta').value.trim()||'Solicitar gestión del ITP'
     };
+    if(GESTORIA_IA_PACKS[$('fPk').value]){
+      itpData.honorarios=parseFloat($('fGiaHonorarios').value)||0;
+      itpData.tasas=$('fGiaTasas').checked;
+      itpData.ccaa=$('fGiaCcaa').value;
+    }
   }
   lics[tk]={biz:biz,domain:$('fDom').value.trim(),pack:$('fPk').value,active:mode==='edit'?(lics[$('fOrig').value]?lics[$('fOrig').value].active:true):true,created:$('fCr').value,expires:$('fEx').value,contact:$('fEm').value.trim(),phone:$('fPh').value.trim(),notes:$('fNo').value.trim(),botName:$('fBn').value.trim()||'Asistente',color:$('fCo').value.trim()||'#7c3aed',calendar:$('fCal').value!=='false',greeting:$('fGr').value.trim(),serviceButtons:bt?bt.split(',').map(function(s){return s.trim()}).filter(function(s){return s}):[],responses:Object.keys(resp).length?resp:undefined,pendingPayments:pp.length?pp:undefined,template:$('fTpl').value||undefined,itp:itpData||undefined,updated:new Date().toISOString()};
   save((mode==='add'?'Alta':'Editar')+': '+biz).then(function(){toast(biz+(mode==='add'?' dado de alta ✅':' actualizado ✅'));hideF();if(mode==='add')code(tk)});

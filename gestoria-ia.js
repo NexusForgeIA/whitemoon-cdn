@@ -30,14 +30,20 @@
   // ─── 2. INIT WIDGET ─────────────────────────────────────────────────────────
   function initWidget(el, lic){
     var itp = lic.itp || {};
+    var TASAS_DGT = 55.70;
+    var attrTasas = el.getAttribute('data-tasas');
+    var tasasIncluidas = attrTasas != null
+      ? (attrTasas === 'true' || attrTasas === '1')
+      : (itp.tasas !== false);
     var CFG = {
-      nombre:     el.getAttribute('data-nombre')     || itp.nombre || lic.biz || 'Gestoría',
-      color:      el.getAttribute('data-color')      || itp.color  || lic.color || '#1565c0',
-      tel:        (el.getAttribute('data-tel')       || itp.tel    || lic.phone || '').replace(/[^0-9]/g, ''),
-      logo:       el.getAttribute('data-logo')       || itp.logo   || '',
-      cta:        el.getAttribute('data-cta')        || itp.cta    || 'Solicitar gestión del ITP',
-      honorarios: parseFloat(el.getAttribute('data-honorarios')) || 0,
-      tasas:      parseFloat(el.getAttribute('data-tasas'))      || 0
+      nombre:        el.getAttribute('data-nombre') || itp.nombre || lic.biz || 'Gestoría',
+      color:         el.getAttribute('data-color')  || itp.color  || lic.color || '#1565c0',
+      tel:           (el.getAttribute('data-tel')   || itp.tel    || lic.phone || '').replace(/[^0-9]/g, ''),
+      logo:          el.getAttribute('data-logo')   || itp.logo   || '',
+      cta:           el.getAttribute('data-cta')    || itp.cta    || 'Solicitar gestión del ITP',
+      ccaaDefault:   el.getAttribute('data-ccaa')   || itp.ccaa   || '',
+      honorarios:    parseFloat(el.getAttribute('data-honorarios') != null ? el.getAttribute('data-honorarios') : itp.honorarios) || 0,
+      tasas:         tasasIncluidas ? TASAS_DGT : 0
     };
 
     var ITP_TABLE = {"Andalucía":8,"Aragón":8,"Asturias":8,"Baleares":8,"Canarias":5.5,"Cantabria":8,"Castilla-La Mancha":9,"Castilla y León":8,"Cataluña":5,"C. Valenciana":8,"Extremadura":8,"Galicia":8,"La Rioja":7,"Madrid":4,"Murcia":8,"Navarra":4,"País Vasco":4,"Ceuta":4,"Melilla":4};
@@ -100,6 +106,10 @@
     ];
 
     var data = {};
+    if(CFG.ccaaDefault && ITP_TABLE[CFG.ccaaDefault] != null){
+      data.ccaa = CFG.ccaaDefault;
+      STEPS.splice(5, 1);
+    }
     var step = 0;
 
     function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }

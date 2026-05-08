@@ -396,7 +396,6 @@ function toggleItp(){
 function codeItp(k){
   var l=lics[k];if(!l||!l.itp)return;
   var itp=l.itp;
-  var color=itp.color||'#1565C0';
   var nombre=itp.nombre||l.biz||'Gestoría';
   var tel=(itp.tel||l.phone||'').replace(/[^0-9]/g,'');
   var logo=itp.logo||'';
@@ -405,19 +404,23 @@ function codeItp(k){
 
   var h='<!-- Calculadora ITP · '+nombre+' -->\n';
   h+='<style>\n';
-  h+='.itp-wl{font-family:system-ui,sans-serif;text-align:center;padding:2rem 1rem;}\n';
-  h+='.itp-wl h2{font-size:1.4rem;margin-bottom:.5rem;color:#1a1a2e;}\n';
-  h+='.itp-wl p{color:#666;font-size:.9rem;margin-bottom:1.5rem;}\n';
-  h+='.itp-btn-calc{display:inline-block;background:'+color+';color:white;padding:.875rem 2rem;border-radius:4px;text-decoration:none;font-weight:600;font-size:.9rem;margin-bottom:.75rem;}\n';
-  h+='.itp-btn-calc:hover{opacity:.85;}\n';
-  h+='.itp-btn-wa{display:inline-flex;align-items:center;gap:8px;background:#25D366;color:white;padding:.75rem 1.75rem;border-radius:4px;text-decoration:none;font-weight:500;font-size:.875rem;}\n';
+  h+='.itp-wl{font-family:system-ui,sans-serif;padding:2rem 1rem;text-align:center}\n';
+  h+='.itp-wl h2{font-size:1.4rem;margin-bottom:.5rem;color:#1a1a2e}\n';
+  h+='.itp-wl p{color:#666;font-size:.9rem;margin-bottom:1.5rem}\n';
+  h+='.itp-frame{width:100%;height:700px;border:none;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,.1)}\n';
+  h+='.itp-wa{display:inline-flex;align-items:center;gap:8px;background:#25D366;color:white;padding:.75rem 1.75rem;border-radius:4px;text-decoration:none;font-weight:500;font-size:.875rem;margin-top:1.5rem}\n';
   h+='</style>\n';
   h+='<div class="itp-wl">\n';
-  if(logo)h+='  <img src="'+logo+'" alt="'+nombre+'" style="height:44px;display:block;margin:0 auto 1.25rem;">\n';
+  if(logo)h+='  <img src="'+logo+'" alt="'+nombre+'" style="height:44px;display:block;margin:0 auto 1.25rem">\n';
   h+='  <h2>Calculadora ITP Vehículos 2026</h2>\n';
   h+='  <p>Calcula el impuesto de tu vehículo de segunda mano. BOE 2026 actualizado.</p>\n';
-  h+='  <a href="https://nexusforgeia.github.io/WHITEMOON-CRM-SAAS-GESTORIAS-ITP/" target="_blank" class="itp-btn-calc">Calcular mi ITP gratis</a><br>\n';
-  if(tel)h+='  <a href="'+waLink+'" target="_blank" class="itp-btn-wa"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>'+cta+'</a>\n';
+  h+='  <iframe\n';
+  h+='    src="https://nexusforgeia.github.io/WHITEMOON-CRM-SAAS-GESTORIAS-ITP/"\n';
+  h+='    class="itp-frame"\n';
+  h+='    title="Calculadora ITP"\n';
+  h+='    loading="lazy">\n';
+  h+='  </iframe>\n';
+  if(tel)h+='  <a href="'+waLink+'" target="_blank" rel="noopener" class="itp-wa"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>'+cta+'</a>\n';
   h+='</div>\n';
   h+='<!-- Fin Calculadora ITP · '+nombre+' -->';
 

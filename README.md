@@ -62,13 +62,13 @@ Si no ves chatbot → normal, el token de prueba no existe aún en licenses.json
     "WM-DENTAL-001": {
       "biz": "Clínica Dental Sonríe",
       "domain": "clinicasonrie.es",
-      "pack": "advance",
+      "pack": "spark",
       "active": true,
       "created": "2026-04-15",
       "expires": "2027-04-15",
       "contact": "info@clinicasonrie.es",
       "phone": "912345678",
-      "notes": "Pack Advance 99€/mes"
+      "notes": "Pack Spark 149€/mes"
     }
   }
 }

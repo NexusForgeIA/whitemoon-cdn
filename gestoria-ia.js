@@ -1,5 +1,5 @@
 /**
- * WHITEMOON GESTORÍA IA — Chatbot ITP conversacional
+ * WHITEMOON GESTORÍA IA — Chatbot ITP conversacional (botón flotante)
  * <script src="https://nexusforgeia.github.io/whitemoon-cdn/gestoria-ia.js"
  *   data-token="WM-XXXX" data-nombre="..." data-color="#1565c0"
  *   data-tel="..." data-honorarios="..." data-tasas="..." data-cta="..."></script>
@@ -51,46 +51,78 @@
 
     var rgb = hexToRgb(CFG.color);
     var colorLight = 'rgba('+rgb.r+','+rgb.g+','+rgb.b+',.12)';
+    var colorMid   = 'rgba('+rgb.r+','+rgb.g+','+rgb.b+',.25)';
 
     // ─── CSS ──────────────────────────────────────────────────────────────────
     var sty = document.createElement('style');
     sty.textContent = [
-      '#wm-gia *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}',
-      '#wm-gia{max-width:480px;margin:24px auto;background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.12);overflow:hidden;border:1px solid #e5e7eb}',
-      '#wm-gia .gia-head{background:'+CFG.color+';color:#fff;padding:16px 18px;display:flex;align-items:center;gap:12px}',
-      '#wm-gia .gia-head img{height:36px;width:auto;background:#fff;padding:4px;border-radius:6px}',
-      '#wm-gia .gia-title{font-weight:600;font-size:.98rem;line-height:1.2}',
-      '#wm-gia .gia-sub{font-size:.74rem;opacity:.88;margin-top:2px}',
-      '#wm-gia .gia-body{padding:16px 14px;background:#f8fafc;min-height:320px;max-height:480px;overflow-y:auto}',
-      '#wm-gia .gia-row{margin-bottom:10px;display:flex}',
-      '#wm-gia .gia-row.bot .gia-bub{background:#fff;color:#1a1a2e;border-radius:14px 14px 14px 4px;padding:10px 13px;max-width:82%;box-shadow:0 1px 2px rgba(0,0,0,.05);font-size:.88rem;line-height:1.45}',
-      '#wm-gia .gia-row.user{justify-content:flex-end}',
-      '#wm-gia .gia-row.user .gia-bub{background:'+CFG.color+';color:#fff;border-radius:14px 14px 4px 14px;padding:10px 13px;max-width:82%;font-size:.88rem;line-height:1.45}',
-      '#wm-gia .gia-opts{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}',
-      '#wm-gia .gia-opts button{background:#fff;color:'+CFG.color+';border:1px solid '+CFG.color+';border-radius:18px;padding:6px 12px;font-size:.78rem;cursor:pointer;transition:all .15s}',
-      '#wm-gia .gia-opts button:hover{background:'+CFG.color+';color:#fff}',
-      '#wm-gia .gia-input{display:flex;border-top:1px solid #e5e7eb;padding:10px;background:#fff;gap:8px}',
-      '#wm-gia .gia-input input{flex:1;padding:10px 14px;border:1px solid #e5e7eb;border-radius:24px;font-size:.88rem;outline:none;color:#1a1a2e}',
-      '#wm-gia .gia-input input:focus{border-color:'+CFG.color+'}',
-      '#wm-gia .gia-input button{background:'+CFG.color+';color:#fff;border:none;border-radius:50%;width:42px;height:42px;cursor:pointer;font-size:1.1rem;font-weight:700}',
-      '#wm-gia .gia-wa{display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#fff !important;padding:10px 18px;border-radius:24px;text-decoration:none;font-weight:600;font-size:.85rem;margin-top:6px}',
-      '#wm-gia .gia-wa svg{width:16px;height:16px;fill:#fff}',
-      '#wm-gia .gia-foot{text-align:center;padding:8px;font-size:.7rem;color:#9ca3af;background:#fff;border-top:1px solid #f1f5f9}'
+      '#wm-gia-btn{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:'+CFG.color+';border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.35);z-index:9999;opacity:0;transition:opacity .4s,transform .2s;}',
+      '#wm-gia-btn.wm-visible{opacity:1;}',
+      '#wm-gia-btn:hover{transform:scale(1.08);}',
+      '#wm-gia-btn svg{width:26px;height:26px;fill:#fff;}',
+      '@keyframes wm-gia-pulse{0%,100%{box-shadow:0 4px 20px rgba(0,0,0,.35)}50%{box-shadow:0 4px 28px '+colorMid+',0 0 0 8px '+colorLight+'}}',
+      '#wm-gia-btn.wm-visible{animation:wm-gia-pulse 4s ease-in-out infinite;}',
+      '#wm-gia-btn.wm-open{display:none;}',
+      '#wm-gia-btn::after{content:"Calcula tu ITP en 1 minuto";position:absolute;right:66px;bottom:50%;transform:translateY(50%);background:#1a1a2e;color:#fff;font-size:12px;font-family:system-ui,sans-serif;white-space:nowrap;padding:6px 10px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .2s;}',
+      '#wm-gia-btn:hover::after{opacity:1;}',
+      '#wm-gia-modal{position:fixed;bottom:90px;right:20px;width:360px;max-height:520px;background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.4);z-index:9998;display:none;flex-direction:column;overflow:hidden;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;}',
+      '#wm-gia-modal.wm-show{display:flex;}',
+      '@media(max-width:600px){#wm-gia-modal{bottom:0;right:0;width:100vw;max-height:80vh;height:80vh;border-radius:16px 16px 0 0;}}',
+      '#wm-gia-modal *{box-sizing:border-box;margin:0;padding:0;}',
+      '#wm-gia-modal .gia-head{background:'+CFG.color+';color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;}',
+      '#wm-gia-modal .gia-head img{height:32px;width:auto;background:#fff;padding:3px;border-radius:6px;flex-shrink:0;}',
+      '#wm-gia-modal .gia-head .gia-hinfo{flex:1;min-width:0;}',
+      '#wm-gia-modal .gia-title{font-weight:700;font-size:.9rem;line-height:1.2;}',
+      '#wm-gia-modal .gia-sub{font-size:.7rem;opacity:.88;margin-top:2px;}',
+      '#wm-gia-modal .gia-close{background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;padding:4px;line-height:1;opacity:.85;flex-shrink:0;font-family:inherit;}',
+      '#wm-gia-modal .gia-close:hover{opacity:1;}',
+      '#wm-gia-modal .gia-body{flex:1;padding:14px 12px;background:#f8fafc;overflow-y:auto;}',
+      '#wm-gia-modal .gia-body::-webkit-scrollbar{width:4px;}',
+      '#wm-gia-modal .gia-body::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:2px;}',
+      '#wm-gia-modal .gia-row{margin-bottom:10px;display:flex;}',
+      '#wm-gia-modal .gia-row.bot .gia-bub{background:#fff;color:#1a1a2e;border-radius:14px 14px 14px 4px;padding:10px 13px;max-width:82%;box-shadow:0 1px 2px rgba(0,0,0,.05);font-size:.83rem;line-height:1.45;word-break:break-word;}',
+      '#wm-gia-modal .gia-row.user{justify-content:flex-end;}',
+      '#wm-gia-modal .gia-row.user .gia-bub{background:'+CFG.color+';color:#fff;border-radius:14px 14px 4px 14px;padding:10px 13px;max-width:82%;font-size:.83rem;line-height:1.45;word-break:break-word;}',
+      '#wm-gia-modal .gia-opts{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px;}',
+      '#wm-gia-modal .gia-opts button{background:#fff;color:'+CFG.color+';border:1px solid '+CFG.color+';border-radius:18px;padding:6px 12px;font-size:.75rem;cursor:pointer;transition:all .15s;font-family:inherit;}',
+      '#wm-gia-modal .gia-opts button:hover{background:'+CFG.color+';color:#fff;}',
+      '#wm-gia-modal .gia-input{display:flex;border-top:1px solid #e5e7eb;padding:10px;background:#fff;gap:8px;flex-shrink:0;}',
+      '#wm-gia-modal .gia-input input{flex:1;padding:9px 14px;border:1px solid #e5e7eb;border-radius:24px;font-size:.85rem;outline:none;color:#1a1a2e;font-family:inherit;}',
+      '#wm-gia-modal .gia-input input:focus{border-color:'+CFG.color+';}',
+      '#wm-gia-modal .gia-input button{background:'+CFG.color+';color:#fff;border:none;border-radius:50%;width:38px;height:38px;cursor:pointer;font-size:1.05rem;font-weight:700;flex-shrink:0;font-family:inherit;}',
+      '#wm-gia-modal .gia-wa{display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#fff !important;padding:9px 16px;border-radius:24px;text-decoration:none;font-weight:600;font-size:.8rem;margin-top:6px;}',
+      '#wm-gia-modal .gia-wa svg{width:16px;height:16px;fill:#fff;}',
+      '#wm-gia-modal .gia-foot{text-align:center;padding:6px;font-size:.65rem;color:#9ca3af;background:#fff;border-top:1px solid #f1f5f9;flex-shrink:0;}',
+      '#wm-gia-modal .gia-foot a{color:#9ca3af;text-decoration:none;}'
     ].join('');
     document.head.appendChild(sty);
 
     // ─── DOM ──────────────────────────────────────────────────────────────────
-    var root = document.getElementById('wm-gia');
-    if(!root){
-      root = document.createElement('div');
-      root.id = 'wm-gia';
-      (script.parentNode || document.body).insertBefore(root, script);
-    }
-    root.innerHTML = '<div class="gia-head">'+(CFG.logo?'<img src="'+escAttr(CFG.logo)+'" alt="'+escAttr(CFG.nombre)+'">':'')+'<div><div class="gia-title">'+esc(CFG.nombre)+'</div><div class="gia-sub">Asistente ITP · Cálculo en 1 minuto</div></div></div><div class="gia-body" id="gia-body"></div><div class="gia-input"><input type="text" id="gia-in" placeholder="Escribe aquí..." autocomplete="off"><button id="gia-send" type="button">→</button></div><div class="gia-foot">Powered by <a href="https://whitemoon.es" target="_blank" rel="noopener" style="color:#9ca3af;text-decoration:none">WhiteMoon</a></div>';
+    var btn = document.createElement('button');
+    btn.id = 'wm-gia-btn';
+    btn.setAttribute('aria-label', 'Abrir calculadora ITP');
+    btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 2h2v2h-2V4zM7 4h3v2H7V4zm3 16H7v-2h3v2zm0-3H7v-2h3v2zm0-3H7v-2h3v2zm4 6h-3v-2h3v2zm0-3h-3v-2h3v2zm0-3h-3v-2h3v2zm3 6h-2v-5h2v5zm0-6h-2v-2h2v2zm0-3h-2V6h2v2z"/></svg>';
 
-    var body = document.getElementById('gia-body');
-    var input = document.getElementById('gia-in');
-    var sendBtn = document.getElementById('gia-send');
+    var modal = document.createElement('div');
+    modal.id = 'wm-gia-modal';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-label', 'Calculadora ITP de ' + esc(CFG.nombre));
+    modal.innerHTML = '<div class="gia-head">'+
+      (CFG.logo?'<img src="'+escAttr(CFG.logo)+'" alt="'+escAttr(CFG.nombre)+'">':'')+
+      '<div class="gia-hinfo"><div class="gia-title">'+esc(CFG.nombre)+'</div><div class="gia-sub">Asistente ITP · Cálculo en 1 minuto</div></div>'+
+      '<button class="gia-close" type="button" aria-label="Cerrar">×</button>'+
+      '</div>'+
+      '<div class="gia-body" id="gia-body"></div>'+
+      '<div class="gia-input"><input type="text" id="gia-in" placeholder="Escribe aquí..." autocomplete="off"><button id="gia-send" type="button">→</button></div>'+
+      '<div class="gia-foot">Powered by <a href="https://whitemoon.es" target="_blank" rel="noopener">WhiteMoon</a></div>';
+
+    document.body.appendChild(btn);
+    document.body.appendChild(modal);
+
+    var body = modal.querySelector('#gia-body');
+    var input = modal.querySelector('#gia-in');
+    var sendBtn = modal.querySelector('#gia-send');
+    var closeBtn = modal.querySelector('.gia-close');
 
     var STEPS = [
       {key:'marca',     msg:'¡Hola! 👋 Soy el asistente de '+esc(CFG.nombre)+'. Te ayudo a calcular el ITP de tu vehículo en menos de 1 minuto.<br><br>¿Cuál es la <b>marca</b> de tu vehículo?', type:'text',   ph:'Ej: Toyota, Seat, BMW...'},
@@ -111,6 +143,7 @@
       STEPS.splice(5, 1);
     }
     var step = 0;
+    var started = false;
 
     function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
     function escAttr(s){ return esc(s).replace(/"/g,'&quot;'); }
@@ -247,8 +280,27 @@
       setTimeout(next, 400);
     }
 
+    function openWidget(){
+      modal.classList.add('wm-show');
+      btn.classList.add('wm-open');
+      if(!started){
+        started = true;
+        setTimeout(next, 300);
+      } else if(!input.disabled){
+        input.focus();
+      }
+    }
+
+    function closeWidget(){
+      modal.classList.remove('wm-show');
+      btn.classList.remove('wm-open');
+    }
+
+    btn.addEventListener('click', openWidget);
+    closeBtn.addEventListener('click', closeWidget);
     sendBtn.addEventListener('click', submit);
     input.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); submit(); } });
-    setTimeout(next, 300);
+
+    setTimeout(function(){ btn.classList.add('wm-visible'); }, 2000);
   }
 })();

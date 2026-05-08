@@ -183,6 +183,7 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
           <option value="scout_starter">Scout Starter — 299€ setup + 199€/mes (CRM prospección)</option>
           <option value="scout_agency">Scout Agency — 399€ setup + 399€/mes</option>
           <option value="scout_enterprise">Scout Enterprise — 499€ setup + 699€/mes (white label)</option>
+          <option value="itp">Calculadora ITP — 299€ setup + 99€/mes (white label)</option>
         </select>
         <select id="filterStatus" onchange="render()">
           <option value="">Todos los estados</option>
@@ -212,7 +213,7 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
       </div>
       <div class="g2 mb">
         <div><label>Dominio</label><input type="text" id="fDom" placeholder="clinicasonrie.es" maxlength="100"></div>
-        <div><label>Pack</label><select id="fPk" onchange="onPackChange()"><option value="spark" selected>Spark — 299€ setup + 149€/mes (chatbot IA)</option><option value="core">Core — 1.800€ setup + 199€/mes (web + chatbot + SEO)</option><option value="scale">Scale — 3.500€ setup + 349€/mes (RAG + automatizaciones)</option><option value="elite">Elite — 6.500€ setup + 599€/mes (RAG premium + CRM)</option><option value="auditoria">Auditoría IA — 899€ pago único</option><option value="scout_starter">Scout Starter — 299€ setup + 199€/mes (CRM prospección)</option><option value="scout_agency">Scout Agency — 399€ setup + 399€/mes</option><option value="scout_enterprise">Scout Enterprise — 499€ setup + 699€/mes (white label)</option></select></div>
+        <div><label>Pack</label><select id="fPk" onchange="onPackChange()"><option value="spark" selected>Spark — 299€ setup + 149€/mes (chatbot IA)</option><option value="core">Core — 1.800€ setup + 199€/mes (web + chatbot + SEO)</option><option value="scale">Scale — 3.500€ setup + 349€/mes (RAG + automatizaciones)</option><option value="elite">Elite — 6.500€ setup + 599€/mes (RAG premium + CRM)</option><option value="auditoria">Auditoría IA — 899€ pago único</option><option value="scout_starter">Scout Starter — 299€ setup + 199€/mes (CRM prospección)</option><option value="scout_agency">Scout Agency — 399€ setup + 399€/mes</option><option value="scout_enterprise">Scout Enterprise — 499€ setup + 699€/mes (white label)</option><option value="itp">Calculadora ITP — 299€ setup + 99€/mes (white label)</option></select></div>
       </div>
       <div class="g2 mb">
         <div><label>Email contacto</label><input type="email" id="fEm" placeholder="info@cliente.es" maxlength="100"></div>
@@ -353,10 +354,12 @@ var PACK_PRICES={
   auditoria:0,                // 899€ pago único, sin recurrente
   scout_starter:199,          // 199€/mes (setup 299€ aparte)
   scout_agency:399,           // 399€/mes (setup 399€ aparte)
-  scout_enterprise:699        // 699€/mes (setup 499€ aparte) - white label
+  scout_enterprise:699,       // 699€/mes (setup 499€ aparte) - white label
+  itp:99                      // 99€/mes (setup 299€ aparte) - white label calculadora ITP
 };
 var CHATBOT_PACKS={spark:1};
-var OBSOLETE_PACKS={basic:1,advance:1,pyme:1,enterprise_n8n:1,consultor_rag:1,empresa_rag:1,premium_rag:1,itp:1,scout:1};
+var ITP_PACKS={itp:1};
+var OBSOLETE_PACKS={basic:1,advance:1,pyme:1,enterprise_n8n:1,consultor_rag:1,empresa_rag:1,premium_rag:1,scout:1};
 var ghToken='';
 var lics={};
 var sha='';
@@ -604,8 +607,14 @@ function addPay(concept,amount,dueDate){
 function _toggleChatbotSection(){
   var pack=$('fPk').value;
   var isChatbot=!!CHATBOT_PACKS[pack];
+  var isItp=!!ITP_PACKS[pack];
   $('chatbotSection').style.display=isChatbot?'':'none';
-  $('nonChatbotMsg').style.display=isChatbot?'none':'block';
+  $('nonChatbotMsg').style.display=(isChatbot||isItp)?'none':'block';
+  // Para pack ITP: auto-activar la sección Calculadora ITP en alta
+  if(isItp&&$('fMode').value==='add'&&!$('fItp').checked){
+    $('fItp').checked=true;
+    if(typeof toggleItp==='function')toggleItp();
+  }
 }
 
 // Defaults (setup + recurrente mensual) por pack
@@ -617,7 +626,8 @@ var PACK_DEFAULTS={
   auditoria:       {label:'Auditoría IA',     setup:899,  mrr:0},
   scout_starter:   {label:'Scout Starter',    setup:299,  mrr:199},
   scout_agency:    {label:'Scout Agency',     setup:399,  mrr:399},
-  scout_enterprise:{label:'Scout Enterprise', setup:499,  mrr:699}
+  scout_enterprise:{label:'Scout Enterprise', setup:499,  mrr:699},
+  itp:             {label:'Calculadora ITP',  setup:299,  mrr:99}
 };
 
 function onPackChange(){
@@ -681,6 +691,16 @@ function saveF(){
 
 function code(k){
   var l=lics[k];if(!l)return;
+  if(ITP_PACKS[l.pack]){
+    if(l.itp){codeItp(k);return}
+    $('codeCTitle').innerHTML='🧮 Calculadora ITP · '+escapeHtml(l.biz);
+    $('codeCDesc').innerHTML='Activa la sección <b>Calculadora ITP</b> en el formulario y completa los datos para generar el código embebido.';
+    $('codeO').textContent='— Configura los datos ITP del cliente para generar el código —';
+    $('codeC').style.display='block';
+    var icItp=$('installContent');if(icItp){icItp.style.display='none';icItp.innerHTML=''}
+    $('codeC').scrollIntoView({behavior:'smooth'});
+    return;
+  }
   if(!CHATBOT_PACKS[l.pack]){
     var def=PACK_DEFAULTS[l.pack];
     var packLabel=def?def.label:(l.pack||'Pack');

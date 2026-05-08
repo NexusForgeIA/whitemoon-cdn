@@ -175,12 +175,14 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
         <input type="text" id="searchQ" placeholder="🔍 Buscar por nombre, token, dominio, email..." oninput="render()">
         <select id="filterPack" onchange="render()">
           <option value="">Todos los packs</option>
-          <option value="spark">Spark 299€+149€/mes</option>
-          <option value="core">Core 1.800€+199€/mes</option>
-          <option value="scale">Scale 3.500€+349€/mes</option>
-          <option value="elite">Elite 6.500€+599€/mes</option>
-          <option value="scout">Scout IA 299€+199€/mes</option>
-          <option value="auditoria">Auditoría IA 899€</option>
+          <option value="spark">Spark — 299€ setup + 149€/mes (chatbot IA)</option>
+          <option value="core">Core — 1.800€ setup + 199€/mes (web + chatbot + SEO)</option>
+          <option value="scale">Scale — 3.500€ setup + 349€/mes (RAG + automatizaciones)</option>
+          <option value="elite">Elite — 6.500€ setup + 599€/mes (RAG premium + CRM)</option>
+          <option value="auditoria">Auditoría IA — 899€ pago único</option>
+          <option value="scout_starter">Scout Starter — 299€ setup + 199€/mes (CRM prospección)</option>
+          <option value="scout_agency">Scout Agency — 399€ setup + 399€/mes</option>
+          <option value="scout_enterprise">Scout Enterprise — 499€ setup + 699€/mes (white label)</option>
         </select>
         <select id="filterStatus" onchange="render()">
           <option value="">Todos los estados</option>
@@ -210,7 +212,7 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
       </div>
       <div class="g2 mb">
         <div><label>Dominio</label><input type="text" id="fDom" placeholder="clinicasonrie.es" maxlength="100"></div>
-        <div><label>Pack</label><select id="fPk" onchange="onPackChange()"><option value="spark" selected>Spark 299€ + 149€/mes (chatbot keyword)</option><option value="core">Core 1.800€ + 199€/mes (web + chatbot + SEO)</option><option value="scale">Scale 3.500€ + 349€/mes ⭐ (RAG + automatizaciones)</option><option value="elite">Elite 6.500€ + 599€/mes (RAG premium + CRM)</option><option value="scout">Scout IA 299€ + 199€/mes (herramienta prospección)</option><option value="auditoria">Auditoría IA 899€ (pago único)</option></select></div>
+        <div><label>Pack</label><select id="fPk" onchange="onPackChange()"><option value="spark" selected>Spark — 299€ setup + 149€/mes (chatbot IA)</option><option value="core">Core — 1.800€ setup + 199€/mes (web + chatbot + SEO)</option><option value="scale">Scale — 3.500€ setup + 349€/mes (RAG + automatizaciones)</option><option value="elite">Elite — 6.500€ setup + 599€/mes (RAG premium + CRM)</option><option value="auditoria">Auditoría IA — 899€ pago único</option><option value="scout_starter">Scout Starter — 299€ setup + 199€/mes (CRM prospección)</option><option value="scout_agency">Scout Agency — 399€ setup + 399€/mes</option><option value="scout_enterprise">Scout Enterprise — 499€ setup + 699€/mes (white label)</option></select></div>
       </div>
       <div class="g2 mb">
         <div><label>Email contacto</label><input type="email" id="fEm" placeholder="info@cliente.es" maxlength="100"></div>
@@ -228,8 +230,7 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
       <button class="btn btn-sm btn-y" onclick="addPay()" style="margin:8px 0 16px">+ Añadir pago pendiente</button>
 
       <div id="nonChatbotMsg" style="display:none;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.25);border-radius:8px;padding:14px 16px;margin:10px 0 16px;color:#a78bfa;font-size:.85rem;line-height:1.5">
-        ℹ Este pack no incluye chatbot embebido.<br>
-        El cliente se registra para facturación y seguimiento.
+        📋 Este pack se registra para facturación y seguimiento. No genera script embebido.
       </div>
       <div id="chatbotSection">
       <div class="stitle">Configuración chatbot</div>
@@ -349,10 +350,13 @@ var PACK_PRICES={
   core:199,                   // 199€/mes (setup 1.800€ aparte)
   scale:349,                  // 349€/mes (setup 3.500€ aparte)
   elite:599,                  // 599€/mes (setup 6.500€ aparte)
-  scout:199,                  // 199€/mes (setup 299€ aparte)
-  auditoria:0                 // 899€ pago único, sin recurrente
+  auditoria:0,                // 899€ pago único, sin recurrente
+  scout_starter:199,          // 199€/mes (setup 299€ aparte)
+  scout_agency:399,           // 399€/mes (setup 399€ aparte)
+  scout_enterprise:699        // 699€/mes (setup 499€ aparte) - white label
 };
 var CHATBOT_PACKS={spark:1};
+var OBSOLETE_PACKS={basic:1,advance:1,pyme:1,enterprise_n8n:1,consultor_rag:1,empresa_rag:1,premium_rag:1,itp:1,scout:1};
 var ghToken='';
 var lics={};
 var sha='';
@@ -482,7 +486,7 @@ function render(){
     var d=daysUntil(l.expires),ec='',eb='';
     if(d!==null){if(d<0){ec='expired';eb='<br><small style="color:#ef4444">⚠ Expirada hace '+Math.abs(d)+'d</small>'}else if(d<=30){ec='expire-soon';eb='<br><small style="color:#f59e0b">⏰ En '+d+'d</small>'}}
     h+='<tr><td><span class="biz">'+escapeHtml(l.biz)+'</span>'+(l.domain?'<br><span class="domain">'+escapeHtml(l.domain)+'</span>':'')+(l.template?'<br><span class="badge" style="background:rgba(124,58,237,.1);color:#a78bfa;border:1px solid rgba(124,58,237,.2);margin-top:3px">🏷️ '+escapeHtml(l.template)+'</span>':'')+(l.itp?'<br><span class="badge badge-itp" style="margin-top:4px">🧮 ITP</span>':'')+'</td>';
-    h+='<td class="token">'+escapeHtml(k)+'</td><td>'+escapeHtml(l.pack||'—')+(l.pack==='basic'?'<br><small style="color:#f59e0b">⚠ Pack obsoleto - migrar a Spark</small>':'')+'</td>';
+    h+='<td class="token">'+escapeHtml(k)+'</td><td>'+escapeHtml(l.pack||'—')+(OBSOLETE_PACKS[l.pack]?'<br><small style="color:#f59e0b">⚠ Pack obsoleto - migrar</small>':'')+'</td>';
     h+='<td><span class="badge '+(l.active?'badge-on':'badge-off')+'">'+(l.active?'ACTIVA':'INACTIVA')+'</span></td>';
     h+='<td class="'+ec+'">'+escapeHtml(l.expires||'—')+eb+'</td><td style="color:#06b6d4">'+rc+'</td>';
     h+='<td class="flex">';
@@ -606,12 +610,14 @@ function _toggleChatbotSection(){
 
 // Defaults (setup + recurrente mensual) por pack
 var PACK_DEFAULTS={
-  spark:    {label:'Spark',       setup:299,  mrr:149},
-  core:     {label:'Core',        setup:1800, mrr:199},
-  scale:    {label:'Scale',       setup:3500, mrr:349},
-  elite:    {label:'Elite',       setup:6500, mrr:599},
-  scout:    {label:'Scout IA',    setup:299,  mrr:199},
-  auditoria:{label:'Auditoría IA',setup:899,  mrr:0}
+  spark:           {label:'Spark',            setup:299,  mrr:149},
+  core:            {label:'Core',             setup:1800, mrr:199},
+  scale:           {label:'Scale',            setup:3500, mrr:349},
+  elite:           {label:'Elite',            setup:6500, mrr:599},
+  auditoria:       {label:'Auditoría IA',     setup:899,  mrr:0},
+  scout_starter:   {label:'Scout Starter',    setup:299,  mrr:199},
+  scout_agency:    {label:'Scout Agency',     setup:399,  mrr:399},
+  scout_enterprise:{label:'Scout Enterprise', setup:499,  mrr:699}
 };
 
 function onPackChange(){

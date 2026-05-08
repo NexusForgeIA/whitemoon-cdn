@@ -1,22 +1,5 @@
 {
   "licenses": {
-    "WM-182d529a1ba70b4297aeb884": {
-      "biz": "Gestoría Prueba WhiteMoon",
-      "domain": "",
-      "pack": "spark",
-      "active": true,
-      "created": "2026-05-08",
-      "expires": "2099-05-08",
-      "contact": "",
-      "phone": "64319980",
-      "notes": "",
-      "botName": "Asistente",
-      "color": "#7c3aed",
-      "calendar": true,
-      "greeting": "",
-      "serviceButtons": [],
-      "updated": "2026-05-08T22:33:17.528Z"
-    },
     "WM-4100b67ac47f1b45e81d20c2": {
       "biz": "Gestoría Prueba WhiteMoon",
       "domain": "",

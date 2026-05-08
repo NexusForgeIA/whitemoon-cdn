@@ -179,7 +179,6 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
           <option value="core">Core 1.800€+199€/mes</option>
           <option value="scale">Scale 3.500€+349€/mes</option>
           <option value="elite">Elite 6.500€+599€/mes</option>
-          <option value="orbit">Orbit 8.500€+599€/mes</option>
           <option value="auditoria">Auditoría IA 899€</option>
           <option value="itp">Calculadora ITP 99€/mes</option>
         </select>
@@ -211,7 +210,7 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
       </div>
       <div class="g2 mb">
         <div><label>Dominio</label><input type="text" id="fDom" placeholder="clinicasonrie.es" maxlength="100"></div>
-        <div><label>Pack</label><select id="fPk" onchange="suggestPayments()"><option value="spark" selected>Spark 149€/mes (chatbot keyword)</option><option value="core">Core 1.800€ + 199€/mes (web + chatbot + SEO)</option><option value="scale">Scale 3.500€ + 349€/mes ⭐</option><option value="elite">Elite 6.500€ + 599€/mes</option><option value="orbit">Orbit 8.500€ + 599€/mes (RAG Custom)</option><option value="auditoria">Auditoría IA 899€ (pago único)</option><option value="itp">Calculadora ITP white label 99€/mes</option></select></div>
+        <div><label>Pack</label><select id="fPk" onchange="suggestPayments()"><option value="spark" selected>Spark 149€/mes (chatbot keyword)</option><option value="core">Core 1.800€ + 199€/mes (web + chatbot + SEO)</option><option value="scale">Scale 3.500€ + 349€/mes ⭐</option><option value="elite">Elite 6.500€ + 599€/mes</option><option value="auditoria">Auditoría IA 899€ (pago único)</option><option value="itp">Calculadora ITP white label 99€/mes</option></select></div>
       </div>
       <div class="g2 mb">
         <div><label>Email contacto</label><input type="email" id="fEm" placeholder="info@cliente.es" maxlength="100"></div>
@@ -344,7 +343,6 @@ var PACK_PRICES={
   core:199,                   // 199€/mes (setup 1.800€ aparte)
   scale:349,                  // 349€/mes (setup 3.500€ aparte)
   elite:599,                  // 599€/mes (setup 6.500€ aparte)
-  orbit:599,                  // 599€/mes (setup 8.500€ aparte, RAG Custom)
   auditoria:0,                // 899€ pago único, sin recurrente
   itp:99+(199/12)             // 99€/mes + 199€/año
 };
@@ -615,11 +613,6 @@ function suggestPayments(){
     var d6=new Date(base);d6.setFullYear(d6.getFullYear()+1);
     addPay('Renovación anual Pack Elite',599*12,d6.toISOString().split('T')[0]);
     toast('Renovación anual sugerida para Elite','info');
-  }
-  else if(pack==='orbit'){
-    var d7=new Date(base);d7.setFullYear(d7.getFullYear()+1);
-    addPay('Renovación anual Pack Orbit',599*12,d7.toISOString().split('T')[0]);
-    toast('Renovación anual sugerida para Orbit','info');
   }
   else if(pack==='auditoria'){
     addPay('Auditoría IA (pago único)',899,base.toISOString().split('T')[0]);

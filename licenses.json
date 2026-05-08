@@ -1,3 +1,45 @@
 {
-  "licenses": {}
+  "licenses": {
+    "WM-f3d54441bb6152a84e1f027b": {
+      "biz": "Gestoría Prueba WhiteMoon",
+      "domain": "",
+      "pack": "gestoria_ia",
+      "active": true,
+      "created": "2026-05-08",
+      "expires": "2099-05-08",
+      "contact": "",
+      "phone": "64319980",
+      "notes": "",
+      "botName": "Asistente",
+      "color": "#7c3aed",
+      "calendar": true,
+      "greeting": "",
+      "serviceButtons": [],
+      "pendingPayments": [
+        {
+          "concept": "Setup Gestoría IA",
+          "amount": 399,
+          "dueDate": "2026-05-08",
+          "paid": false
+        },
+        {
+          "concept": "Renovación anual Gestoría IA",
+          "amount": 3588,
+          "dueDate": "2027-05-08",
+          "paid": false
+        }
+      ],
+      "itp": {
+        "nombre": "Gestoría Prueba WhiteMoon",
+        "color": "#1565c0",
+        "tel": "",
+        "logo": "",
+        "cta": "Solicitar gestión del ITP",
+        "honorarios": 150,
+        "tasas": true,
+        "ccaa": ""
+      },
+      "updated": "2026-05-08T22:45:16.524Z"
+    }
+  }
 }

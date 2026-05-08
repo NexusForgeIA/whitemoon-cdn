@@ -443,91 +443,33 @@ function codeGestoriaIA(k){
   var nombre=itp.nombre||l.biz||'Gestoría';
   var color=itp.color||l.color||'#1565C0';
   var tel=(itp.tel||l.phone||'').replace(/[^0-9]/g,'');
-  var logo=itp.logo||'';
+  var honorarios=itp.honorarios||0;
+  var tasas=itp.tasas||0;
   var cta=itp.cta||'Solicitar gestión del ITP';
 
+  function attr(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
   var h='<!-- WhiteMoon · Gestoría IA · '+nombre+' -->\n';
-  h+='<div id="wm-gia"></div>\n';
-  h+='<style>\n';
-  h+='#wm-gia *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}\n';
-  h+='#wm-gia{max-width:480px;margin:24px auto;background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.12);overflow:hidden;border:1px solid #e5e7eb}\n';
-  h+='#wm-gia .gia-head{background:'+color+';color:#fff;padding:16px 18px;display:flex;align-items:center;gap:12px}\n';
-  h+='#wm-gia .gia-head img{height:36px;width:auto;background:#fff;padding:4px;border-radius:6px}\n';
-  h+='#wm-gia .gia-title{font-weight:600;font-size:.98rem;line-height:1.2}\n';
-  h+='#wm-gia .gia-sub{font-size:.74rem;opacity:.88;margin-top:2px}\n';
-  h+='#wm-gia .gia-body{padding:16px 14px;background:#f8fafc;min-height:320px;max-height:480px;overflow-y:auto}\n';
-  h+='#wm-gia .gia-row{margin-bottom:10px;display:flex}\n';
-  h+='#wm-gia .gia-row.bot .gia-bub{background:#fff;color:#1a1a2e;border-radius:14px 14px 14px 4px;padding:10px 13px;max-width:82%;box-shadow:0 1px 2px rgba(0,0,0,.05);font-size:.88rem;line-height:1.45}\n';
-  h+='#wm-gia .gia-row.user{justify-content:flex-end}\n';
-  h+='#wm-gia .gia-row.user .gia-bub{background:'+color+';color:#fff;border-radius:14px 14px 4px 14px;padding:10px 13px;max-width:82%;font-size:.88rem;line-height:1.45}\n';
-  h+='#wm-gia .gia-opts{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}\n';
-  h+='#wm-gia .gia-opts button{background:#fff;color:'+color+';border:1px solid '+color+';border-radius:18px;padding:6px 12px;font-size:.78rem;cursor:pointer;transition:all .15s}\n';
-  h+='#wm-gia .gia-opts button:hover{background:'+color+';color:#fff}\n';
-  h+='#wm-gia .gia-input{display:flex;border-top:1px solid #e5e7eb;padding:10px;background:#fff;gap:8px}\n';
-  h+='#wm-gia .gia-input input{flex:1;padding:10px 14px;border:1px solid #e5e7eb;border-radius:24px;font-size:.88rem;outline:none;color:#1a1a2e}\n';
-  h+='#wm-gia .gia-input input:focus{border-color:'+color+'}\n';
-  h+='#wm-gia .gia-input button{background:'+color+';color:#fff;border:none;border-radius:50%;width:42px;height:42px;cursor:pointer;font-size:1.1rem;font-weight:700}\n';
-  h+='#wm-gia .gia-wa{display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#fff !important;padding:10px 18px;border-radius:24px;text-decoration:none;font-weight:600;font-size:.85rem;margin-top:6px}\n';
-  h+='#wm-gia .gia-wa svg{width:16px;height:16px;fill:#fff}\n';
-  h+='#wm-gia .gia-foot{text-align:center;padding:8px;font-size:.7rem;color:#9ca3af;background:#fff;border-top:1px solid #f1f5f9}\n';
-  h+='</style>\n';
-  h+='<script>(function(){\n';
-  h+='var CFG={nombre:'+JSON.stringify(nombre)+',color:'+JSON.stringify(color)+',tel:'+JSON.stringify(tel)+',logo:'+JSON.stringify(logo)+',cta:'+JSON.stringify(cta)+'};\n';
-  h+='var ITP_TABLE={"Andalucía":8,"Aragón":8,"Asturias":8,"Baleares":8,"Canarias":5.5,"Cantabria":8,"Castilla-La Mancha":9,"Castilla y León":8,"Cataluña":5,"C. Valenciana":8,"Extremadura":8,"Galicia":8,"La Rioja":7,"Madrid":4,"Murcia":8,"Navarra":4,"País Vasco":4,"Ceuta":4,"Melilla":4};\n';
-  h+='var CCAA_LIST=Object.keys(ITP_TABLE);\n';
-  h+='var data={},step=0;\n';
-  h+='var STEPS=[\n';
-  h+=' {key:"marca",msg:"¡Hola! 👋 Soy el asistente de "+CFG.nombre+". Te ayudo a calcular el ITP de tu vehículo en menos de 1 minuto.<br><br>¿Cuál es la <b>marca</b> de tu vehículo?",type:"text",ph:"Ej: Toyota, Seat, BMW..."},\n';
-  h+=' {key:"modelo",msg:"Genial. ¿Y el <b>modelo</b>?",type:"text",ph:"Ej: Corolla, Ibiza, Serie 3..."},\n';
-  h+=' {key:"matricula",msg:"Perfecto. ¿Cuál es la <b>matrícula</b>? (la necesitamos para tramitar)",type:"text",ph:"Ej: 1234ABC"},\n';
-  h+=' {key:"anio",msg:"¿En qué <b>año</b> se matriculó por primera vez?",type:"number",ph:"Ej: 2018"},\n';
-  h+=' {key:"precio",msg:"¿Cuál es el <b>precio de compra</b>? (en euros)",type:"number",ph:"Ej: 12000"},\n';
-  h+=' {key:"ccaa",msg:"¿En qué <b>Comunidad Autónoma</b> vas a matricularlo?",type:"opts",opts:CCAA_LIST},\n';
-  h+=' {key:"resultado",msg:"",type:"calc"},\n';
-  h+=' {key:"nombre",msg:"Para enviarte la gestión completa, ¿me dices tu <b>nombre y apellidos</b>?",type:"text",ph:"Tu nombre"},\n';
-  h+=' {key:"telefono",msg:"Por último, un <b>teléfono</b> de contacto (te escribiremos por WhatsApp):",type:"tel",ph:"612345678"},\n';
-  h+=' {key:"resumen",msg:"",type:"summary"}\n';
-  h+='];\n';
-  h+='var root=document.getElementById("wm-gia");\n';
-  h+='root.innerHTML=\'<div class="gia-head">\'+(CFG.logo?\'<img src="\'+CFG.logo+\'" alt="\'+CFG.nombre+\'">\':\'\')+\'<div><div class="gia-title">\'+CFG.nombre+\'</div><div class="gia-sub">Asistente ITP · Cálculo en 1 minuto</div></div></div><div class="gia-body" id="gia-body"></div><div class="gia-input"><input type="text" id="gia-in" placeholder="Escribe aquí..." autocomplete="off"><button id="gia-send" type="button">→</button></div><div class="gia-foot">Powered by '+nombre.replace(/\x27/g,"\\\x27")+'</div>\';\n';
-  h+='var body=document.getElementById("gia-body"),input=document.getElementById("gia-in"),sendBtn=document.getElementById("gia-send");\n';
-  h+='function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}\n';
-  h+='function bot(html){var d=document.createElement("div");d.className="gia-row bot";d.innerHTML=\'<div class="gia-bub">\'+html+\'</div>\';body.appendChild(d);body.scrollTop=body.scrollHeight}\n';
-  h+='function user(text){var d=document.createElement("div");d.className="gia-row user";d.innerHTML=\'<div class="gia-bub">\'+esc(text)+\'</div>\';body.appendChild(d);body.scrollTop=body.scrollHeight}\n';
-  h+='function opts(arr,onPick){var d=document.createElement("div");d.className="gia-opts";arr.forEach(function(o){var b=document.createElement("button");b.type="button";b.textContent=o;b.onclick=function(){d.remove();onPick(o)};d.appendChild(b)});body.appendChild(d);body.scrollTop=body.scrollHeight}\n';
-  h+='function fmtEur(n){return Number(n).toLocaleString("es-ES",{minimumFractionDigits:2,maximumFractionDigits:2})+" €"}\n';
-  h+='function next(){var s=STEPS[step];if(!s)return;\n';
-  h+=' if(s.type==="calc"){var pct=ITP_TABLE[data.ccaa]||8;var imp=Math.round(data.precio*pct*100)/10000;data.itp_pct=pct;data.itp_imp=imp;\n';
-  h+='   bot("📊 <b>Cálculo estimado del ITP</b><br><br>Vehículo: "+esc(data.marca)+" "+esc(data.modelo)+"<br>Matrícula: "+esc(data.matricula)+"<br>Año: "+esc(data.anio)+"<br>Precio: "+fmtEur(data.precio)+"<br>CCAA: "+esc(data.ccaa)+" ("+pct+"%)<br><br><b>ITP a pagar: "+fmtEur(imp)+"</b><br><br><i>* Estimación orientativa. El cálculo definitivo lo realiza la gestoría según valor fiscal y reducciones aplicables.</i>");\n';
-  h+='   step++;setTimeout(next,900);return;}\n';
-  h+=' if(s.type==="summary"){var tel=(data.telefono||"").replace(/[^0-9]/g,"");var msg="Hola, soy "+data.nombre+". Quiero gestionar el ITP de mi "+data.marca+" "+data.modelo+" (matrícula "+data.matricula+", año "+data.anio+"). Precio: "+fmtEur(data.precio)+". CCAA: "+data.ccaa+". ITP estimado: "+fmtEur(data.itp_imp)+". Mi teléfono: "+data.telefono;\n';
-  h+='   var waBase=CFG.tel?"https://wa.me/34"+CFG.tel:"https://wa.me/?text=";var waLink=CFG.tel?(waBase+"?text="+encodeURIComponent(msg)):(waBase+encodeURIComponent(msg));\n';
-  h+='   bot("✅ <b>¡Gracias, "+esc(data.nombre)+"!</b><br><br>Resumen de tu solicitud:<br><br>🚗 "+esc(data.marca)+" "+esc(data.modelo)+"<br>🔢 Matrícula: "+esc(data.matricula)+"<br>📅 Año: "+esc(data.anio)+"<br>💶 Precio: "+fmtEur(data.precio)+"<br>📍 CCAA: "+esc(data.ccaa)+"<br>🧮 ITP estimado: <b>"+fmtEur(data.itp_imp)+"</b><br>📞 Teléfono: "+esc(data.telefono)+"<br><br>Pulsa el botón para enviarnos la solicitud por WhatsApp y te ayudaremos con todo el trámite:<br><br>"+\'<a class="gia-wa" href="\'+waLink+\'" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>\'+esc(CFG.cta)+\'</a>\');\n';
-  h+='   input.disabled=true;sendBtn.disabled=true;input.placeholder="Conversación finalizada";return;}\n';
-  h+=' bot(s.msg);\n';
-  h+=' if(s.type==="opts"){opts(s.opts,function(v){user(v);data[s.key]=v;step++;setTimeout(next,400)});input.disabled=true;sendBtn.disabled=true;return;}\n';
-  h+=' input.disabled=false;sendBtn.disabled=false;input.placeholder=s.ph||"Escribe aquí...";input.type=(s.type==="number"?"number":(s.type==="tel"?"tel":"text"));input.value="";input.focus();\n';
-  h+='}\n';
-  h+='function submit(){var s=STEPS[step];if(!s)return;var v=input.value.trim();if(!v)return;\n';
-  h+=' if(s.type==="number"){var n=parseFloat(v.replace(/\\./g,"").replace(/,/g,"."));if(isNaN(n)||n<=0){bot("⚠️ Por favor, introduce un número válido.");return}data[s.key]=n;user(s.key==="precio"?fmtEur(n):String(n));}\n';
-  h+=' else if(s.type==="tel"){var t=v.replace(/[^0-9]/g,"");if(t.length<9){bot("⚠️ El teléfono debe tener al menos 9 dígitos.");return}data[s.key]=t;user(t);}\n';
-  h+=' else{data[s.key]=v;user(v);}\n';
-  h+=' input.value="";step++;setTimeout(next,400);\n';
-  h+='}\n';
-  h+='sendBtn.addEventListener("click",submit);\n';
-  h+='input.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();submit()}});\n';
-  h+='setTimeout(next,300);\n';
-  h+='})();<\/script>\n';
+  h+='<script\n';
+  h+='  src="'+CDN_BASE+'/gestoria-ia.js"\n';
+  h+='  data-token="'+attr(k)+'"\n';
+  h+='  data-nombre="'+attr(nombre)+'"\n';
+  h+='  data-color="'+attr(color)+'"\n';
+  h+='  data-tel="'+attr(tel)+'"\n';
+  h+='  data-honorarios="'+attr(honorarios)+'"\n';
+  h+='  data-tasas="'+attr(tasas)+'"\n';
+  h+='  data-cta="'+attr(cta)+'"><\/script>\n';
   h+='<!-- Fin Gestoría IA · '+nombre+' -->';
 
   $('codeCTitle').innerHTML='🧮 Código Gestoría IA — '+escapeHtml(nombre);
-  $('codeCDesc').innerHTML='Pegar donde quieras mostrar el chatbot ITP en la web del cliente:';
+  $('codeCDesc').innerHTML='Pegar donde quieras mostrar el chatbot ITP en la web del cliente. El widget se carga desde el CDN de WhiteMoon y verifica la licencia automáticamente.';
   $('codeO').textContent=h;
   $('codeC').style.display='block';
   var ic=$('installContent');if(ic){ic.style.display='none';ic.innerHTML=''}
   $('codeC').scrollIntoView({behavior:'smooth'});
   toast('Código Gestoría IA generado para '+nombre,'info');
 }
+
 // === FIN MÓDULO ITP ===
 
 function doLogin(){

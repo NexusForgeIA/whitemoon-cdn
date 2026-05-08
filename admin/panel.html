@@ -184,6 +184,7 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
           <option value="scout_agency">Scout Agency — 399€ setup + 399€/mes</option>
           <option value="scout_enterprise">Scout Enterprise — 499€ setup + 699€/mes (white label)</option>
           <option value="itp">Calculadora ITP — 299€ setup + 99€/mes (white label)</option>
+          <option value="gestoria_ia">Gestoría IA — 399€ setup + 299€/mes (chatbot + calculadora ITP integrada)</option>
         </select>
         <select id="filterStatus" onchange="render()">
           <option value="">Todos los estados</option>
@@ -213,7 +214,7 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
       </div>
       <div class="g2 mb">
         <div><label>Dominio</label><input type="text" id="fDom" placeholder="clinicasonrie.es" maxlength="100"></div>
-        <div><label>Pack</label><select id="fPk" onchange="onPackChange()"><option value="spark" selected>Spark — 299€ setup + 149€/mes (chatbot IA)</option><option value="core">Core — 1.800€ setup + 199€/mes (web + chatbot + SEO)</option><option value="scale">Scale — 3.500€ setup + 349€/mes (RAG + automatizaciones)</option><option value="elite">Elite — 6.500€ setup + 599€/mes (RAG premium + CRM)</option><option value="auditoria">Auditoría IA — 899€ pago único</option><option value="scout_starter">Scout Starter — 299€ setup + 199€/mes (CRM prospección)</option><option value="scout_agency">Scout Agency — 399€ setup + 399€/mes</option><option value="scout_enterprise">Scout Enterprise — 499€ setup + 699€/mes (white label)</option><option value="itp">Calculadora ITP — 299€ setup + 99€/mes (white label)</option></select></div>
+        <div><label>Pack</label><select id="fPk" onchange="onPackChange()"><option value="spark" selected>Spark — 299€ setup + 149€/mes (chatbot IA)</option><option value="core">Core — 1.800€ setup + 199€/mes (web + chatbot + SEO)</option><option value="scale">Scale — 3.500€ setup + 349€/mes (RAG + automatizaciones)</option><option value="elite">Elite — 6.500€ setup + 599€/mes (RAG premium + CRM)</option><option value="auditoria">Auditoría IA — 899€ pago único</option><option value="scout_starter">Scout Starter — 299€ setup + 199€/mes (CRM prospección)</option><option value="scout_agency">Scout Agency — 399€ setup + 399€/mes</option><option value="scout_enterprise">Scout Enterprise — 499€ setup + 699€/mes (white label)</option><option value="itp">Calculadora ITP — 299€ setup + 99€/mes (white label)</option><option value="gestoria_ia">Gestoría IA — 399€ setup + 299€/mes (chatbot + calculadora ITP integrada)</option></select></div>
       </div>
       <div class="g2 mb">
         <div><label>Email contacto</label><input type="email" id="fEm" placeholder="info@cliente.es" maxlength="100"></div>
@@ -295,6 +296,57 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
         </div>
       </div>
 
+      <!-- MÓDULO GESTORÍA IA -->
+      <div id="gestoriaIaSection" style="display:none">
+        <div class="stitle">⚙️ Configuración Gestoría IA</div>
+        <div class="itp-wrap" style="background:rgba(124,58,237,.04);border-color:rgba(124,58,237,.18)">
+          <div class="itp-info" style="background:rgba(124,58,237,.06);border-color:rgba(124,58,237,.15);color:#a78bfa">Chatbot conversacional con calculadora ITP integrada. Genera un script HTML autocontenido (sin dependencias externas) listo para WordPress, Joomla, HTML, Wix o Shopify.</div>
+          <div class="g2 mb">
+            <div><label>Nombre gestoría</label><input type="text" id="fGiaNombre" placeholder="Gestoría Martínez" maxlength="80"></div>
+            <div><label>Color principal</label><input type="color" id="fGiaColor" value="#7c3aed"></div>
+          </div>
+          <div class="g2 mb">
+            <div><label>Teléfono / WhatsApp</label><input type="tel" id="fGiaTel" placeholder="612345678" maxlength="20"></div>
+            <div><label>Honorarios gestoría (€)</label><input type="number" id="fGiaHon" placeholder="150" value="150" min="0" step="1"></div>
+          </div>
+          <div class="g2 mb">
+            <div>
+              <label>Comunidad autónoma por defecto</label>
+              <select id="fGiaCcaa">
+                <option value="madrid">Madrid (6%)</option>
+                <option value="cataluna">Cataluña (10%)</option>
+                <option value="andalucia">Andalucía (8%)</option>
+                <option value="valencia">Valencia (8%)</option>
+                <option value="paisvasco">País Vasco (4%)</option>
+                <option value="galicia">Galicia (8%)</option>
+                <option value="aragon">Aragón (8%)</option>
+                <option value="clm">Castilla-La Mancha (9%)</option>
+                <option value="cyl">Castilla y León (8%)</option>
+                <option value="murcia">Murcia (8%)</option>
+                <option value="asturias">Asturias (8%)</option>
+                <option value="cantabria">Cantabria (8%)</option>
+                <option value="extremadura">Extremadura (8%)</option>
+                <option value="navarra">Navarra (4%)</option>
+                <option value="larioja">La Rioja (8%)</option>
+                <option value="baleares">Baleares (8%)</option>
+                <option value="canarias">Canarias (5,5%)</option>
+                <option value="ceuta">Ceuta (4%)</option>
+                <option value="melilla">Melilla (4%)</option>
+                <option value="otras">Otras (8%)</option>
+              </select>
+            </div>
+            <div style="display:flex;align-items:flex-end;padding-bottom:8px">
+              <label style="display:flex;align-items:center;gap:8px;color:#a78bfa;text-transform:none;letter-spacing:0;font-size:.82rem;font-weight:600;cursor:pointer">
+                <input type="checkbox" id="fGiaDgt" checked style="width:16px;height:16px;accent-color:#7c3aed">
+                Tasas DGT incluidas (≈55,70€)
+              </label>
+            </div>
+          </div>
+          <div class="mb"><label>Texto aviso legal</label><textarea id="fGiaAviso" rows="2" maxlength="300" placeholder="Cálculo orientativo basado en valores fiscales BOE. El gestor verificará el importe definitivo.">Cálculo orientativo basado en valores fiscales BOE. El gestor verificará el importe definitivo.</textarea></div>
+        </div>
+      </div>
+      <!-- FIN MÓDULO GESTORÍA IA -->
+
       <div class="flex" style="margin-top:16px;justify-content:space-between">
         <div class="flex">
           <button class="btn btn-p" onclick="saveF()" id="saveBtn">Guardar</button>
@@ -355,10 +407,12 @@ var PACK_PRICES={
   scout_starter:199,          // 199€/mes (setup 299€ aparte)
   scout_agency:399,           // 399€/mes (setup 399€ aparte)
   scout_enterprise:699,       // 699€/mes (setup 499€ aparte) - white label
-  itp:99                      // 99€/mes (setup 299€ aparte) - white label calculadora ITP
+  itp:99,                     // 99€/mes (setup 299€ aparte) - white label calculadora ITP
+  gestoria_ia:299             // 299€/mes (setup 399€ aparte) - chatbot + calculadora ITP integrada
 };
 var CHATBOT_PACKS={spark:1};
 var ITP_PACKS={itp:1};
+var GESTORIA_IA_PACKS={gestoria_ia:1};
 var OBSOLETE_PACKS={basic:1,advance:1,pyme:1,enterprise_n8n:1,consultor_rag:1,empresa_rag:1,premium_rag:1,scout:1};
 var ghToken='';
 var lics={};
@@ -434,6 +488,94 @@ function codeItp(k){
 }
 // === FIN MÓDULO ITP ===
 
+// === MÓDULO GESTORÍA IA ===
+function codeGestoriaIA(k){
+  var l=lics[k];if(!l)return;
+  var gia=l.gestoriaIa||{};
+  var nombre=gia.nombre||l.biz||'Gestoría';
+  var color=gia.color||'#7c3aed';
+  var tel=(gia.tel||l.phone||'').replace(/[^0-9]/g,'');
+  var honorarios=parseFloat(gia.honorarios)||0;
+  var ccaaDef=gia.ccaa||'madrid';
+  var tasasDgt=gia.tasasDgt!==false;
+  var aviso=gia.aviso||'Es una estimación orientativa. El gestor verificará el valor exacto con el BOE oficial.';
+
+  var CFG={
+    nombre:nombre,
+    color:color,
+    tel:tel,
+    honorarios:honorarios,
+    ccaaDef:ccaaDef,
+    tasasDgt:tasasDgt,
+    aviso:aviso
+  };
+
+  var h='';
+  h+='<!-- Gestoría IA · '+nombre+' (WhiteMoon) -->\n';
+  h+='<style>\n';
+  h+='#wm-gia-fab{position:fixed;bottom:24px;right:24px;width:60px;height:60px;border-radius:50%;background:'+color+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.25);z-index:999998;border:none;font-family:system-ui,-apple-system,Segoe UI,sans-serif;transition:transform .2s}\n';
+  h+='#wm-gia-fab:hover{transform:scale(1.08)}\n';
+  h+='#wm-gia-win{position:fixed;bottom:24px;right:24px;width:360px;max-width:calc(100vw - 24px);height:560px;max-height:calc(100vh - 48px);background:#fff;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.25);display:none;flex-direction:column;overflow:hidden;z-index:999999;font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#1a1a2e}\n';
+  h+='#wm-gia-hd{background:'+color+';color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:15px}\n';
+  h+='#wm-gia-cls{cursor:pointer;font-size:22px;line-height:1;background:none;border:none;color:#fff;padding:0 4px}\n';
+  h+='#wm-gia-msgs{flex:1;overflow-y:auto;padding:14px;background:#f7f7fb;display:flex;flex-direction:column;gap:8px}\n';
+  h+='.wm-gia-m{max-width:85%;padding:10px 13px;border-radius:14px;font-size:14px;line-height:1.45;word-wrap:break-word;animation:wmGiaIn .25s ease}\n';
+  h+='.wm-gia-m-bot{background:#fff;color:#1a1a2e;border:1px solid #e5e5ef;align-self:flex-start;border-bottom-left-radius:4px}\n';
+  h+='.wm-gia-m-user{background:'+color+';color:#fff;align-self:flex-end;border-bottom-right-radius:4px}\n';
+  h+='@keyframes wmGiaIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}\n';
+  h+='.wm-gia-bts{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}\n';
+  h+='.wm-gia-bt{background:#fff;color:'+color+';border:1px solid '+color+';border-radius:18px;padding:7px 13px;font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s}\n';
+  h+='.wm-gia-bt:hover{background:'+color+';color:#fff}\n';
+  h+='#wm-gia-input{display:flex;border-top:1px solid #e5e5ef;background:#fff;padding:10px}\n';
+  h+='#wm-gia-txt{flex:1;border:1px solid #e5e5ef;border-radius:20px;padding:9px 14px;font-size:14px;outline:none;font-family:inherit;color:#1a1a2e;background:#fff}\n';
+  h+='#wm-gia-txt:focus{border-color:'+color+'}\n';
+  h+='#wm-gia-snd{background:'+color+';color:#fff;border:none;width:38px;height:38px;border-radius:50%;margin-left:8px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;font-family:inherit}\n';
+  h+='#wm-gia-snd:hover{filter:brightness(.92)}\n';
+  h+='#wm-gia-foot{font-size:10px;color:#aaa;text-align:center;padding:4px 8px;background:#fff;border-top:1px solid #f0f0f5}\n';
+  h+='@media(max-width:480px){#wm-gia-win{width:100vw;height:100vh;max-height:100vh;bottom:0;right:0;border-radius:0}}\n';
+  h+='</style>\n';
+  h+='<button id="wm-gia-fab" type="button" aria-label="Abrir chat">💬</button>\n';
+  h+='<div id="wm-gia-win" role="dialog" aria-label="Asistente '+nombre+'">\n';
+  h+='  <div id="wm-gia-hd"><span>💼 '+nombre+'</span><button id="wm-gia-cls" type="button" aria-label="Cerrar">×</button></div>\n';
+  h+='  <div id="wm-gia-msgs"></div>\n';
+  h+='  <div id="wm-gia-input"><input id="wm-gia-txt" type="text" placeholder="Escribe tu mensaje..." autocomplete="off"><button id="wm-gia-snd" type="button" aria-label="Enviar">➤</button></div>\n';
+  h+='  <div id="wm-gia-foot">Powered by WhiteMoon · IA</div>\n';
+  h+='</div>\n';
+  h+='<script>\n';
+  h+='(function(){\n';
+  h+='var CFG='+JSON.stringify(CFG).replace(/<\/(script)/gi,'<\\/$1')+';\n';
+  h+='var CCAA={madrid:{l:"Madrid",t:6},cataluna:{l:"Cataluña",t:10},andalucia:{l:"Andalucía",t:8},valencia:{l:"Valencia",t:8},paisvasco:{l:"País Vasco",t:4},galicia:{l:"Galicia",t:8},aragon:{l:"Aragón",t:8},clm:{l:"Castilla-La Mancha",t:9},cyl:{l:"Castilla y León",t:8},murcia:{l:"Murcia",t:8},asturias:{l:"Asturias",t:8},cantabria:{l:"Cantabria",t:8},extremadura:{l:"Extremadura",t:8},navarra:{l:"Navarra",t:4},larioja:{l:"La Rioja",t:8},baleares:{l:"Baleares",t:8},canarias:{l:"Canarias",t:5.5},ceuta:{l:"Ceuta",t:4},melilla:{l:"Melilla",t:4},otras:{l:"Otras",t:8}};\n';
+  h+='var DEP=[100,84,67,56,47,39,34,28,24,19,17];\n';
+  h+='var state={step:"inicio",data:{}};\n';
+  h+='var fab,win,cls,msgs,txt,snd;\n';
+  h+='function $(i){return document.getElementById(i)}\n';
+  h+='function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}\n';
+  h+='function fmt(n){try{return Number(n).toLocaleString("es-ES",{minimumFractionDigits:2,maximumFractionDigits:2})}catch(e){return String(n)}}\n';
+  h+='function scroll(){msgs.scrollTop=msgs.scrollHeight}\n';
+  h+='function addBot(html,btns){var d=document.createElement("div");d.className="wm-gia-m wm-gia-m-bot";d.innerHTML=html;msgs.appendChild(d);if(btns&&btns.length){var b=document.createElement("div");b.className="wm-gia-bts";btns.forEach(function(o){var x=document.createElement("button");x.type="button";x.className="wm-gia-bt";x.textContent=o.label;x.onclick=function(){addUser(o.label);handle({btn:o.value})};b.appendChild(x)});msgs.appendChild(b)}scroll()}\n';
+  h+='function addUser(text){var d=document.createElement("div");d.className="wm-gia-m wm-gia-m-user";d.textContent=text;msgs.appendChild(d);scroll()}\n';
+  h+='function start(){addBot("¡Hola! 👋 Soy el asistente de <b>"+esc(CFG.nombre)+"</b>.<br>¿En qué puedo ayudarte?",[{label:"🚗 Calcular transferencia",value:"calc"},{label:"📋 Otros trámites",value:"otros"},{label:"📞 Hablar con el gestor",value:"gestor"}]);state.step="inicio"}\n';
+  h+='function calcular(){var d=state.data;var c=CCAA[d.ccaa]||CCAA[CFG.ccaaDef]||CCAA.otras;var ay=new Date().getFullYear();var years=ay-d.anyo;if(years<0)years=0;var depPct=(years>=11)?10:DEP[years];var valorFiscal=Math.round(d.precio*depPct/100);var base=Math.max(valorFiscal,d.precio);var itp=Math.round(base*c.t)/100;var dgt=CFG.tasasDgt?55.70:0;var hon=Number(CFG.honorarios)||0;var total=Math.round((itp+dgt+hon)*100)/100;d.itp=itp;d.total=total;d.ccaaLabel=c.l;d.ccaaTipo=c.t;d.valorFiscal=valorFiscal;var html="📊 <b>Estimación de costes para tu transferencia:</b><br><br>";html+="💰 Precio contrato: "+fmt(d.precio)+"€<br>";html+="📉 Valor fiscal BOE: "+fmt(valorFiscal)+"€<br>";html+="🏛️ ITP estimado ("+esc(c.l)+" "+c.t+"%): "+fmt(itp)+"€<br>";if(dgt)html+="🚗 Tasas DGT: "+fmt(dgt)+"€<br>";html+="👔 Honorarios gestoría: "+fmt(hon)+"€<br>";html+="─────────────────<br>";html+="💵 <b>TOTAL estimado: "+fmt(total)+"€</b><br><br>";html+="<small>⚠️ "+esc(CFG.aviso)+"</small><br><br>";html+="¿Quieres que te llamemos para gestionar el trámite?";addBot(html,[{label:"✅ Sí, gestionar",value:"lead"},{label:"❓ Tengo dudas",value:"lead"}]);state.step="resultado"}\n';
+  h+='function leadName(){addBot("¿Me dices tu nombre?");state.step="lead_name"}\n';
+  h+='function leadEnd(){var d=state.data;addBot("✅ Perfecto <b>"+esc(d.nombre)+"</b>. El equipo de <b>"+esc(CFG.nombre)+"</b> te llamará para confirmar el cálculo y gestionar el trámite. ¡Hasta pronto!");if(CFG.tel){var t=String(CFG.tel).replace(/[^0-9]/g,"");var msg="Nuevo lead transferencia:\\n";msg+="Nombre: "+(d.nombre||"")+"\\n";msg+="Tel: "+(d.telefono||"")+"\\n";if(d.anyo)msg+="Vehículo: "+d.anyo+"\\n";if(d.precio)msg+="Precio contrato: "+d.precio+"€\\n";if(d.ccaaLabel)msg+="CCAA: "+d.ccaaLabel+"\\n";if(d.itp!=null)msg+="ITP estimado: "+d.itp+"€\\n";if(d.total!=null)msg+="Total estimado: "+d.total+"€";var url="https://wa.me/34"+t+"?text="+encodeURIComponent(msg);setTimeout(function(){window.open(url,"_blank","noopener")},1500)}state.step="fin"}\n';
+  h+='function handle(input){var step=state.step;if(input.btn){if(step==="inicio"){if(input.btn==="calc"){addBot("¿Cuál es el precio de compra del vehículo según el contrato? (en €)");state.step="ask_precio";return}if(input.btn==="otros"){addBot("¿Qué trámite necesitas?",[{label:"📋 Cambio titularidad",value:"tram"},{label:"🏍️ Moto/ciclomotor",value:"tram"},{label:"🚌 Vehículo especial",value:"tram"},{label:"❓ Otro",value:"tram"}]);state.step="otros";return}if(input.btn==="gestor"){leadName();return}}if(step==="otros"){leadName();return}if(step==="ask_ccaa"){state.data.ccaa=input.btn;calcular();return}if(step==="resultado"){leadName();return}}var t=(input.text||"").trim();if(!t)return;if(step==="ask_precio"){var p=parseFloat(t.replace(/[^0-9,.]/g,"").replace(/\\./g,"").replace(",","."));if(!p&&p!==0){p=parseFloat(t.replace(/[^0-9.]/g,""))}if(!p||p<=0){addBot("Por favor, dime un precio válido en € (ej: 8000)");return}state.data.precio=p;addBot("¿Año de matriculación del vehículo?");state.step="ask_anyo";return}if(step==="ask_anyo"){var y=parseInt(t.replace(/\\D/g,""),10);if(!y||y<1990||y>2026){addBot("Por favor, indica un año entre 1990 y 2026");return}state.data.anyo=y;addBot("¿En qué comunidad autónoma vas a hacer la transferencia?",[{label:"Madrid (6%)",value:"madrid"},{label:"Cataluña (10%)",value:"cataluna"},{label:"Andalucía (8%)",value:"andalucia"},{label:"Valencia (8%)",value:"valencia"},{label:"País Vasco (4%)",value:"paisvasco"},{label:"Galicia (8%)",value:"galicia"},{label:"Aragón (8%)",value:"aragon"},{label:"Castilla-La Mancha (9%)",value:"clm"},{label:"Castilla y León (8%)",value:"cyl"},{label:"Otras (8%)",value:"otras"}]);state.step="ask_ccaa";return}if(step==="lead_name"){state.data.nombre=t;addBot("Perfecto <b>"+esc(t)+"</b>, ¿tu teléfono de contacto?");state.step="lead_tel";return}if(step==="lead_tel"){var tel=t.replace(/\\D/g,"");if(tel.length!==9){addBot("Por favor, indica un teléfono válido (9 dígitos).");return}state.data.telefono=tel;leadEnd();return}}\n';
+  h+='function send(){var t=txt.value.trim();if(!t)return;txt.value="";addUser(t);handle({text:t})}\n';
+  h+='function ready(fn){if(document.readyState!=="loading"){fn()}else{document.addEventListener("DOMContentLoaded",fn)}}\n';
+  h+='ready(function(){fab=$("wm-gia-fab");win=$("wm-gia-win");cls=$("wm-gia-cls");msgs=$("wm-gia-msgs");txt=$("wm-gia-txt");snd=$("wm-gia-snd");if(!fab||!win)return;fab.onclick=function(){win.style.display="flex";fab.style.display="none";if(!msgs.children.length)start()};cls.onclick=function(){win.style.display="none";fab.style.display="flex"};snd.onclick=send;txt.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();send()}})});\n';
+  h+='})();\n';
+  h+='<\/script>\n';
+  h+='<!-- Fin Gestoría IA · '+nombre+' -->';
+
+  $('codeCTitle').innerHTML='💼 Código Gestoría IA — '+escapeHtml(nombre);
+  $('codeCDesc').innerHTML='Pegar antes de <code>&lt;/body&gt;</code> en la web del cliente. HTML autocontenido (sin dependencias externas).';
+  $('codeO').textContent=h;
+  $('codeC').style.display='block';
+  var ic=$('installContent');if(ic){ic.style.display='none';ic.innerHTML=''}
+  $('codeC').scrollIntoView({behavior:'smooth'});
+  toast('Código Gestoría IA generado para '+nombre,'info');
+}
+// === FIN MÓDULO GESTORÍA IA ===
+
 function doLogin(){
   var t=$('ghToken').value.trim();
   if(!t){toast('Introduce un token','err');return}
@@ -491,7 +633,7 @@ function render(){
     var l=lics[k],rc=l.responses?Object.keys(l.responses).filter(function(x){return!x.startsWith('_')}).length:0;
     var d=daysUntil(l.expires),ec='',eb='';
     if(d!==null){if(d<0){ec='expired';eb='<br><small style="color:#ef4444">⚠ Expirada hace '+Math.abs(d)+'d</small>'}else if(d<=30){ec='expire-soon';eb='<br><small style="color:#f59e0b">⏰ En '+d+'d</small>'}}
-    h+='<tr><td><span class="biz">'+escapeHtml(l.biz)+'</span>'+(l.domain?'<br><span class="domain">'+escapeHtml(l.domain)+'</span>':'')+(l.template?'<br><span class="badge" style="background:rgba(124,58,237,.1);color:#a78bfa;border:1px solid rgba(124,58,237,.2);margin-top:3px">🏷️ '+escapeHtml(l.template)+'</span>':'')+(l.itp?'<br><span class="badge badge-itp" style="margin-top:4px">🧮 ITP</span>':'')+'</td>';
+    h+='<tr><td><span class="biz">'+escapeHtml(l.biz)+'</span>'+(l.domain?'<br><span class="domain">'+escapeHtml(l.domain)+'</span>':'')+(l.template?'<br><span class="badge" style="background:rgba(124,58,237,.1);color:#a78bfa;border:1px solid rgba(124,58,237,.2);margin-top:3px">🏷️ '+escapeHtml(l.template)+'</span>':'')+(l.itp?'<br><span class="badge badge-itp" style="margin-top:4px">🧮 ITP</span>':'')+(GESTORIA_IA_PACKS[l.pack]?'<br><span class="badge" style="background:rgba(124,58,237,.15);color:#a78bfa;border:1px solid rgba(124,58,237,.25);margin-top:4px">💼 Gestoría IA</span>':'')+'</td>';
     h+='<td class="token">'+escapeHtml(k)+'</td><td>'+escapeHtml(l.pack||'—')+(OBSOLETE_PACKS[l.pack]?'<br><small style="color:#f59e0b">⚠ Pack obsoleto - migrar</small>':'')+'</td>';
     h+='<td><span class="badge '+(l.active?'badge-on':'badge-off')+'">'+(l.active?'ACTIVA':'INACTIVA')+'</span></td>';
     h+='<td class="'+ec+'">'+escapeHtml(l.expires||'—')+eb+'</td><td style="color:#06b6d4">'+rc+'</td>';
@@ -500,6 +642,7 @@ function render(){
     h+='<button class="btn btn-c btn-xs" onclick="edit(\''+escapeHtml(k)+'\')">✎</button>';
     h+='<button class="btn btn-o btn-xs" onclick="code(\''+escapeHtml(k)+'\')"><\/></button>';
     if(l.itp)h+='<button class="btn btn-xs" style="background:rgba(6,182,212,.1);color:#06b6d4;border:1px solid rgba(6,182,212,.2)" onclick="codeItp(\''+escapeHtml(k)+'\')">🧮</button>';
+    if(GESTORIA_IA_PACKS[l.pack])h+='<button class="btn btn-xs" style="background:rgba(124,58,237,.1);color:#a78bfa;border:1px solid rgba(124,58,237,.2)" onclick="codeGestoriaIA(\''+escapeHtml(k)+'\')" title="Generar código Gestoría IA">💼</button>';
     h+='<button class="btn btn-y btn-xs" onclick="dupl(\''+escapeHtml(k)+'\')">⎘</button>';
     h+='<button class="btn btn-xs" style="background:rgba(239,68,68,.06);color:#ef4444;border:1px solid rgba(239,68,68,.12)" onclick="del(\''+escapeHtml(k)+'\')">✕</button>';
     h+='</td></tr>';
@@ -559,6 +702,7 @@ function showAdd(){
   $('fTpl').value='';$('tplWarn').style.display='none';$('tplWarn').innerHTML='';
   $('fItp').checked=false;$('itpBody').className='itp-body';
   $('fItpNombre').value='';$('fItpColor').value='#1565C0';$('fItpTel').value='';$('fItpLogo').value='';$('fItpCta').value='Solicitar gestión del ITP';
+  $('fGiaNombre').value='';$('fGiaColor').value='#7c3aed';$('fGiaTel').value='';$('fGiaHon').value='150';$('fGiaCcaa').value='madrid';$('fGiaDgt').checked=true;$('fGiaAviso').value='Cálculo orientativo basado en valores fiscales BOE. El gestor verificará el importe definitivo.';
   var t=new Date().toISOString().split('T')[0];$('fCr').value=t;
   $('fEx').value=new Date(new Date().setFullYear(new Date().getFullYear()+1)).toISOString().split('T')[0];
   $('frm').style.display='block';$('frm').scrollIntoView({behavior:'smooth'});
@@ -588,6 +732,15 @@ function edit(k){
   $('fItp').checked=!!l.itp;$('itpBody').className='itp-body'+(l.itp?' show':'');
   $('fItpNombre').value=itp.nombre||'';$('fItpColor').value=itp.color||'#1565C0';
   $('fItpTel').value=itp.tel||'';$('fItpLogo').value=itp.logo||'';$('fItpCta').value=itp.cta||'Solicitar gestión del ITP';
+  // Gestoría IA
+  var gia=l.gestoriaIa||{};
+  $('fGiaNombre').value=gia.nombre||'';
+  $('fGiaColor').value=gia.color||'#7c3aed';
+  $('fGiaTel').value=gia.tel||'';
+  $('fGiaHon').value=(gia.honorarios!=null?gia.honorarios:150);
+  $('fGiaCcaa').value=gia.ccaa||'madrid';
+  $('fGiaDgt').checked=gia.tasasDgt!==false;
+  $('fGiaAviso').value=gia.aviso||'Cálculo orientativo basado en valores fiscales BOE. El gestor verificará el importe definitivo.';
   _toggleChatbotSection();
   $('frm').style.display='block';$('frm').scrollIntoView({behavior:'smooth'});
 }
@@ -611,8 +764,11 @@ function _toggleChatbotSection(){
   var pack=$('fPk').value;
   var isChatbot=!!CHATBOT_PACKS[pack];
   var isItp=!!ITP_PACKS[pack];
-  $('chatbotSection').style.display=isChatbot?'':'none';
-  $('nonChatbotMsg').style.display=(isChatbot||isItp)?'none':'block';
+  var isGia=!!GESTORIA_IA_PACKS[pack];
+  // El chatbot genérico se oculta para Gestoría IA (tiene su propio bloque)
+  $('chatbotSection').style.display=(isChatbot&&!isGia)?'':'none';
+  $('gestoriaIaSection').style.display=isGia?'':'none';
+  $('nonChatbotMsg').style.display=(isChatbot||isItp||isGia)?'none':'block';
   // Para pack ITP: auto-activar la sección Calculadora ITP en alta
   if(isItp&&$('fMode').value==='add'&&!$('fItp').checked){
     $('fItp').checked=true;
@@ -630,7 +786,8 @@ var PACK_DEFAULTS={
   scout_starter:   {label:'Scout Starter',    setup:299,  mrr:199},
   scout_agency:    {label:'Scout Agency',     setup:399,  mrr:399},
   scout_enterprise:{label:'Scout Enterprise', setup:499,  mrr:699},
-  itp:             {label:'Calculadora ITP',  setup:299,  mrr:99}
+  itp:             {label:'Calculadora ITP',  setup:299,  mrr:99},
+  gestoria_ia:     {label:'Gestoría IA',       setup:399,  mrr:299}
 };
 
 function onPackChange(){
@@ -688,12 +845,29 @@ function saveF(){
       cta:$('fItpCta').value.trim()||'Solicitar gestión del ITP'
     };
   }
-  lics[tk]={biz:biz,domain:$('fDom').value.trim(),pack:$('fPk').value,active:mode==='edit'?(lics[$('fOrig').value]?lics[$('fOrig').value].active:true):true,created:$('fCr').value,expires:$('fEx').value,contact:$('fEm').value.trim(),phone:$('fPh').value.trim(),notes:$('fNo').value.trim(),botName:$('fBn').value.trim()||'Asistente',color:$('fCo').value.trim()||'#7c3aed',calendar:$('fCal').value!=='false',greeting:$('fGr').value.trim(),serviceButtons:bt?bt.split(',').map(function(s){return s.trim()}).filter(function(s){return s}):[],responses:Object.keys(resp).length?resp:undefined,pendingPayments:pp.length?pp:undefined,template:$('fTpl').value||undefined,itp:itpData||undefined,updated:new Date().toISOString()};
+  // Guardar datos Gestoría IA (sólo si pack = gestoria_ia)
+  var giaData=null;
+  if(GESTORIA_IA_PACKS[$('fPk').value]){
+    giaData={
+      nombre:$('fGiaNombre').value.trim()||biz,
+      color:$('fGiaColor').value||'#7c3aed',
+      tel:$('fGiaTel').value.trim(),
+      honorarios:parseFloat($('fGiaHon').value)||0,
+      ccaa:$('fGiaCcaa').value||'madrid',
+      tasasDgt:$('fGiaDgt').checked,
+      aviso:$('fGiaAviso').value.trim()
+    };
+  }
+  lics[tk]={biz:biz,domain:$('fDom').value.trim(),pack:$('fPk').value,active:mode==='edit'?(lics[$('fOrig').value]?lics[$('fOrig').value].active:true):true,created:$('fCr').value,expires:$('fEx').value,contact:$('fEm').value.trim(),phone:$('fPh').value.trim(),notes:$('fNo').value.trim(),botName:$('fBn').value.trim()||'Asistente',color:$('fCo').value.trim()||'#7c3aed',calendar:$('fCal').value!=='false',greeting:$('fGr').value.trim(),serviceButtons:bt?bt.split(',').map(function(s){return s.trim()}).filter(function(s){return s}):[],responses:Object.keys(resp).length?resp:undefined,pendingPayments:pp.length?pp:undefined,template:$('fTpl').value||undefined,itp:itpData||undefined,gestoriaIa:giaData||undefined,updated:new Date().toISOString()};
   save((mode==='add'?'Alta':'Editar')+': '+biz).then(function(){toast(biz+(mode==='add'?' dado de alta ✅':' actualizado ✅'));hideF();if(mode==='add')code(tk)});
 }
 
 function code(k){
   var l=lics[k];if(!l)return;
+  if(GESTORIA_IA_PACKS[l.pack]){
+    codeGestoriaIA(k);
+    return;
+  }
   if(ITP_PACKS[l.pack]){
     if(l.itp){codeItp(k);return}
     $('codeCTitle').innerHTML='🧮 Calculadora ITP · '+escapeHtml(l.biz);

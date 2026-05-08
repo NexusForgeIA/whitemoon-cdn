@@ -82,6 +82,7 @@
       '#wm-gia-modal .gia-msg{max-width:85%;font-size:.83rem;line-height:1.5;padding:9px 13px;word-break:break-word;border-radius:12px;}',
       '#wm-gia-modal .gia-msg.gia-bot{background:#1a1a1a;color:#e5e7eb;border:1px solid '+CFG.color+';border-radius:12px 12px 12px 4px;align-self:flex-start;}',
       '#wm-gia-modal .gia-msg.gia-usr{background:'+CFG.color+';color:#fff;border-radius:12px 12px 4px 12px;align-self:flex-end;}',
+      '#wm-gia-modal .gia-warn{display:block;margin-top:6px;padding:8px 10px;background:rgba(245,158,11,.1);border-left:3px solid #f59e0b;border-radius:4px;color:#fbbf24;font-size:.72rem;line-height:1.4;font-style:italic;}',
       '#wm-gia-modal .gia-typing{display:flex;gap:5px;padding:11px 14px;background:#1a1a1a;border:1px solid '+CFG.color+';border-radius:12px 12px 12px 4px;align-self:flex-start;align-items:center;}',
       '#wm-gia-modal .gia-typing span{width:7px;height:7px;background:'+CFG.color+';border-radius:50%;animation:wm-gia-dot 1.2s ease-in-out infinite;}',
       '#wm-gia-modal .gia-typing span:nth-child(2){animation-delay:.2s;}',
@@ -335,7 +336,7 @@
       if(CFG.tasas > 0 || CFG.honorarios > 0){
         html += '<br>─────────────<br>💵 <b>TOTAL: '+fmtEur(total)+'</b>';
       }
-      html += '<br><br>⚠️ <i>Estimación orientativa.</i>';
+      html += '<br><br><span class="gia-warn">⚠️ Cálculo orientativo basado en el valor del contrato. Hacienda puede aplicar el valor mínimo del vehículo si es superior al precio de compraventa. Un/a gestor/a te llamará para darte el cálculo exacto.</span>';
       bot(html);
 
       setTimeout(function(){

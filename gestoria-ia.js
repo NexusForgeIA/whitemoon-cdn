@@ -331,7 +331,7 @@
         var p = parseFloat(text.replace(/\./g,'').replace(/,/g,'.'));
         if(isNaN(p) || p <= 0){ bot('⚠️ Introduce un precio válido.'); return; }
         data.precio = p; userMsg(fmtEur(p)); flowStep = 6;
-        bot('¿En qué <b>Comunidad Autónoma</b> vas a matricularlo?');
+        bot('¿En qué <b>Comunidad Autónoma</b> se va a realizar la transferencia?');
         setInputState(false);
         showOpts(CCAA_LIST, function(ccaa){
           data.ccaa = ccaa;

@@ -296,11 +296,13 @@
             return;
           }
           bot('Para la venta necesitas:<br>'+
-              '📄 DNI del vendedor<br>'+
+              '📄 DNI del vendedor y comprador<br>'+
               '📋 Permiso de circulación original<br>'+
               '🔧 Ficha técnica del vehículo<br>'+
-              '🧾 Recibo del impuesto de circulación (último año)<br><br>'+
-              '¿Quieres que te llamemos para gestionar el trámite?');
+              '📝 Contrato de compraventa firmado por ambas partes<br>'+
+              '🧾 Recibo del impuesto de circulación (último año)'+
+              '<br><br><span class="gia-warn">⚠️ El contrato de compraventa es imprescindible y debe incluir el precio real de venta — Hacienda lo usará como base para calcular el ITP.</span>'+
+              '<br><br>¿Quieres que te llamemos para gestionar el trámite?');
           showOpts(['Sí, gestionar','Tengo más dudas'], function(){
             startCapture();
           });

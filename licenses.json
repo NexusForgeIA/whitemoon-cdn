@@ -1,3 +1,21 @@
 {
-  "licenses": {}
+  "licenses": {
+    "WM-1e41ba44f655a06e46681758": {
+      "biz": "WHITEMOON AGENCIA IA",
+      "domain": "whitemoon.es",
+      "pack": "spark",
+      "active": true,
+      "created": "2026-05-09",
+      "expires": "2099-05-09",
+      "contact": "comercial@whitemoon.es",
+      "phone": "643199580",
+      "notes": "",
+      "botName": "Asistente",
+      "color": "#7c3aed",
+      "calendar": true,
+      "greeting": "",
+      "serviceButtons": [],
+      "updated": "2026-05-09T14:22:38.616Z"
+    }
+  }
 }

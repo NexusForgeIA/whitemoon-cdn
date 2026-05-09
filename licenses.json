@@ -1,3 +1,46 @@
 {
-  "licenses": {}
+  "licenses": {
+    "WM-7b2ad30ad3bd4af3720746f3": {
+      "biz": "Gestoría Prueba WhiteMoon",
+      "domain": "",
+      "pack": "gestoria_ia",
+      "active": true,
+      "created": "2026-05-09",
+      "expires": "2027-05-09",
+      "contact": "cristobalmartinezcomas@gmail.com",
+      "phone": "643199580",
+      "notes": "",
+      "botName": "Asistente",
+      "color": "#7c3aed",
+      "calendar": true,
+      "greeting": "",
+      "serviceButtons": [],
+      "pendingPayments": [
+        {
+          "concept": "Setup Gestoría IA",
+          "amount": 399,
+          "dueDate": "2026-05-09",
+          "paid": false
+        },
+        {
+          "concept": "Renovación anual Gestoría IA",
+          "amount": 3588,
+          "dueDate": "2027-05-09",
+          "paid": false
+        }
+      ],
+      "itp": {
+        "nombre": "Gestoría Prueba WhiteMoon",
+        "color": "#1565c0",
+        "tel": "",
+        "logo": "",
+        "cta": "Solicitar gestión del ITP",
+        "honorarios": 140,
+        "tasas": true,
+        "ccaa": "",
+        "direccion": "Calle madrid 9"
+      },
+      "updated": "2026-05-09T09:24:27.288Z"
+    }
+  }
 }

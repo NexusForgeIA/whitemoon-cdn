@@ -292,38 +292,14 @@
         }
 
         // vendedor
-        var hon = CFG.honorarios > 0 ? fmtEur(CFG.honorarios) : '(consultar)';
-        bot('Como vendedor, te gestionamos toda la transferencia.<br>'+
-            'Los honorarios de <b>'+esc(CFG.nombre)+'</b> son <b>'+hon+'</b> más las tasas de la DGT (~55,70€).<br><br>'+
-            '¿Quieres que te llamemos para confirmar la documentación necesaria?');
-        showOpts([
-          {label:'Sí, llamadme',              value:'llamar'},
-          {label:'¿Qué documentos necesito?', value:'docs'}
-        ], function(v){
-          data.tramite = 'Transferencia - Vendedor';
-          if(v === 'llamar'){
-            startCapture();
-            return;
-          }
-          bot('Para la venta necesitas:<br>'+
-              '📄 DNI del vendedor y comprador<br>'+
-              '📋 Permiso de circulación original<br>'+
-              '🔧 Ficha técnica del vehículo<br>'+
-              '📝 Contrato de compraventa firmado por ambas partes<br>'+
-              '🧾 Recibo del impuesto de circulación (último año)'+
-              '<br><br><span class="gia-warn">⚠️ El contrato de compraventa es imprescindible y debe incluir el precio real de venta — Hacienda lo usará como base para calcular el ITP.</span>'+
-              '<br><br>¿Quieres que te llamemos para gestionar el trámite?');
-          showOpts(['Sí, gestionar','Tengo más dudas'], function(){
-            startCapture();
-          });
-        });
+        flowITP('Transferencia - Vendedor', 'Para calcular el ITP que pagará el comprador y gestionar la transferencia, necesito los datos del vehículo.');
       });
     }
 
     // ─── FLUJO ITP ────────────────────────────────────────────────────────────
-    function flowITP(tramiteLabel){
+    function flowITP(tramiteLabel, introMsg){
       data.tramite = tramiteLabel || 'Cálculo ITP vehículo';
-      bot('Vamos a calcular el ITP de tu vehículo paso a paso 🧮');
+      bot(introMsg || 'Vamos a calcular el ITP de tu vehículo paso a paso 🧮');
       flowStep = 1;
       activeFlow = 'itp';
       setTimeout(function(){

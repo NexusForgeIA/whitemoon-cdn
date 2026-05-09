@@ -244,8 +244,10 @@
     function showMainMenu(){
       activeFlow = null;
       flowStep = 0;
-      bot('¡Hola! 👋 Bienvenido/a a <b>'+esc(CFG.nombre)+'</b>.<br>¿En qué puedo ayudarte hoy?');
-      showOpts(MAIN_OPTS, function(v){ routeFlow(v); });
+      showTyping(function(){
+        addMsg('¡Hola! 👋 Bienvenido/a a <b>'+esc(CFG.nombre)+'</b>.<br>¿En qué puedo ayudarte hoy?', 'bot');
+        showOpts(MAIN_OPTS, function(v){ routeFlow(v); });
+      });
       setInputState(true, 'O escribe tu consulta...');
     }
 

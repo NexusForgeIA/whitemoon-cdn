@@ -1,3 +1,41 @@
 {
-  "licenses": {}
+  "licenses": {
+    "WM-bd41d3f0fb704728c75472b4": {
+      "biz": "Reformas Whitemoon",
+      "domain": "",
+      "pack": "spark",
+      "active": true,
+      "created": "2026-05-09",
+      "expires": "2099-05-09",
+      "contact": "cristobalmartinezcomas@gmail.com",
+      "phone": "643199580",
+      "notes": "",
+      "botName": "Asistente",
+      "color": "#e67e22",
+      "calendar": false,
+      "greeting": "¡Hola! 👋 Bienvenido/a. ¿En qué puedo ayudarte?",
+      "serviceButtons": [
+        "🏠 Reforma integral",
+        "🚿 Reforma de baño",
+        "🍳 Reforma de cocina",
+        "🏢 Local comercial",
+        "💶 ¿Cuánto cuesta?"
+      ],
+      "responses": {
+        "reforma integral,integral,completa,piso,vivienda,casa": "Hacemos reformas integrales de principio a fin. Coordinamos todos los gremios para que no tengas que preocuparte de nada. ¿Quieres que te llamemos para una visita gratuita sin compromiso?",
+        "baño,bano,ducha,aseo,wc": "Reformamos baños completos en 5-7 días con materiales de primera calidad. ¿Quieres presupuesto gratuito?",
+        "cocina,cocinaa": "Cocinas a medida con instalación de fontanería y electricidad incluida. ¿Te llamamos para una visita sin compromiso?",
+        "local,comercial,negocio,oficina": "Reformamos locales comerciales adaptados a normativa vigente. Apertura en plazo garantizado. ¿Quieres presupuesto?",
+        "precio,cuanto,coste,cuesta,presupuesto": "El presupuesto es siempre gratuito y sin compromiso. Depende del tipo de reforma y metros. ¿Te llamamos para valorarlo?",
+        "urgente,rapido,plazo,cuando": "Trabajamos con plazos acordados y los cumplimos. Si tienes urgencia lo tenemos en cuenta. ¿Me dices qué necesitas?",
+        "garantia,calidad,seguro": "Ofrecemos 5 años de garantía en mano de obra. Precio cerrado sin sorpresas. ¿Quieres saber más?",
+        "_ask_name": "Para enviarte el presupuesto sin compromiso, ¿me dices tu nombre?",
+        "_ask_phone": "Perfecto {nombre}. ¿Tu teléfono de contacto?",
+        "_summary": "Perfecto {nombre}. Nuestro equipo te llamará en menos de 1 hora para darte presupuesto gratuito. ¡Que tengas un excelente día! 🌟",
+        "_goodbye": "¡Hasta pronto! Si necesitas algo más, estamos aquí."
+      },
+      "template": "reformas",
+      "updated": "2026-05-09T10:15:12.597Z"
+    }
+  }
 }

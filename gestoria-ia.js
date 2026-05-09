@@ -254,32 +254,66 @@
 
     // ─── FLUJO TRANSFERENCIA ──────────────────────────────────────────────────
     function flowTransfer(){
-      data.tramite = 'Transferencia de vehículo';
-      bot('¿Estás comprando o vendiendo el vehículo?');
-      showOpts(['Comprando','Vendiendo','Los dos'], function(v){
-        data.transfer_rol = v;
-        bot('¿Tienes toda la documentación preparada?');
-        showOpts(['Sí tengo todo','Me falta algo','No sé qué necesito'], function(d2){
-          data.transfer_doc = d2;
-          if(d2 === 'Sí tengo todo'){
-            bot('Perfecto. Con todo listo el trámite es muy ágil ✅');
-          } else {
-            bot('Para una transferencia necesitas:<br>'+
-              '📄 DNI de comprador y vendedor<br>'+
+      bot('¿Eres el comprador o el vendedor del vehículo?');
+      showOpts([
+        {label:'🛒 Soy el comprador', value:'comprador'},
+        {label:'💰 Soy el vendedor',  value:'vendedor'},
+        {label:'Somos los dos',       value:'ambos'}
+      ], function(rol){
+        data.transfer_rol = rol;
+
+        if(rol === 'ambos'){
+          flowITP('Transferencia - Comprador y vendedor');
+          return;
+        }
+
+        if(rol === 'comprador'){
+          bot('Para calcular el coste total de tu transferencia necesito algunos datos del vehículo.<br>¿Tienes el precio de compraventa del contrato?');
+          showOpts(['Sí, lo tengo','No lo sé aún'], function(p){
+            if(p === 'Sí, lo tengo'){
+              flowITP('Transferencia - Comprador');
+            } else {
+              data.tramite = 'Transferencia - Comprador sin precio';
+              bot('Sin problema. ¿Me dices tu nombre y teléfono y te llamamos para calcular el coste exacto?');
+              setTimeout(startCapture, 1200);
+            }
+          });
+          return;
+        }
+
+        // vendedor
+        var hon = CFG.honorarios > 0 ? fmtEur(CFG.honorarios) : '(consultar)';
+        bot('Como vendedor, te gestionamos toda la transferencia.<br>'+
+            'Los honorarios de <b>'+esc(CFG.nombre)+'</b> son <b>'+hon+'</b> más las tasas de la DGT (~55,70€).<br><br>'+
+            '¿Quieres que te llamemos para confirmar la documentación necesaria?');
+        showOpts([
+          {label:'Sí, llamadme',              value:'llamar'},
+          {label:'¿Qué documentos necesito?', value:'docs'}
+        ], function(v){
+          data.tramite = 'Transferencia - Vendedor';
+          if(v === 'llamar'){
+            startCapture();
+            return;
+          }
+          bot('Para la venta necesitas:<br>'+
+              '📄 DNI del vendedor<br>'+
               '📋 Permiso de circulación original<br>'+
               '🔧 Ficha técnica del vehículo<br>'+
-              '🧾 Justificante pago impuesto municipal');
-          }
-          setTimeout(startCapture, 1400);
+              '🧾 Recibo del impuesto de circulación (último año)<br><br>'+
+              '¿Quieres que te llamemos para gestionar el trámite?');
+          showOpts(['Sí, gestionar','Tengo más dudas'], function(){
+            startCapture();
+          });
         });
       });
     }
 
     // ─── FLUJO ITP ────────────────────────────────────────────────────────────
-    function flowITP(){
-      data.tramite = 'Cálculo ITP vehículo';
+    function flowITP(tramiteLabel){
+      data.tramite = tramiteLabel || 'Cálculo ITP vehículo';
       bot('Vamos a calcular el ITP de tu vehículo paso a paso 🧮');
       flowStep = 1;
+      activeFlow = 'itp';
       setTimeout(function(){
         bot('¿Cuál es la <b>marca</b> de tu vehículo?');
         setInputState(true, 'Ej: Toyota, Seat, BMW...');

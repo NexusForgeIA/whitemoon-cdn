@@ -181,9 +181,9 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
           <option value="scale">Scale — 3.500€ setup + 349€/mes (RAG + automatizaciones)</option>
           <option value="elite">Elite — 6.500€ setup + 599€/mes (RAG premium + CRM)</option>
           <option value="auditoria">Auditoría IA — 899€ pago único</option>
-          <option value="scout_starter">Scout Starter — 499€ setup + 299€/mes (CRM prospección)</option>
-          <option value="scout_agency">Scout Agency — 399€ setup + 399€/mes</option>
-          <option value="scout_enterprise">Scout Enterprise — 499€ setup + 699€/mes (white label)</option>
+          <option value="scout_starter">Scout Starter — 299€ setup + 299€/mes (CRM prospección)</option>
+          <option value="scout_agency">Scout Agency — 499€ setup + 399€/mes</option>
+          <option value="scout_enterprise">Scout Enterprise — 699€ setup + 699€/mes (white label)</option>
           <option value="gestoria_ia">Gestoría IA — 399€ setup + 299€/mes</option>
         </select>
         <select id="filterStatus" onchange="render()">
@@ -214,7 +214,7 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
       </div>
       <div class="g2 mb">
         <div><label>Dominio</label><input type="text" id="fDom" placeholder="clinicasonrie.es" maxlength="100"></div>
-        <div><label>Pack</label><select id="fPk" onchange="onPackChange()"><option value="spark" selected>Spark — 499€ setup + 199€/mes (chatbot IA)</option><option value="core">Core — 1.800€ setup + 199€/mes (web + chatbot + SEO)</option><option value="scale">Scale — 3.500€ setup + 349€/mes (RAG + automatizaciones)</option><option value="elite">Elite — 6.500€ setup + 599€/mes (RAG premium + CRM)</option><option value="auditoria">Auditoría IA — 899€ pago único</option><option value="scout_starter">Scout Starter — 499€ setup + 299€/mes (CRM prospección)</option><option value="scout_agency">Scout Agency — 399€ setup + 399€/mes</option><option value="scout_enterprise">Scout Enterprise — 499€ setup + 699€/mes (white label)</option><option value="gestoria_ia">Gestoría IA — 399€ setup + 299€/mes (chatbot + calculadora ITP)</option></select></div>
+        <div><label>Pack</label><select id="fPk" onchange="onPackChange()"><option value="spark" selected>Spark — 499€ setup + 199€/mes (chatbot IA)</option><option value="core">Core — 1.800€ setup + 199€/mes (web + chatbot + SEO)</option><option value="scale">Scale — 3.500€ setup + 349€/mes (RAG + automatizaciones)</option><option value="elite">Elite — 6.500€ setup + 599€/mes (RAG premium + CRM)</option><option value="auditoria">Auditoría IA — 899€ pago único</option><option value="scout_starter">Scout Starter — 299€ setup + 299€/mes (CRM prospección)</option><option value="scout_agency">Scout Agency — 499€ setup + 399€/mes</option><option value="scout_enterprise">Scout Enterprise — 699€ setup + 699€/mes (white label)</option><option value="gestoria_ia">Gestoría IA — 399€ setup + 299€/mes (chatbot + calculadora ITP)</option></select></div>
       </div>
       <div class="g2 mb">
         <div><label>Email contacto</label><input type="email" id="fEm" placeholder="info@cliente.es" maxlength="100"></div>
@@ -365,9 +365,9 @@ var PACK_PRICES={
   scale:349,                  // 349€/mes (setup 3.500€ aparte)
   elite:599,                  // 599€/mes (setup 6.500€ aparte)
   auditoria:0,                // 899€ pago único, sin recurrente
-  scout_starter:299,          // 299€/mes (setup 499€ aparte)
-  scout_agency:399,           // 399€/mes (setup 399€ aparte)
-  scout_enterprise:699,       // 699€/mes (setup 499€ aparte) - white label
+  scout_starter:299,          // 299€/mes (setup 299€ aparte)
+  scout_agency:399,           // 399€/mes (setup 499€ aparte)
+  scout_enterprise:699,       // 699€/mes (setup 699€ aparte) - white label
   gestoria_ia:299             // 299€/mes (setup 399€ aparte) - chatbot ITP conversacional
 };
 var CHATBOT_PACKS={spark:1};
@@ -644,9 +644,9 @@ var PACK_DEFAULTS={
   scale:           {label:'Scale',            setup:3500, mrr:349},
   elite:           {label:'Elite',            setup:6500, mrr:599},
   auditoria:       {label:'Auditoría IA',     setup:899,  mrr:0},
-  scout_starter:   {label:'Scout Starter',    setup:499,  mrr:299},
-  scout_agency:    {label:'Scout Agency',     setup:399,  mrr:399},
-  scout_enterprise:{label:'Scout Enterprise', setup:499,  mrr:699},
+  scout_starter:   {label:'Scout Starter',    setup:299,  mrr:299},
+  scout_agency:    {label:'Scout Agency',     setup:499,  mrr:399},
+  scout_enterprise:{label:'Scout Enterprise', setup:699,  mrr:699},
   gestoria_ia:     {label:'Gestoría IA',       setup:399,  mrr:299}
 };
 

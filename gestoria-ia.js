@@ -83,6 +83,14 @@
       '#wm-gia-modal .gia-msg.gia-bot{background:#1a1a1a;color:#e5e7eb;border:1px solid '+CFG.color+';border-radius:12px 12px 12px 4px;align-self:flex-start;}',
       '#wm-gia-modal .gia-msg.gia-usr{background:'+CFG.color+';color:#fff;border-radius:12px 12px 4px 12px;align-self:flex-end;}',
       '#wm-gia-modal .gia-warn{display:block;margin-top:6px;padding:8px 10px;background:rgba(245,158,11,.1);border-left:3px solid #f59e0b;border-radius:4px;color:#fbbf24;font-size:.72rem;line-height:1.4;font-style:italic;}',
+      '#wm-gia-modal .gia-final{margin-top:10px;padding:16px;border-radius:12px;background:linear-gradient(135deg,rgba('+rgb.r+','+rgb.g+','+rgb.b+',.22) 0%,rgba('+rgb.r+','+rgb.g+','+rgb.b+',.06) 100%);border:1px solid '+colorMid+';color:#f1f5f9;align-self:stretch;}',
+      '#wm-gia-modal .gia-final-title{font-size:.95rem;font-weight:700;margin-bottom:8px;color:#fff;}',
+      '#wm-gia-modal .gia-final-text{font-size:.82rem;line-height:1.5;color:#e5e7eb;margin-bottom:10px;}',
+      '#wm-gia-modal .gia-final-cta{font-size:.78rem;color:#cbd5e1;margin-bottom:10px;text-align:center;}',
+      '#wm-gia-modal .gia-final-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:#25D366;color:#fff;padding:13px 14px;border-radius:10px;text-decoration:none;font-weight:700;font-size:.9rem;box-shadow:0 4px 14px rgba(37,211,102,.35);transition:transform .15s,box-shadow .15s;}',
+      '#wm-gia-modal .gia-final-btn:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(37,211,102,.5);}',
+      '#wm-gia-modal .gia-final-btn svg{width:20px;height:20px;fill:#fff;flex-shrink:0;}',
+      '#wm-gia-modal .gia-final-foot{margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.12);text-align:center;font-size:.76rem;color:#cbd5e1;}',
       '#wm-gia-modal .gia-typing{display:flex;gap:5px;padding:11px 14px;background:#1a1a1a;border:1px solid '+CFG.color+';border-radius:12px 12px 12px 4px;align-self:flex-start;align-items:center;}',
       '#wm-gia-modal .gia-typing span{width:7px;height:7px;background:'+CFG.color+';border-radius:50%;animation:wm-gia-dot 1.2s ease-in-out infinite;}',
       '#wm-gia-modal .gia-typing span:nth-child(2){animation-delay:.2s;}',
@@ -543,29 +551,22 @@
         ? 'https://wa.me/34'+CFG.tel+'?text='+encodeURIComponent(msg)
         : 'https://wa.me/?text='+encodeURIComponent(msg);
 
-      bot('✅ <b>¡Perfecto, '+esc(data.nombre)+'!</b><br><br>'+
-          'Un/a gestor/a ha recibido tus datos y te llamará en menos de 1 hora para informarte sobre toda la gestión y el trámite.<br><br>'+
-          'Si prefieres contactar ahora:');
-
-      setTimeout(function(){
-        var wrap = document.createElement('div');
-        wrap.className = 'gia-opts';
-        var a = document.createElement('a');
-        a.className = 'gia-wa';
-        a.href = waLink;
-        a.target = '_blank';
-        a.rel = 'noopener';
-        a.innerHTML = '<svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074z"/></svg>📲 Enviar por WhatsApp';
-        wrap.appendChild(a);
-        var bClose = document.createElement('button');
-        bClose.type = 'button';
-        bClose.textContent = 'Cerrar chat';
-        bClose.onclick = function(){ closeWidget(); };
-        wrap.appendChild(bClose);
-        body.appendChild(wrap);
+      showTyping(function(){
+        var card = document.createElement('div');
+        card.className = 'gia-final';
+        card.innerHTML =
+          '<div class="gia-final-title">✅ ¡Perfecto, '+esc(data.nombre)+'!</div>'+
+          '<div class="gia-final-text">Un/a gestor/a ha recibido tus datos y te llamará en menos de 1 hora para informarte sobre toda la gestión y el trámite.</div>'+
+          '<div class="gia-final-cta">👇 Pulsa para que empecemos con tu gestión</div>'+
+          '<a class="gia-final-btn" href="'+escAttr(waLink)+'" target="_blank" rel="noopener">'+
+            '<svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074z"/></svg>'+
+            '📲 Iniciar gestión por WhatsApp'+
+          '</a>'+
+          '<div class="gia-final-foot">🌟 ¡Que tengas un excelente día!</div>';
+        body.appendChild(card);
         body.scrollTop = body.scrollHeight;
         showClose();
-      }, 1300);
+      });
     }
 
     function buildDetalle(){

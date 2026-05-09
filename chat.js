@@ -1,5 +1,5 @@
 /**
- * WHITEMOON CHATBOT — Engine v2 con soporte plantillas sectoriales
+ * WHITEMOON CHATBOT — Engine v3 con flujos modulares por sector
  * <script src="https://nexusforgeia.github.io/whitemoon-cdn/chat.js" data-token="WM-XXXX"></script>
  * © WhiteMoon · whitemoon.es
  */
@@ -22,40 +22,34 @@
     if(!local && lic.domain && !host.includes(lic.domain)){ console.warn('[WM-CHAT] Dominio no autorizado'); return; }
     if(lic.expires && new Date(lic.expires) < new Date()){ console.warn('[WM-CHAT] Licencia expirada'); return; }
 
-    // ─── 2. CARGAR PLANTILLA SI EXISTE ────────────────────────────────────────
     if(lic.template){
       fetch(BASE + '/templates/' + lic.template + '.json?_=' + Date.now())
       .then(function(r){ return r.ok ? r.json() : null; })
-      .then(function(tpl){ initChatbot(script, lic, tpl || null); })
-      .catch(function(){ initChatbot(script, lic, null); });
+      .then(function(tpl){ boot(script, lic, tpl || null); })
+      .catch(function(){ boot(script, lic, null); });
     } else {
-      initChatbot(script, lic, null);
+      boot(script, lic, null);
     }
   })
   .catch(function(e){ console.error('[WM-CHAT]', e); });
 
   // ─── HELPERS ────────────────────────────────────────────────────────────────
-
   function parseServices(str){
     if(!str || !str.trim()) return null;
     var arr = str.split(',').map(function(s){ return s.trim(); }).filter(function(s){ return s; });
     return arr.length ? arr : null;
   }
-
   function mergeResponses(tplResp, licResp){
     var out = {};
     if(tplResp){ Object.keys(tplResp).forEach(function(k){ if(!k.startsWith('_')) out[k] = tplResp[k]; }); }
     if(licResp){ Object.keys(licResp).forEach(function(k){ if(!k.startsWith('_')) out[k] = licResp[k]; }); }
     return out;
   }
-
   function normalize(s){
     return String(s||'').toLowerCase().trim()
-      .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e')
-      .replace(/[íìï]/g,'i').replace(/[óòö]/g,'o')
-      .replace(/[úùü]/g,'u').replace(/ñ/g,'n');
+      .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e').replace(/[íìï]/g,'i')
+      .replace(/[óòö]/g,'o').replace(/[úùü]/g,'u').replace(/ñ/g,'n');
   }
-
   function matchKeyword(text, responses){
     var t = normalize(text);
     var keys = Object.keys(responses);
@@ -69,64 +63,62 @@
     }
     return null;
   }
-
-  function matchTriage(text, triage){
-    if(!triage) return null;
-    var t = normalize(text);
-    var levels = ['urgent', 'medium', 'low'];
-    for(var i = 0; i < levels.length; i++){
-      var level = triage[levels[i]];
-      if(!level || !level.keywords) continue;
-      var kws = level.keywords.split(',');
-      for(var j = 0; j < kws.length; j++){
-        var kw = normalize(kws[j]);
-        if(kw && t.indexOf(kw) !== -1) return { level: levels[i], data: level };
-      }
-    }
-    return null;
-  }
-
   function replaceVars(text, vars){
-    return text.replace(/\{(\w+)\}/g, function(_, k){ return vars[k] !== undefined ? vars[k] : ''; });
+    return String(text||'').replace(/\{(\w+)\}/g, function(_, k){ return vars[k] !== undefined ? vars[k] : ''; });
   }
-
   function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
+  function escAttr(s){ return escapeHtml(s).replace(/"/g,'&quot;'); }
   function hexToRgb(hex){
     var c = (hex||'#7c3aed').replace('#','');
     if(c.length === 3) c = c[0]+c[0]+c[1]+c[1]+c[2]+c[2];
     return { r: parseInt(c.slice(0,2),16), g: parseInt(c.slice(2,4),16), b: parseInt(c.slice(4,6),16) };
   }
 
-  // ─── 3. INIT CHATBOT ────────────────────────────────────────────────────────
-  function initChatbot(el, lic, tpl){
+  // ─── BOOT ───────────────────────────────────────────────────────────────────
+  function boot(el, lic, tpl){
     var tplResp = tpl && tpl.responses ? tpl.responses : null;
     var licResp = lic.responses || null;
-
     var cfg = {
-      botName:     el.getAttribute('data-bot-name') || lic.botName || (tpl && tpl.botName) || 'Asistente',
-      color:       el.getAttribute('data-color')    || lic.color   || (tpl && tpl.color)   || '#7c3aed',
-      greeting:    lic.greeting || (tpl && tpl.greeting) || '¡Hola! 👋 Bienvenido/a. ¿En qué puedo ayudarte?',
-      phone:       lic.phone    || '',
-      biz:         lic.biz      || '',
-      buttons:     parseServices(el.getAttribute('data-services')) || lic.serviceButtons || (tpl && tpl.serviceButtons) || [],
-      responses:   mergeResponses(tplResp, licResp),
-      askName:     (licResp && licResp._ask_name)  || (tplResp && tplResp._ask_name)  || '¿Me dices tu nombre?',
-      askPhone:    (licResp && licResp._ask_phone) || (tplResp && tplResp._ask_phone) || 'Perfecto {nombre}. ¿Un teléfono de contacto?',
-      summary:     (licResp && licResp._summary)   || (tplResp && tplResp._summary)   || 'Perfecto {nombre}. He tomado nota y nuestro equipo te contactará pronto.',
-      goodbye:     (licResp && licResp._goodbye)   || (tplResp && tplResp._goodbye)   || '¡Hasta pronto! 👋',
-      hasCalendar: lic.calendar !== false,
-      whatsapp:    (lic.phone || '').replace(/[^0-9]/g, ''),
-      waTemplate:  (tpl && tpl.whatsapp && tpl.whatsapp.messageTemplate) || null,
-      triage:      (tpl && tpl.triage) || null,
-      captureExtra:(tpl && tpl.captureExtra) || null
+      botName:    el.getAttribute('data-bot-name') || lic.botName || (tpl && tpl.botName) || 'Asistente',
+      color:      el.getAttribute('data-color')    || lic.color   || (tpl && tpl.color)   || '#7c3aed',
+      greeting:   lic.greeting || (tpl && tpl.greeting) || '¡Hola! 👋 ¿En qué puedo ayudarte?',
+      tel:        (lic.phone || '').replace(/[^0-9]/g, ''),
+      biz:        lic.biz || '',
+      serviceButtons: parseServices(el.getAttribute('data-services')) || lic.serviceButtons || (tpl && tpl.serviceButtons) || [],
+      responses:  mergeResponses(tplResp, licResp),
+      askName:    (licResp && licResp._ask_name)  || (tplResp && tplResp._ask_name)  || 'Para continuar, ¿me dices tu nombre?',
+      askPhone:   (licResp && licResp._ask_phone) || (tplResp && tplResp._ask_phone) || 'Gracias {nombre} 👋 ¿Tu teléfono de contacto? (9 dígitos)',
+      summary:    (licResp && licResp._summary)   || (tplResp && tplResp._summary)   || 'Perfecto {nombre}. Te contactamos en breve.',
+      template:   lic.template || ''
     };
 
+    var widget = buildWidget(cfg);
+    var flowName = lic.template || 'generic';
+    loadFlow(flowName, widget, cfg);
+  }
+
+  function loadFlow(name, widget, cfg){
+    var s = document.createElement('script');
+    s.src = BASE + '/chat-flows/' + name + '.js?_=' + Date.now();
+    s.onload = function(){
+      if(window.WMFlow && typeof window.WMFlow.init === 'function'){
+        try { window.WMFlow.init(cfg, widget); }
+        catch(e){ console.error('[WM-CHAT] flow init', e); }
+      }
+    };
+    s.onerror = function(){
+      if(name !== 'generic'){ loadFlow('generic', widget, cfg); }
+      else { console.error('[WM-CHAT] No se pudo cargar el flujo'); }
+    };
+    document.head.appendChild(s);
+  }
+
+  // ─── WIDGET ─────────────────────────────────────────────────────────────────
+  function buildWidget(cfg){
     var rgb = hexToRgb(cfg.color);
     var colorLight = 'rgba('+rgb.r+','+rgb.g+','+rgb.b+',.12)';
     var colorMid   = 'rgba('+rgb.r+','+rgb.g+','+rgb.b+',.25)';
 
-    // ─── CSS ──────────────────────────────────────────────────────────────────
     var sty = document.createElement('style');
     sty.textContent = [
       '#wm-chat-btn{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:'+cfg.color+';border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.35);z-index:9999;opacity:0;transition:opacity .4s,transform .2s;}',
@@ -142,13 +134,14 @@
       '#wm-chat-modal.wm-show{display:flex;}',
       '@media(max-width:600px){#wm-chat-modal{bottom:0;right:0;width:100vw;height:80vh;border-radius:16px 16px 0 0;}}',
       '#wm-chat-modal .wm-header{background:'+cfg.color+';padding:14px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;}',
-      '#wm-chat-modal .wm-header .wm-avatar{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}',
-      '#wm-chat-modal .wm-header .wm-hinfo{flex:1;}',
-      '#wm-chat-modal .wm-header .wm-hname{color:#fff;font-weight:700;font-size:.88rem;}',
-      '#wm-chat-modal .wm-header .wm-hstatus{color:rgba(255,255,255,.8);font-size:.7rem;display:flex;align-items:center;gap:4px;}',
-      '#wm-chat-modal .wm-header .wm-hdot{width:7px;height:7px;background:#4ade80;border-radius:50%;display:inline-block;}',
-      '#wm-chat-modal .wm-header .wm-close{background:none;border:none;color:#fff;font-size:1.3rem;cursor:pointer;padding:4px;line-height:1;opacity:.8;}',
-      '#wm-chat-modal .wm-header .wm-close:hover{opacity:1;}',
+      '#wm-chat-modal .wm-avatar{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}',
+      '#wm-chat-modal .wm-hinfo{flex:1;min-width:0;}',
+      '#wm-chat-modal .wm-hname{color:#fff;font-weight:700;font-size:.88rem;}',
+      '#wm-chat-modal .wm-hstatus{color:rgba(255,255,255,.8);font-size:.7rem;display:flex;align-items:center;gap:4px;}',
+      '#wm-chat-modal .wm-hdot{width:7px;height:7px;background:#4ade80;border-radius:50%;display:inline-block;}',
+      '#wm-chat-modal .wm-close{background:none;border:none;color:#fff;font-size:1.3rem;cursor:pointer;padding:4px;line-height:1;opacity:.85;}',
+      '#wm-chat-modal .wm-close:hover{opacity:1;}',
+      '#wm-chat-modal .wm-close.wm-hidden{display:none;}',
       '#wm-chat-modal .wm-msgs{flex:1;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:8px;}',
       '#wm-chat-modal .wm-msgs::-webkit-scrollbar{width:4px;}',
       '#wm-chat-modal .wm-msgs::-webkit-scrollbar-thumb{background:#2a2a4e;border-radius:2px;}',
@@ -160,24 +153,29 @@
       '.wm-typing span:nth-child(2){animation-delay:.2s;}',
       '.wm-typing span:nth-child(3){animation-delay:.4s;}',
       '@keyframes wm-dot{0%,80%,100%{transform:scale(.7);opacity:.4}40%{transform:scale(1);opacity:1}}',
-      '#wm-chat-modal .wm-btns{padding:4px 12px 8px;display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0;}',
-      '#wm-chat-modal .wm-btns button{background:'+colorLight+';color:#ffffff;border:1px solid '+colorMid+';border-radius:20px;padding:6px 13px;font-size:.75rem;font-family:inherit;cursor:pointer;white-space:nowrap;transition:background .15s;}',
-      '#wm-chat-modal .wm-btns button:hover{background:'+colorMid+';}',
+      '#wm-chat-modal .wm-opts{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 4px;align-self:flex-start;max-width:100%;}',
+      '#wm-chat-modal .wm-opts button{background:transparent;color:#e0e0ff;border:1px solid '+colorMid+';border-radius:18px;padding:7px 13px;font-size:.76rem;font-family:inherit;cursor:pointer;transition:background .15s,color .15s;white-space:normal;}',
+      '#wm-chat-modal .wm-opts button:hover{background:'+cfg.color+';color:#fff;border-color:'+cfg.color+';}',
       '#wm-chat-modal .wm-input-wrap{padding:10px 12px;background:#111827;display:flex;gap:8px;flex-shrink:0;border-top:1px solid #2a2a4e;}',
-      '#wm-chat-modal .wm-input{flex:1;background:#1f2937;border:1px solid #374151;border-radius:10px;padding:9px 12px;color:#fff;font-size:.83rem;font-family:inherit;outline:none;resize:none;max-height:80px;line-height:1.4;}',
+      '#wm-chat-modal .wm-input{flex:1;background:#1f2937;border:1px solid #374151;border-radius:10px;padding:9px 12px;color:#fff;font-size:.83rem;font-family:inherit;outline:none;}',
       '#wm-chat-modal .wm-input:focus{border-color:'+cfg.color+';}',
       '#wm-chat-modal .wm-send{background:'+cfg.color+';border:none;border-radius:10px;padding:9px 14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .15s;}',
       '#wm-chat-modal .wm-send:hover{opacity:.85;}',
       '#wm-chat-modal .wm-send svg{width:18px;height:18px;fill:#fff;}',
-      '.wm-wa-btn{display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#fff;padding:10px 18px;border-radius:10px;text-decoration:none;font-size:.82rem;font-weight:600;margin-top:4px;transition:opacity .15s;}',
-      '.wm-wa-btn:hover{opacity:.88;}',
-      '.wm-wa-btn svg{width:18px;height:18px;fill:#fff;flex-shrink:0;}',
+      '#wm-chat-modal .wm-warn{display:block;margin-top:6px;padding:8px 10px;background:rgba(245,158,11,.1);border-left:3px solid #f59e0b;border-radius:4px;color:#fbbf24;font-size:.72rem;line-height:1.4;font-style:italic;}',
+      '#wm-chat-modal .wm-final{margin-top:8px;padding:16px;border-radius:12px;background:linear-gradient(135deg,rgba('+rgb.r+','+rgb.g+','+rgb.b+',.22) 0%,rgba('+rgb.r+','+rgb.g+','+rgb.b+',.06) 100%);border:1px solid '+colorMid+';color:#f1f5f9;align-self:stretch;}',
+      '#wm-chat-modal .wm-final-title{font-size:.95rem;font-weight:700;margin-bottom:8px;color:#fff;}',
+      '#wm-chat-modal .wm-final-text{font-size:.82rem;line-height:1.5;color:#e5e7eb;margin-bottom:10px;}',
+      '#wm-chat-modal .wm-final-cta{font-size:.78rem;color:#cbd5e1;margin-bottom:10px;text-align:center;}',
+      '#wm-chat-modal .wm-final-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:#25D366;color:#fff;padding:13px 14px;border-radius:10px;text-decoration:none;font-weight:700;font-size:.9rem;box-shadow:0 4px 14px rgba(37,211,102,.35);transition:transform .15s,box-shadow .15s;}',
+      '#wm-chat-modal .wm-final-btn:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(37,211,102,.5);}',
+      '#wm-chat-modal .wm-final-btn svg{width:20px;height:20px;fill:#fff;flex-shrink:0;}',
+      '#wm-chat-modal .wm-final-foot{margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.12);text-align:center;font-size:.76rem;color:#cbd5e1;}',
       '#wm-chat-modal .wm-powered{text-align:center;padding:4px 0 8px;font-size:.6rem;color:#4a4a6a;}',
       '#wm-chat-modal .wm-powered a{color:#6a6a9a;text-decoration:none;}'
     ].join('');
     document.head.appendChild(sty);
 
-    // ─── DOM ──────────────────────────────────────────────────────────────────
     var btn = document.createElement('button');
     btn.id = 'wm-chat-btn';
     btn.setAttribute('aria-label', 'Abrir chat');
@@ -197,9 +195,8 @@
         '<button class="wm-close" aria-label="Cerrar chat">×</button>',
       '</div>',
       '<div class="wm-msgs" id="wm-msgs"></div>',
-      '<div class="wm-btns" id="wm-btns"></div>',
       '<div class="wm-input-wrap">',
-        '<textarea class="wm-input" id="wm-input" placeholder="Escribe tu mensaje..." rows="1"></textarea>',
+        '<input type="text" class="wm-input" id="wm-input" placeholder="Escribe tu mensaje..." autocomplete="off">',
         '<button class="wm-send" id="wm-send" aria-label="Enviar">',
           '<svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>',
         '</button>',
@@ -210,301 +207,271 @@
     document.body.appendChild(btn);
     document.body.appendChild(modal);
 
-    // ─── ESTADO ───────────────────────────────────────────────────────────────
-    var state = 0;          // 0=bienvenida, 1=conversacion, 2=captura, 3=finalizado
-    var captureStep = 0;    // 0=nombre, 1=telefono, 2=extra, 3=done
-    var captureExtraKeys = cfg.captureExtra ? Object.keys(cfg.captureExtra) : [];
-    var captureExtraIdx  = 0;
-    var captured = { name: '', phone: '', extra: '', service: '', priority: '' };
-    var lastUserInput = '';
-    var buttonsShown = false;
-    var CAPTURE_TRIGGERS = 'cita,llamar,llamame,contacto,hablar,quiero,necesito,urgente,ayuda,presupuesto,consulta,reserva,informacion';
+    var msgsEl  = modal.querySelector('#wm-msgs');
+    var inputEl = modal.querySelector('#wm-input');
+    var sendBtn = modal.querySelector('#wm-send');
+    var closeBtn= modal.querySelector('.wm-close');
 
-    var msgsEl  = document.getElementById('wm-msgs');
-    var btnsEl  = document.getElementById('wm-btns');
-    var inputEl = document.getElementById('wm-input');
-    var sendBtn = document.getElementById('wm-send');
+    // ─── ESTADO COMPARTIDO ────────────────────────────────────────────────────
+    var inputHandler = null;
+    var captureCtx   = null;     // {step: 1=name, 2=phone, opts}
+    var started      = false;
+    var leadData     = {};
 
-    // ─── UI HELPERS ───────────────────────────────────────────────────────────
-
-    function addMsg(text, who){
+    // ─── PRIMITIVAS ───────────────────────────────────────────────────────────
+    function addBot(html){
       var d = document.createElement('div');
-      d.className = 'wm-msg wm-' + who;
-      d.innerHTML = text.replace(/\n/g, '<br>');
+      d.className = 'wm-msg wm-bot';
+      d.innerHTML = html;
       msgsEl.appendChild(d);
       msgsEl.scrollTop = msgsEl.scrollHeight;
       return d;
     }
-
+    function addUser(text){
+      var d = document.createElement('div');
+      d.className = 'wm-msg wm-usr';
+      d.innerHTML = escapeHtml(text);
+      msgsEl.appendChild(d);
+      msgsEl.scrollTop = msgsEl.scrollHeight;
+      return d;
+    }
     function showTyping(cb){
-      var delay = 600 + Math.floor(Math.random() * 600);
       var t = document.createElement('div');
       t.className = 'wm-typing';
       t.innerHTML = '<span></span><span></span><span></span>';
       msgsEl.appendChild(t);
       msgsEl.scrollTop = msgsEl.scrollHeight;
+      var delay = 600 + Math.floor(Math.random() * 500);
       setTimeout(function(){
         if(t.parentNode) t.parentNode.removeChild(t);
         cb();
       }, delay);
     }
+    function bot(html, cb){ showTyping(function(){ addBot(html); if(cb) cb(); }); }
+    function botText(text, cb){ bot(escapeHtml(text).replace(/\n/g,'<br>'), cb); }
 
-    function botSay(text){
-      showTyping(function(){ addMsg(escapeHtml(text), 'bot'); });
-    }
-
-    function buildWaLink(){
-      var num = '34' + cfg.whatsapp;
-      var msg;
-      if(cfg.waTemplate){
-        msg = replaceVars(cfg.waTemplate, {
-          nombre:         captured.name,
-          telefono:       captured.phone,
-          servicio:       captured.service || 'Consulta general',
-          consulta:       captured.service || 'Consulta general',
-          area:           captured.service || 'Consulta general',
-          prioridad:      captured.priority || 'CONSULTA',
-          vehiculo:       captured.askVehicle    || '',
-          mascota:        captured.askPet        || '',
-          disponibilidad: captured.askDate       || '',
-          personas:       captured.askPersons    || '',
-          fecha:          captured.askDate       || '',
-          notas:          captured.extra || captured.service || ''
-        });
-      } else {
-        msg = '🔔 *Nueva consulta - ' + cfg.biz + '*\n\n' +
-              '👤 *Nombre:* ' + captured.name + '\n' +
-              '📞 *Tel:* +34' + captured.phone + '\n' +
-              '💬 *Servicio:* ' + (captured.service || 'Consulta general') + '\n\n' +
-              '_Via chatbot WhiteMoon_';
-      }
-      return 'https://wa.me/' + num + '?text=' + encodeURIComponent(msg);
-    }
-
-    function showWaButton(){
-      if(!cfg.whatsapp) return;
-      showTyping(function(){
-        var d = document.createElement('div');
-        d.className = 'wm-msg wm-bot';
-        d.style.background = 'transparent';
-        d.style.padding = '0';
-        var a = document.createElement('a');
-        a.className = 'wm-wa-btn';
-        a.href = buildWaLink();
-        a.target = '_blank';
-        a.rel = 'noopener';
-        a.innerHTML = '<svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>' +
-                      '📲 Enviar consulta por WhatsApp';
-        d.appendChild(a);
-        msgsEl.appendChild(d);
-        msgsEl.scrollTop = msgsEl.scrollHeight;
-      });
-    }
-
-    function hideButtons(){
-      btnsEl.innerHTML = '';
-      btnsEl.style.display = 'none';
-    }
-
-    function showQuickButtons(){
-      if(buttonsShown || !cfg.buttons.length) return;
-      buttonsShown = true;
-      btnsEl.style.display = 'flex';
-      cfg.buttons.forEach(function(label){
+    function showOpts(opts, onPick){
+      var wrap = document.createElement('div');
+      wrap.className = 'wm-opts';
+      opts.forEach(function(o){
         var b = document.createElement('button');
-        b.textContent = label;
+        b.type = 'button';
+        b.textContent = o.label;
         b.addEventListener('click', function(){
-          if(state === 2 || state === 3) return;
-          addMsg(escapeHtml(label), 'usr');
-          hideButtons();
-          state = 1;
-          respond(label);
+          if(wrap.parentNode) wrap.parentNode.removeChild(wrap);
+          addUser(o.label);
+          onPick(o);
         });
-        btnsEl.appendChild(b);
+        wrap.appendChild(b);
       });
+      msgsEl.appendChild(wrap);
+      msgsEl.scrollTop = msgsEl.scrollHeight;
     }
 
-    function isCaptureIntent(text){
-      var t = normalize(text);
-      var triggers = CAPTURE_TRIGGERS.split(',');
-      for(var i = 0; i < triggers.length; i++){
-        if(t.indexOf(normalize(triggers[i])) !== -1) return true;
-      }
-      return false;
-    }
-
-    // ─── MOTOR CONVERSACIONAL ─────────────────────────────────────────────────
-
-    function respond(text){
-      // PRIORIDAD 1: triage
-      var tm = matchTriage(text, cfg.triage);
-      if(tm){
-        captured.priority = tm.data.priority || '';
-        captured.service  = text;
-        showTyping(function(){
-          addMsg(escapeHtml(tm.data.message), 'bot');
-          setTimeout(function(){ startCapture(); }, 1400);
-        });
-        return;
-      }
-
-      // PRIORIDAD 2: keyword match
-      var match = matchKeyword(text, cfg.responses);
-      var normText = normalize(text);
-      var isDupe = (normText === lastUserInput);
-      lastUserInput = normText;
-      if(match){
-        if(isDupe){
-          showTyping(function(){ addMsg(escapeHtml('¿Puede darme más detalles sobre su caso?'), 'bot'); });
-        } else {
-          captured.service = text;
-          showTyping(function(){
-            addMsg(escapeHtml(match), 'bot');
-            if(isCaptureIntent(text)){
-              setTimeout(function(){ startCapture(); }, 1400);
-            }
-          });
-        }
-        return;
-      }
-
-      // PRIORIDAD 3: intención de contacto
-      if(isCaptureIntent(text)){
-        captured.service = text;
-        startCapture();
-        return;
-      }
-
-      // PRIORIDAD 4: fallback
-      showTyping(function(){
-        addMsg(escapeHtml('Entendido. ¿En qué más puedo ayudarle? Si necesita que le contactemos, dígame.'), 'bot');
-      });
-    }
-
-    function startCapture(){
-      state = 2;
-      captureStep = 0;
-      captureExtraIdx = 0;
-      showTyping(function(){ addMsg(escapeHtml(cfg.askName), 'bot'); });
-    }
-
-    function askNextExtra(){
-      if(captureExtraIdx >= captureExtraKeys.length){
-        finishCapture();
-        return;
-      }
-      var key = captureExtraKeys[captureExtraIdx];
-      var question = cfg.captureExtra[key];
-      showTyping(function(){ addMsg(escapeHtml(question), 'bot'); });
-    }
-
-    function finishCapture(){
-      captureStep = 3;
-      var sum = replaceVars(cfg.summary, {
-        nombre:   captured.name,
-        telefono: captured.phone,
-        servicio: captured.service
-      });
-      showTyping(function(){
-        addMsg(escapeHtml(sum), 'bot');
-        var bye = replaceVars(cfg.goodbye, { nombre: captured.name });
-        showTyping(function(){
-          addMsg(escapeHtml(bye), 'bot');
-          if(cfg.whatsapp) showWaButton();
-          state = 3;
-        });
-      });
-    }
-
-    function handleCapture(text){
-      if(captureStep === 0){
-        captured.name = text.trim();
-        captureStep = 1;
-        showTyping(function(){
-          addMsg(escapeHtml(replaceVars(cfg.askPhone, { nombre: captured.name })), 'bot');
-        });
-      } else if(captureStep === 1){
-        var digits = text.replace(/[^0-9]/g, '');
-        if(digits.length < 9){
-          botSay('Ese número no parece correcto. Por favor introduce un teléfono de 9 dígitos.');
-          return;
-        }
-        captured.phone = digits.slice(-9);
-        captureStep = 2;
-        captureExtraIdx = 0;
-        askNextExtra();
-      } else if(captureStep === 2){
-        var key = captureExtraKeys[captureExtraIdx];
-        captured[key] = text.trim();
-        if(captured.extra) captured.extra += ' / ' + text.trim();
-        else captured.extra = text.trim();
-        captureExtraIdx++;
-        askNextExtra();
-      }
-    }
-
-    // ─── INPUT ────────────────────────────────────────────────────────────────
-
-    function handleUserInput(text){
-      text = (text || '').trim();
-      if(!text) return;
-      addMsg(escapeHtml(text), 'usr');
+    function setInput(enabled, placeholder, type){
+      inputEl.disabled = !enabled;
+      sendBtn.disabled = !enabled;
+      inputEl.placeholder = placeholder || (enabled ? 'Escribe tu mensaje...' : '');
+      inputEl.type = type || 'text';
       inputEl.value = '';
-      inputEl.style.height = 'auto';
-
-      if(state === 3) return;
-
-      if(state === 2){
-        handleCapture(text);
-        return;
-      }
-
-      if(state === 0){
-        state = 1;
-        hideButtons();
-      }
-
-      respond(text);
+      if(enabled) setTimeout(function(){ inputEl.focus(); }, 50);
+    }
+    function onInput(fn){ inputHandler = fn; }
+    function onInputOnce(fn){
+      var prev = inputHandler;
+      inputHandler = function(text){
+        var ok = fn(text);
+        if(ok !== false) inputHandler = prev;
+      };
     }
 
-    // ─── INICIO ───────────────────────────────────────────────────────────────
+    function hideClose(){ closeBtn.classList.add('wm-hidden'); }
+    function showCloseBtn(){ closeBtn.classList.remove('wm-hidden'); }
 
-    function openChat(){
+    function openChat(initFn){
       modal.classList.add('wm-show');
       btn.classList.add('wm-open');
-      inputEl.focus();
-      if(msgsEl.children.length === 0){
-        state = 0;
-        showTyping(function(){
-          addMsg(escapeHtml(cfg.greeting), 'bot');
-          setTimeout(showQuickButtons, 300);
-        });
-      }
+      if(!started){ started = true; if(initFn) initFn(); }
+      else if(!inputEl.disabled){ inputEl.focus(); }
     }
-
     function closeChat(){
       modal.classList.remove('wm-show');
       btn.classList.remove('wm-open');
     }
 
-    btn.addEventListener('click', openChat);
-    modal.querySelector('.wm-close').addEventListener('click', closeChat);
-
-    sendBtn.addEventListener('click', function(){ handleUserInput(inputEl.value); });
-
-    inputEl.addEventListener('keydown', function(e){
-      if(e.key === 'Enter' && !e.shiftKey){
-        e.preventDefault();
-        handleUserInput(inputEl.value);
+    // ─── flow(): runner declarativo ───────────────────────────────────────────
+    function flow(steps, onDone){
+      var idx = 0;
+      var data = {};
+      function next(){
+        if(idx >= steps.length){ onDone(data); return; }
+        var s = steps[idx];
+        bot(s.msg, function(){
+          if(s.input){
+            setInput(true, s.placeholder || '', s.type || 'text');
+            onInputOnce(function(text){
+              text = (text || '').trim();
+              if(!text) return false;
+              if(s.validate){
+                var ok = s.validate(text);
+                if(ok !== true){ if(typeof ok === 'string') botText(ok); return false; }
+              }
+              data[s.key || ('step'+idx)] = text;
+              addUser(text);
+              idx++; next();
+              return true;
+            });
+          } else {
+            setInput(false);
+            var opts = (s.opts || []).map(function(o){
+              return typeof o === 'string' ? { label: o, value: o } : o;
+            });
+            showOpts(opts, function(o){
+              if(typeof o.action === 'function'){ o.action(data); return; }
+              data[s.key || ('step'+idx)] = o.value != null ? o.value : (o.label || '');
+              if(s.tag) data[s.tag] = o.tag || data[s.key];
+              idx++; next();
+            });
+          }
+        });
       }
-    });
+      next();
+    }
 
-    inputEl.addEventListener('input', function(){
-      this.style.height = 'auto';
-      this.style.height = Math.min(this.scrollHeight, 80) + 'px';
-    });
+    // ─── CAPTURA + FINISH ─────────────────────────────────────────────────────
+    function startCapture(opts){
+      opts = opts || {};
+      captureCtx = { step: 1, opts: opts };
+      if(opts.tramite)   leadData.tramite = opts.tramite;
+      if(opts.prioridad) leadData.prioridad = opts.prioridad;
+      if(opts.detalle)   leadData.detalle = opts.detalle;
+      hideClose();
+      bot(escapeHtml(opts.askName || cfg.askName), function(){
+        setInput(true, 'Tu nombre');
+      });
+    }
+    function handleCaptureInput(text){
+      if(!captureCtx) return;
+      if(captureCtx.step === 1){
+        leadData.nombre = text.trim();
+        addUser(leadData.nombre);
+        captureCtx.step = 2;
+        var ph = replaceVars(captureCtx.opts.askPhone || cfg.askPhone, { nombre: leadData.nombre });
+        bot(escapeHtml(ph), function(){
+          setInput(true, '612345678', 'tel');
+        });
+      } else if(captureCtx.step === 2){
+        var digits = text.replace(/[^0-9]/g, '');
+        if(digits.length < 9){ botText('⚠️ El teléfono debe tener al menos 9 dígitos.'); return; }
+        leadData.telefono = digits.slice(-9);
+        addUser(leadData.telefono);
+        finishCapture(captureCtx.opts || {});
+      }
+    }
 
-    setTimeout(function(){ btn.classList.add('wm-visible'); }, 2000);
+    function buildDetalle(extra){
+      var src = extra || leadData.detalle;
+      if(!src) return 'Consulta general';
+      if(typeof src === 'string') return src;
+      var parts = [];
+      Object.keys(src).forEach(function(k){
+        if(k.charAt(0) === '_') return;
+        parts.push(k + ': ' + src[k]);
+      });
+      return parts.length ? parts.join(' | ') : 'Consulta general';
+    }
+
+    function finishCapture(opts){
+      opts = opts || {};
+      captureCtx = null;
+      setInput(false, 'Conversación finalizada');
+
+      var detalle = buildDetalle(opts.detalle);
+      var prioridad = opts.prioridad || leadData.prioridad || '';
+      var tramite = opts.tramite || leadData.tramite || 'Consulta general';
+
+      var defaultTpl = '📋 NUEVA CONSULTA — {botName}\n━━━━━━━━━━━━━━━\n👤 {nombre} · 📱 +34{telefono}\n📋 {tramite}{prioridadLine}\n📝 Detalle: {detalle}\n━━━━━━━━━━━━━━━\nVia chatbot WhiteMoon · whitemoon.es';
+      var tpl = opts.waTemplate || defaultTpl;
+      var msg = replaceVars(tpl, {
+        botName:  cfg.botName,
+        biz:      cfg.biz,
+        nombre:   leadData.nombre,
+        telefono: leadData.telefono,
+        tramite:  tramite,
+        prioridad: prioridad,
+        prioridadLine: prioridad ? '\n🚨 Prioridad: ' + prioridad : '',
+        detalle:  detalle
+      });
+      var waLink = cfg.tel
+        ? 'https://wa.me/34'+cfg.tel+'?text='+encodeURIComponent(msg)
+        : 'https://wa.me/?text='+encodeURIComponent(msg);
+
+      var fin = opts.finish || {};
+      var agente = opts.agent || fin.agent || 'gestor/a';
+      var title = replaceVars(fin.title || '✅ ¡Perfecto, {nombre}!', { nombre: leadData.nombre });
+      var text  = replaceVars(fin.text  || 'Un/a {agent} recibirá tus datos y te llamará en menos de 1 hora para informarte sobre toda la gestión y el trámite.', { nombre: leadData.nombre, agent: agente });
+      var cta   = fin.cta || '👇 Pulsa para confirmar tu solicitud';
+      var btnLb = fin.btn || '📲 Confirmar solicitud';
+      var foot  = fin.foot || '🌟 ¡Que tengas un excelente día!';
+
+      showTyping(function(){
+        var card = document.createElement('div');
+        card.className = 'wm-final';
+        var html = '<div class="wm-final-title">'+escapeHtml(title)+'</div>'+
+                   '<div class="wm-final-text">'+escapeHtml(text)+'</div>';
+        if(cta) html += '<div class="wm-final-cta">'+escapeHtml(cta)+'</div>';
+        html += '<a class="wm-final-btn" href="'+escAttr(waLink)+'" target="_blank" rel="noopener">'+
+                  '<svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074z"/></svg>'+
+                  escapeHtml(btnLb)+
+                '</a>';
+        if(foot) html += '<div class="wm-final-foot">'+escapeHtml(foot)+'</div>';
+        card.innerHTML = html;
+        msgsEl.appendChild(card);
+        msgsEl.scrollTop = msgsEl.scrollHeight;
+        showCloseBtn();
+      });
+    }
+
+    // ─── INPUT GLOBAL ─────────────────────────────────────────────────────────
+    sendBtn.addEventListener('click', function(){ dispatch(inputEl.value); });
+    inputEl.addEventListener('keydown', function(e){
+      if(e.key === 'Enter'){ e.preventDefault(); dispatch(inputEl.value); }
+    });
+    function dispatch(text){
+      text = (text || '').trim();
+      if(!text) return;
+      inputEl.value = '';
+      if(captureCtx){ handleCaptureInput(text); return; }
+      if(typeof inputHandler === 'function'){ inputHandler(text); return; }
+    }
+
+    btn.addEventListener('click', function(){ openChat(api._onOpen); });
+    closeBtn.addEventListener('click', closeChat);
+    setTimeout(function(){ btn.classList.add('wm-visible'); }, 1500);
+
+    // ─── API EXPUESTA ─────────────────────────────────────────────────────────
+    var api = {
+      cfg: cfg,
+      addBot: addBot,
+      addUser: addUser,
+      bot: bot,
+      botText: botText,
+      showTyping: showTyping,
+      showOpts: showOpts,
+      flow: flow,
+      setInput: setInput,
+      onInput: onInput,
+      onInputOnce: onInputOnce,
+      hideClose: hideClose,
+      showClose: showCloseBtn,
+      closeWidget: closeChat,
+      startCapture: startCapture,
+      finishCapture: finishCapture,
+      data: leadData,
+      utils: { normalize: normalize, matchKeyword: matchKeyword, replaceVars: replaceVars, escapeHtml: escapeHtml },
+      _onOpen: null
+    };
+    api.onOpen = function(fn){ api._onOpen = fn; };
+    return api;
   }
-
 })();

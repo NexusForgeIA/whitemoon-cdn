@@ -176,15 +176,14 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
         <input type="text" id="searchQ" placeholder="🔍 Buscar por nombre, token, dominio, email..." oninput="render()">
         <select id="filterPack" onchange="render()">
           <option value="">Todos los packs</option>
-          <option value="spark">Spark — 299€ setup + 149€/mes (chatbot IA)</option>
+          <option value="spark">Spark — 499€ setup + 199€/mes (chatbot IA)</option>
           <option value="core">Core — 1.800€ setup + 199€/mes (web + chatbot + SEO)</option>
           <option value="scale">Scale — 3.500€ setup + 349€/mes (RAG + automatizaciones)</option>
           <option value="elite">Elite — 6.500€ setup + 599€/mes (RAG premium + CRM)</option>
           <option value="auditoria">Auditoría IA — 899€ pago único</option>
-          <option value="scout_starter">Scout Starter — 299€ setup + 199€/mes (CRM prospección)</option>
+          <option value="scout_starter">Scout Starter — 499€ setup + 299€/mes (CRM prospección)</option>
           <option value="scout_agency">Scout Agency — 399€ setup + 399€/mes</option>
           <option value="scout_enterprise">Scout Enterprise — 499€ setup + 699€/mes (white label)</option>
-          <option value="itp">Calculadora ITP — 299€ setup + 99€/mes (white label)</option>
           <option value="gestoria_ia">Gestoría IA — 399€ setup + 299€/mes</option>
         </select>
         <select id="filterStatus" onchange="render()">
@@ -215,7 +214,7 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
       </div>
       <div class="g2 mb">
         <div><label>Dominio</label><input type="text" id="fDom" placeholder="clinicasonrie.es" maxlength="100"></div>
-        <div><label>Pack</label><select id="fPk" onchange="onPackChange()"><option value="spark" selected>Spark — 299€ setup + 149€/mes (chatbot IA)</option><option value="core">Core — 1.800€ setup + 199€/mes (web + chatbot + SEO)</option><option value="scale">Scale — 3.500€ setup + 349€/mes (RAG + automatizaciones)</option><option value="elite">Elite — 6.500€ setup + 599€/mes (RAG premium + CRM)</option><option value="auditoria">Auditoría IA — 899€ pago único</option><option value="scout_starter">Scout Starter — 299€ setup + 199€/mes (CRM prospección)</option><option value="scout_agency">Scout Agency — 399€ setup + 399€/mes</option><option value="scout_enterprise">Scout Enterprise — 499€ setup + 699€/mes (white label)</option><option value="itp">Calculadora ITP — 299€ setup + 99€/mes (white label)</option><option value="gestoria_ia">Gestoría IA — 399€ setup + 299€/mes (chatbot + calculadora ITP)</option></select></div>
+        <div><label>Pack</label><select id="fPk" onchange="onPackChange()"><option value="spark" selected>Spark — 499€ setup + 199€/mes (chatbot IA)</option><option value="core">Core — 1.800€ setup + 199€/mes (web + chatbot + SEO)</option><option value="scale">Scale — 3.500€ setup + 349€/mes (RAG + automatizaciones)</option><option value="elite">Elite — 6.500€ setup + 599€/mes (RAG premium + CRM)</option><option value="auditoria">Auditoría IA — 899€ pago único</option><option value="scout_starter">Scout Starter — 499€ setup + 299€/mes (CRM prospección)</option><option value="scout_agency">Scout Agency — 399€ setup + 399€/mes</option><option value="scout_enterprise">Scout Enterprise — 499€ setup + 699€/mes (white label)</option><option value="gestoria_ia">Gestoría IA — 399€ setup + 299€/mes (chatbot + calculadora ITP)</option></select></div>
       </div>
       <div class="g2 mb">
         <div><label>Email contacto</label><input type="email" id="fEm" placeholder="info@cliente.es" maxlength="100"></div>
@@ -361,21 +360,19 @@ var CDN_BASE='https://nexusforgeia.github.io/whitemoon-cdn';
 // Ingreso medio mensualizado por pack (para stat 'Ingreso/mes').
 // Para packs RAG, mantenimiento mensual recurrente (setup se cobra aparte vía pendingPayments).
 var PACK_PRICES={
-  spark:149,                  // 149€/mes (setup 299€ aparte)
+  spark:199,                  // 199€/mes (setup 499€ aparte)
   core:199,                   // 199€/mes (setup 1.800€ aparte)
   scale:349,                  // 349€/mes (setup 3.500€ aparte)
   elite:599,                  // 599€/mes (setup 6.500€ aparte)
   auditoria:0,                // 899€ pago único, sin recurrente
-  scout_starter:199,          // 199€/mes (setup 299€ aparte)
+  scout_starter:299,          // 299€/mes (setup 499€ aparte)
   scout_agency:399,           // 399€/mes (setup 399€ aparte)
   scout_enterprise:699,       // 699€/mes (setup 499€ aparte) - white label
-  itp:99,                     // 99€/mes (setup 299€ aparte) - white label calculadora ITP
   gestoria_ia:299             // 299€/mes (setup 399€ aparte) - chatbot ITP conversacional
 };
 var CHATBOT_PACKS={spark:1};
-var ITP_PACKS={itp:1};
 var GESTORIA_IA_PACKS={gestoria_ia:1};
-var OBSOLETE_PACKS={basic:1,advance:1,pyme:1,enterprise_n8n:1,consultor_rag:1,empresa_rag:1,premium_rag:1,scout:1};
+var OBSOLETE_PACKS={basic:1,advance:1,pyme:1,enterprise_n8n:1,consultor_rag:1,empresa_rag:1,premium_rag:1,scout:1,itp:1};
 var ghToken='';
 var lics={};
 var sha='';
@@ -407,46 +404,6 @@ function toggleItp(){
   var cb=$('fItp');
   var body=$('itpBody');
   if(cb&&body)body.className='itp-body'+(cb.checked?' show':'');
-}
-
-function codeItp(k){
-  var l=lics[k];if(!l||!l.itp)return;
-  var itp=l.itp;
-  var nombre=itp.nombre||l.biz||'Gestoría';
-  var tel=(itp.tel||l.phone||'').replace(/[^0-9]/g,'');
-  var logo=itp.logo||'';
-  var cta=itp.cta||'Solicitar gestión del ITP';
-  var waLink=tel?'https://wa.me/34'+tel+'?text=Hola%2C%20quiero%20gestionar%20el%20ITP%20de%20mi%20veh%C3%ADculo':'#';
-
-  var h='<!-- Calculadora ITP · '+nombre+' -->\n';
-  h+='<style>\n';
-  h+='.itp-wl{font-family:system-ui,sans-serif;padding:2rem 1rem;text-align:center}\n';
-  h+='.itp-wl h2{font-size:1.4rem;margin-bottom:.5rem;color:#1a1a2e}\n';
-  h+='.itp-wl p{color:#666;font-size:.9rem;margin-bottom:1.5rem}\n';
-  h+='.itp-frame{width:100%;height:700px;border:none;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,.1)}\n';
-  h+='.itp-wa{display:inline-flex;align-items:center;gap:8px;background:#25D366;color:white;padding:.75rem 1.75rem;border-radius:4px;text-decoration:none;font-weight:500;font-size:.875rem;margin-top:1.5rem}\n';
-  h+='</style>\n';
-  h+='<div class="itp-wl">\n';
-  if(logo)h+='  <img src="'+logo+'" alt="'+nombre+'" style="height:44px;display:block;margin:0 auto 1.25rem">\n';
-  h+='  <h2>Calculadora ITP Vehículos 2026</h2>\n';
-  h+='  <p>Calcula el impuesto de tu vehículo de segunda mano. BOE 2026 actualizado.</p>\n';
-  h+='  <iframe\n';
-  h+='    src="https://nexusforgeia.github.io/WHITEMOON-CRM-SAAS-GESTORIAS-ITP/"\n';
-  h+='    class="itp-frame"\n';
-  h+='    title="Calculadora ITP"\n';
-  h+='    loading="lazy">\n';
-  h+='  </iframe>\n';
-  if(tel)h+='  <a href="'+waLink+'" target="_blank" rel="noopener" class="itp-wa"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>'+cta+'</a>\n';
-  h+='</div>\n';
-  h+='<!-- Fin Calculadora ITP · '+nombre+' -->';
-
-  $('codeCTitle').innerHTML='🧮 Código Calculadora ITP — '+escapeHtml(nombre);
-  $('codeCDesc').innerHTML='Pegar donde quieras mostrar la calculadora en la web del cliente:';
-  $('codeO').textContent=h;
-  $('codeC').style.display='block';
-  var ic=$('installContent');if(ic){ic.style.display='none';ic.innerHTML=''}
-  $('codeC').scrollIntoView({behavior:'smooth'});
-  toast('Código ITP generado para '+nombre,'info');
 }
 
 function codeGestoriaIA(k){
@@ -545,7 +502,7 @@ function render(){
     var l=lics[k],rc=l.responses?Object.keys(l.responses).filter(function(x){return!x.startsWith('_')}).length:0;
     var d=daysUntil(l.expires),ec='',eb='';
     if(d!==null){if(d<0){ec='expired';eb='<br><small style="color:#ef4444">⚠ Expirada hace '+Math.abs(d)+'d</small>'}else if(d<=30){ec='expire-soon';eb='<br><small style="color:#f59e0b">⏰ En '+d+'d</small>'}}
-    h+='<tr><td><span class="biz">'+escapeHtml(l.biz)+'</span>'+(l.domain?'<br><span class="domain">'+escapeHtml(l.domain)+'</span>':'')+(l.template?'<br><span class="badge" style="background:rgba(124,58,237,.1);color:#a78bfa;border:1px solid rgba(124,58,237,.2);margin-top:3px">🏷️ '+escapeHtml(l.template)+'</span>':'')+(GESTORIA_IA_PACKS[l.pack]?'<br><span class="badge badge-itp" style="margin-top:4px">🧮 Gestoría IA</span>':(l.itp?'<br><span class="badge badge-itp" style="margin-top:4px">🧮 ITP</span>':''))+'</td>';
+    h+='<tr><td><span class="biz">'+escapeHtml(l.biz)+'</span>'+(l.domain?'<br><span class="domain">'+escapeHtml(l.domain)+'</span>':'')+(l.template?'<br><span class="badge" style="background:rgba(124,58,237,.1);color:#a78bfa;border:1px solid rgba(124,58,237,.2);margin-top:3px">🏷️ '+escapeHtml(l.template)+'</span>':'')+(GESTORIA_IA_PACKS[l.pack]?'<br><span class="badge badge-itp" style="margin-top:4px">🧮 Gestoría IA</span>':'')+'</td>';
     h+='<td class="token">'+escapeHtml(k)+'</td><td>'+escapeHtml(l.pack||'—')+(OBSOLETE_PACKS[l.pack]?'<br><small style="color:#f59e0b">⚠ Pack obsoleto - migrar</small>':'')+'</td>';
     h+='<td><span class="badge '+(l.active?'badge-on':'badge-off')+'">'+(l.active?'ACTIVA':'INACTIVA')+'</span></td>';
     h+='<td class="'+ec+'">'+escapeHtml(l.expires||'—')+eb+'</td><td style="color:#06b6d4">'+rc+'</td>';
@@ -554,7 +511,6 @@ function render(){
     h+='<button class="btn btn-c btn-xs" onclick="edit(\''+escapeHtml(k)+'\')">✎</button>';
     h+='<button class="btn btn-o btn-xs" onclick="code(\''+escapeHtml(k)+'\')"><\/></button>';
     if(GESTORIA_IA_PACKS[l.pack])h+='<button class="btn btn-xs" style="background:rgba(6,182,212,.1);color:#06b6d4;border:1px solid rgba(6,182,212,.2)" onclick="codeGestoriaIA(\''+escapeHtml(k)+'\')" title="Generar chatbot Gestoría IA">🧮</button>';
-    else if(l.itp)h+='<button class="btn btn-xs" style="background:rgba(6,182,212,.1);color:#06b6d4;border:1px solid rgba(6,182,212,.2)" onclick="codeItp(\''+escapeHtml(k)+'\')">🧮</button>';
     h+='<button class="btn btn-y btn-xs" onclick="dupl(\''+escapeHtml(k)+'\')">⎘</button>';
     h+='<button class="btn btn-xs" style="background:rgba(239,68,68,.06);color:#ef4444;border:1px solid rgba(239,68,68,.12)" onclick="del(\''+escapeHtml(k)+'\')">✕</button>';
     h+='</td></tr>';
@@ -670,13 +626,12 @@ function addPay(concept,amount,dueDate){
 function _toggleChatbotSection(){
   var pack=$('fPk').value;
   var isChatbot=!!CHATBOT_PACKS[pack];
-  var isItp=!!ITP_PACKS[pack];
   var isGestoria=!!GESTORIA_IA_PACKS[pack];
   $('chatbotSection').style.display=isChatbot?'':'none';
-  $('nonChatbotMsg').style.display=(isChatbot||isItp||isGestoria)?'none':'block';
+  $('nonChatbotMsg').style.display=(isChatbot||isGestoria)?'none':'block';
   $('giaSection').style.display=isGestoria?'':'none';
-  // Para pack ITP o Gestoría IA: auto-activar la sección Calculadora ITP en alta
-  if((isItp||isGestoria)&&$('fMode').value==='add'&&!$('fItp').checked){
+  // Para pack Gestoría IA: auto-activar la sección Calculadora ITP en alta
+  if(isGestoria&&$('fMode').value==='add'&&!$('fItp').checked){
     $('fItp').checked=true;
     if(typeof toggleItp==='function')toggleItp();
   }
@@ -684,15 +639,14 @@ function _toggleChatbotSection(){
 
 // Defaults (setup + recurrente mensual) por pack
 var PACK_DEFAULTS={
-  spark:           {label:'Spark',            setup:299,  mrr:149},
+  spark:           {label:'Spark',            setup:499,  mrr:199},
   core:            {label:'Core',             setup:1800, mrr:199},
   scale:           {label:'Scale',            setup:3500, mrr:349},
   elite:           {label:'Elite',            setup:6500, mrr:599},
   auditoria:       {label:'Auditoría IA',     setup:899,  mrr:0},
-  scout_starter:   {label:'Scout Starter',    setup:299,  mrr:199},
+  scout_starter:   {label:'Scout Starter',    setup:499,  mrr:299},
   scout_agency:    {label:'Scout Agency',     setup:399,  mrr:399},
   scout_enterprise:{label:'Scout Enterprise', setup:499,  mrr:699},
-  itp:             {label:'Calculadora ITP',  setup:299,  mrr:99},
   gestoria_ia:     {label:'Gestoría IA',       setup:399,  mrr:299}
 };
 
@@ -715,22 +669,10 @@ function suggestPayments(){
     return;
   }
 
-  if(pack==='gestoria_ia'){
-    addPay('Setup Gestoría IA',def.setup,base.toISOString().split('T')[0]);
-    var dG=new Date(base);dG.setFullYear(dG.getFullYear()+1);
-    addPay('Renovación anual Gestoría IA',def.mrr*12,dG.toISOString().split('T')[0]);
-    toast('Pagos sugeridos para Gestoría IA','info');
-    return;
-  }
-
   if(def.setup>0){
     addPay('Setup inicial Pack '+def.label,def.setup,base.toISOString().split('T')[0]);
+    toast('Pago de setup sugerido para '+def.label,'info');
   }
-  if(def.mrr>0){
-    var d=new Date(base);d.setFullYear(d.getFullYear()+1);
-    addPay('Renovación anual Pack '+def.label,def.mrr*12,d.toISOString().split('T')[0]);
-  }
-  toast('Pagos sugeridos para '+def.label,'info');
 }
 
 function saveF(){
@@ -772,16 +714,6 @@ function saveF(){
 function code(k){
   var l=lics[k];if(!l)return;
   if(GESTORIA_IA_PACKS[l.pack]){codeGestoriaIA(k);return}
-  if(ITP_PACKS[l.pack]){
-    if(l.itp){codeItp(k);return}
-    $('codeCTitle').innerHTML='🧮 Calculadora ITP · '+escapeHtml(l.biz);
-    $('codeCDesc').innerHTML='Activa la sección <b>Calculadora ITP</b> en el formulario y completa los datos para generar el código embebido.';
-    $('codeO').textContent='— Configura los datos ITP del cliente para generar el código —';
-    $('codeC').style.display='block';
-    var icItp=$('installContent');if(icItp){icItp.style.display='none';icItp.innerHTML=''}
-    $('codeC').scrollIntoView({behavior:'smooth'});
-    return;
-  }
   if(!CHATBOT_PACKS[l.pack]){
     var def=PACK_DEFAULTS[l.pack];
     var packLabel=def?def.label:(l.pack||'Pack');

@@ -543,7 +543,9 @@
         ? 'https://wa.me/34'+CFG.tel+'?text='+encodeURIComponent(msg)
         : 'https://wa.me/?text='+encodeURIComponent(msg);
 
-      bot('¡Perfecto! ✅<br>Te contactaremos en horario de oficina.<br>Si prefieres contactar ahora:');
+      bot('✅ <b>¡Perfecto, '+esc(data.nombre)+'!</b><br><br>'+
+          'Un/a gestor/a ha recibido tus datos y te llamará en menos de 1 hora para informarte sobre toda la gestión y el trámite.<br><br>'+
+          'Si prefieres contactar ahora:');
 
       setTimeout(function(){
         var wrap = document.createElement('div');

@@ -1,3 +1,16 @@
 {
-  "licenses": {}
+  "licenses": {
+    "WM-bambu2024cordoba": {
+      "biz": "Bamboo Sushi Córdoba",
+      "domain": "bambusushi.es",
+      "pack": "core",
+      "active": true,
+      "created": "2026-05-11",
+      "expires": "2027-05-11",
+      "contact": "",
+      "phone": "",
+      "notes": "Pack Core · 3 pagos 600€ · 199€/mes · Web completa con chatbot",
+      "updated": "2026-05-11T00:00:00.000Z"
+    }
+  }
 }

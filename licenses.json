@@ -6,7 +6,7 @@
       "pack": "core",
       "active": true,
       "created": "2026-05-11",
-      "expires": "2027-05-11",
+      "expires": "2099-05-11",
       "contact": "",
       "phone": "",
       "notes": "Pack Core · 3 pagos 600€ · 199€/mes · Web completa con chatbot",
@@ -41,7 +41,7 @@
           "paid": false
         }
       ],
-      "updated": "2026-05-11T17:33:24.588Z"
+      "updated": "2026-05-11T17:38:24.237Z"
     }
   }
 }

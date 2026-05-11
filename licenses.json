@@ -1,3 +1,35 @@
 {
-  "licenses": {}
+  "licenses": {
+    "WM-25f2b40b6afd5f9e38bf57b2": {
+      "biz": "BAMBOO SUSHI CORDOBA",
+      "domain": "",
+      "pack": "core",
+      "active": true,
+      "created": "2026-05-11",
+      "expires": "2099-05-11",
+      "contact": "",
+      "phone": "643 49 84 65",
+      "notes": "",
+      "botName": "Asistente",
+      "color": "#7c3aed",
+      "calendar": true,
+      "greeting": "",
+      "serviceButtons": [],
+      "pendingPayments": [
+        {
+          "concept": "Setup inicial Pack Core",
+          "amount": 1800,
+          "dueDate": "2026-05-11",
+          "paid": false
+        },
+        {
+          "concept": "PAGO MENSUAL",
+          "amount": 199,
+          "dueDate": "2099-11-11",
+          "paid": false
+        }
+      ],
+      "updated": "2026-05-11T17:14:05.870Z"
+    }
+  }
 }

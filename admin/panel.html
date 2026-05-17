@@ -241,25 +241,68 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
       <div class="mb"><label>Saludo inicial</label><input type="text" id="fGr" placeholder="¡Hola! 👋 Bienvenido/a. ¿En qué puedo ayudarte?" maxlength="200"></div>
       <div class="mb"><label>Botones rápidos (separados por coma)</label><input type="text" id="fBt" placeholder="Implantes, Ortodoncia, Blanqueamiento, Pedir cita" maxlength="300"></div>
 
-      <div class="stitle">🏷️ Plantilla sectorial</div>
-      <div class="info">Selecciona un sector para precargar automáticamente saludo, botones y respuestas típicas. Podrás modificarlos después.</div>
-      <div class="mb">
-        <label>Sector / Plantilla</label>
-        <select id="fTpl" onchange="onTemplateChange()">
-          <option value="">— Sin plantilla (configuración manual) —</option>
-          <option value="dental">🦷 Dental / Clínica dental</option>
-          <option value="legal">⚖️ Legal / Despacho abogados (con triage)</option>
-          <option value="peluqueria">✂️ Peluquería / Estética</option>
-          <option value="restaurante">🍽️ Restaurante / Hostelería</option>
-          <option value="gestoria">📋 Gestoría / Asesoría</option>
-          <option value="taller">🔧 Taller / Automoción (captura matrícula)</option>
-          <option value="veterinaria">🐾 Veterinaria (calendario)</option>
-          <option value="formacion">📚 Formación / Centro educativo</option>
-          <option value="podologia">🦶 Podología / Clínica podológica</option>
-          <option value="reformas">🔨 Reformas / Construcción</option>
+      <div class="stitle">🤖 Agente IA (Claude)</div>
+      <div class="srow">
+        <label class="slabel">Activar Agente IA conversacional</label>
+        <select id="fAI">
+          <option value="">No (chatbot scripted)</option>
+          <option value="1">Sí (Claude Haiku — conversacional)</option>
         </select>
       </div>
-      <div id="tplWarn" style="display:none"></div>
+      <div id="aiPromptSection" style="display:none">
+        <div class="srow">
+          <label class="slabel">System Prompt del Agente</label>
+          <textarea id="fAIPrompt" rows="10"
+            style="width:100%;font-family:monospace;font-size:.8rem;background:#0d0d1a;border:1px solid rgba(124,77,255,.3);color:#fff;border-radius:8px;padding:12px;resize:vertical"
+            placeholder="Eres el agente IA de [NOMBRE NEGOCIO]..."></textarea>
+        </div>
+        <div class="srow">
+          <button type="button" onclick="loadDefaultPrompt()"
+            style="background:rgba(124,77,255,.2);border:1px solid rgba(124,77,255,.4);color:#c084fc;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:.8rem;font-family:inherit">
+            📋 Cargar plantilla base
+          </button>
+        </div>
+      </div>
+      <script>
+      document.getElementById('fAI').addEventListener('change', function(){
+        document.getElementById('aiPromptSection').style.display =
+          this.value === '1' ? 'block' : 'none';
+        if(this.value === '1' && !document.getElementById('fAIPrompt').value){
+          loadDefaultPrompt();
+        }
+      });
+
+      function loadDefaultPrompt(){
+        var biz = document.getElementById('fBiz') ?
+          document.getElementById('fBiz').value : '[NOMBRE NEGOCIO]';
+        var domain = document.getElementById('fDom') ?
+          document.getElementById('fDom').value : '[DOMINIO]';
+        var phone = document.getElementById('fPh') ?
+          document.getElementById('fPh').value : '[TELÉFONO]';
+        document.getElementById('fAIPrompt').value =
+`Eres el agente IA de ${biz||'[NOMBRE NEGOCIO]'}.
+Ubicación: [CIUDAD]
+Sector: [SECTOR]
+Servicios: [SERVICIOS — describe brevemente cada uno]
+Horario: [HORARIO — ej: Lunes a Viernes 9h-20h]
+Teléfono: ${phone||'[TELÉFONO]'}
+Web: ${domain||'[DOMINIO]'}
+WhatsApp: [WHATSAPP si tiene]
+
+MISIÓN: Responder consultas, cualificar leads y captar
+nombre + teléfono del cliente de forma natural y empática.
+
+REGLAS:
+- Máximo 2-3 frases por mensaje
+- Una sola pregunta a la vez
+- Cuando tengas nombre Y teléfono:
+  "Perfecto [nombre], te contactamos hoy. ¡Que vaya genial!"
+- Si el cliente se despide sin dar datos:
+  "¡Sin problema! Cuando quieras estamos aquí. [TELÉFONO]"
+- Nunca inventes servicios que no estén en este prompt
+- Tono: cercano, profesional, orientado a resultados`;
+      }
+      </script>
 
       <div class="stitle">Respuestas personalizadas</div>
       <div class="info">Cada fila: <b>palabras clave</b> → <b>respuesta</b> del chatbot.</div>
@@ -496,7 +539,7 @@ function render(){
     var l=lics[k],rc=l.responses?Object.keys(l.responses).filter(function(x){return!x.startsWith('_')}).length:0;
     var d=daysUntil(l.expires),ec='',eb='';
     if(d!==null){if(d<0){ec='expired';eb='<br><small style="color:#ef4444">⚠ Expirada hace '+Math.abs(d)+'d</small>'}else if(d<=30){ec='expire-soon';eb='<br><small style="color:#f59e0b">⏰ En '+d+'d</small>'}}
-    h+='<tr><td><span class="biz">'+escapeHtml(l.biz)+'</span>'+(l.domain?'<br><span class="domain">'+escapeHtml(l.domain)+'</span>':'')+(l.template?'<br><span class="badge" style="background:rgba(124,58,237,.1);color:#a78bfa;border:1px solid rgba(124,58,237,.2);margin-top:3px">🏷️ '+escapeHtml(l.template)+'</span>':'')+(GESTORIA_IA_PACKS[l.pack]?'<br><span class="badge badge-itp" style="margin-top:4px">🧮 Gestoría IA</span>':'')+'</td>';
+    h+='<tr><td><span class="biz">'+escapeHtml(l.biz)+'</span>'+(l.domain?'<br><span class="domain">'+escapeHtml(l.domain)+'</span>':'')+(l.aiEnabled?'<br><span style="background:rgba(124,77,255,.2);color:#c084fc;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:700;margin-top:3px;display:inline-block">🤖 Claude</span>':'')+(GESTORIA_IA_PACKS[l.pack]?'<br><span class="badge badge-itp" style="margin-top:4px">🧮 Gestoría IA</span>':'')+'</td>';
     h+='<td class="token">'+escapeHtml(k)+'</td><td>'+escapeHtml(l.pack||'—')+(OBSOLETE_PACKS[l.pack]?'<br><small style="color:#f59e0b">⚠ Pack obsoleto - migrar</small>':'')+'</td>';
     h+='<td><span class="badge '+(l.active?'badge-on':'badge-off')+'">'+(l.active?'ACTIVA':'INACTIVA')+'</span></td>';
     h+='<td class="'+ec+'">'+escapeHtml(l.expires||'—')+eb+'</td><td style="color:#06b6d4">'+rc+'</td>';
@@ -561,7 +604,7 @@ function showAdd(){
   $('fBn').value='Asistente';$('fCo').value='#7c3aed';$('fCal').value='true';$('fGr').value='';$('fBt').value='';
   $('fAN').value='';$('fAP').value='';$('fSu').value='';$('fBy').value='';
   $('rList').innerHTML='';$('paysList').innerHTML='';
-  $('fTpl').value='';$('tplWarn').style.display='none';$('tplWarn').innerHTML='';
+  $('fAI').value='';$('fAIPrompt').value='';$('aiPromptSection').style.display='none';
   $('fItp').checked=false;$('itpBody').className='itp-body';
   $('fItpNombre').value='';$('fItpColor').value='#1565C0';$('fItpTel').value='';$('fItpLogo').value='';$('fItpCta').value='Solicitar gestión del ITP';
   $('fGiaHonorarios').value='0';$('fGiaTasas').checked=true;$('fGiaCcaa').value='';$('fGiaDireccion').value='';
@@ -587,8 +630,14 @@ function edit(k){
   if(l.responses)Object.keys(l.responses).forEach(function(x){if(!x.startsWith('_'))addR(x,l.responses[x])});
   $('paysList').innerHTML='';
   if(l.pendingPayments&&l.pendingPayments.length)l.pendingPayments.forEach(function(p){if(!p.paid)addPay(p.concept,p.amount,p.dueDate)});
-  // Plantilla sectorial
-  $('fTpl').value=l.template||'';$('tplWarn').style.display='none';$('tplWarn').innerHTML='';
+  // Agente IA
+  $('fAI').value = l.aiEnabled ? '1' : '';
+  $('fAIPrompt').value = l.aiPrompt || '';
+  if(l.aiEnabled){
+    document.getElementById('aiPromptSection').style.display='block';
+  } else {
+    document.getElementById('aiPromptSection').style.display='none';
+  }
   // ITP
   var itp=l.itp||{};
   $('fItp').checked=!!l.itp;$('itpBody').className='itp-body'+(l.itp?' show':'');
@@ -698,7 +747,7 @@ function saveF(){
       itpData.direccion=$('fGiaDireccion').value.trim()||'';
     }
   }
-  lics[tk]={biz:biz,domain:$('fDom').value.trim(),pack:$('fPk').value,active:mode==='edit'?(lics[$('fOrig').value]?lics[$('fOrig').value].active:true):true,created:$('fCr').value,expires:$('fEx').value,contact:$('fEm').value.trim(),phone:$('fPh').value.trim(),notes:$('fNo').value.trim(),botName:$('fBn').value.trim()||'Asistente',color:$('fCo').value.trim()||'#7c3aed',calendar:$('fCal').value!=='false',greeting:$('fGr').value.trim(),serviceButtons:bt?bt.split(',').map(function(s){return s.trim()}).filter(function(s){return s}):[],responses:Object.keys(resp).length?resp:undefined,pendingPayments:pp.length?pp:undefined,template:$('fTpl').value||undefined,itp:itpData||undefined,updated:new Date().toISOString()};
+  lics[tk]={biz:biz,domain:$('fDom').value.trim(),pack:$('fPk').value,active:mode==='edit'?(lics[$('fOrig').value]?lics[$('fOrig').value].active:true):true,created:$('fCr').value,expires:$('fEx').value,contact:$('fEm').value.trim(),phone:$('fPh').value.trim(),notes:$('fNo').value.trim(),botName:$('fBn').value.trim()||'Asistente',color:$('fCo').value.trim()||'#7c3aed',calendar:$('fCal').value!=='false',greeting:$('fGr').value.trim(),serviceButtons:bt?bt.split(',').map(function(s){return s.trim()}).filter(function(s){return s}):[],responses:Object.keys(resp).length?resp:undefined,pendingPayments:pp.length?pp:undefined,aiEnabled:$('fAI').value==='1'||undefined,aiPrompt:$('fAI').value==='1'?$('fAIPrompt').value:undefined,itp:itpData||undefined,updated:new Date().toISOString()};
   save((mode==='add'?'Alta':'Editar')+': '+biz).then(function(){toast(biz+(mode==='add'?' dado de alta ✅':' actualizado ✅'));hideF();if(mode==='add')code(tk)});
 }
 
@@ -784,36 +833,6 @@ function exportPaymentsCSV(){
 
 function exportJSON(){
   var blob=new Blob([JSON.stringify({exported:new Date().toISOString(),licenses:lics},null,2)],{type:'application/json'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='whitemoon-backup-'+new Date().toISOString().split('T')[0]+'.json';a.click();URL.revokeObjectURL(url);toast('Backup JSON descargado');
-}
-
-function onTemplateChange(){
-  var val=$('fTpl').value;
-  var warn=$('tplWarn');
-  if(!val){warn.style.display='none';warn.className='';warn.innerHTML='';return}
-  warn.className='info';warn.style.display='block';warn.innerHTML='⏳ Cargando plantilla...';
-  fetch(CDN_BASE+'/templates/'+val+'.json?_='+Date.now())
-  .then(function(r){if(!r.ok)throw new Error('not_found');return r.json()})
-  .then(function(tpl){
-    if(tpl.botName)$('fBn').value=tpl.botName;
-    if(tpl.color)$('fCo').value=tpl.color;
-    if(typeof tpl.calendar!=='undefined')$('fCal').value=tpl.calendar?'true':'false';
-    if(tpl.greeting)$('fGr').value=tpl.greeting;
-    if(tpl.serviceButtons)$('fBt').value=tpl.serviceButtons.join(', ');
-    if(tpl.responses){
-      if(tpl.responses._ask_name)$('fAN').value=tpl.responses._ask_name;
-      if(tpl.responses._ask_phone)$('fAP').value=tpl.responses._ask_phone;
-      if(tpl.responses._summary)$('fSu').value=tpl.responses._summary;
-      if(tpl.responses._goodbye)$('fBy').value=tpl.responses._goodbye;
-      $('rList').innerHTML='';
-      Object.keys(tpl.responses).forEach(function(k){if(!k.startsWith('_'))addR(k,tpl.responses[k])});
-    }
-    warn.className='info';
-    warn.innerHTML='✅ Plantilla <b>'+escapeHtml(tpl.name||val)+'</b> cargada. Revisa y ajusta los campos.';
-  })
-  .catch(function(){
-    warn.className='warn';
-    warn.innerHTML='⚠️ Plantilla <b>'+escapeHtml(val)+'</b> en construcción — disponible próximamente. Puedes configurar manualmente.';
-  });
 }
 
 document.addEventListener('keydown',function(e){

@@ -211,7 +211,7 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
       </div>
       <div class="g2 mb">
         <div><label>Dominio</label><input type="text" id="fDom" placeholder="clinicasonrie.es" maxlength="100"></div>
-        <div><label>Pack</label><select id="fPk" onchange="onPackChange()"><option value="spark" selected>Spark — 499€ setup + 199€/mes (chatbot IA)</option><option value="core">Core — 1.800€ setup + 199€/mes (web + chatbot + SEO)</option><option value="scale">Scale — 4.500€ setup + 449€/mes (RAG + automatizaciones)</option><option value="elite">Elite — 8.500€ setup + 799€/mes (RAG premium + CRM)</option><option value="auditoria">Auditoría IA — 899€ pago único</option><option value="gestoria_ia">Gestoría IA — 599€ setup + 299€/mes (chatbot + calculadora ITP)</option></select></div>
+        <div><label>Pack</label><select id="fPk" onchange="onPackChange()"><option value="spark" selected>Spark — 499€ setup + 199€/mes (chatbot IA)</option><option value="core">Core — 1.800€ setup + 199€/mes (web + chatbot + SEO)</option><option value="core-rag">Core RAG — 3.200€ setup + 349€/mes (Agente IA + documentos propios)</option><option value="scale">Scale — 4.500€ setup + 449€/mes (RAG + automatizaciones)</option><option value="elite">Elite — 8.500€ setup + 799€/mes (RAG premium + CRM)</option><option value="auditoria">Auditoría IA — 899€ pago único</option><option value="gestoria_ia">Gestoría IA — 599€ setup + 299€/mes (chatbot + calculadora ITP)</option></select></div>
       </div>
       <div class="g2 mb">
         <div><label>Email contacto</label><input type="email" id="fEm" placeholder="info@cliente.es" maxlength="100"></div>
@@ -413,6 +413,7 @@ var CDN_BASE='https://nexusforgeia.github.io/whitemoon-cdn';
 var PACK_PRICES={
   spark:           {setup:499,  monthly:199},
   core:            {setup:1800, monthly:199},
+  'core-rag':      {setup:3200, monthly:349},
   scale:           {setup:4500, monthly:449},
   elite:           {setup:8500, monthly:799},
   auditoria:       {setup:899,  monthly:0},

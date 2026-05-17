@@ -354,19 +354,19 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
 var REPO='NexusForgeIA/whitemoon-cdn';
 var FILE='licenses.json';
 var CDN_BASE='https://nexusforgeia.github.io/whitemoon-cdn';
-// Ingreso medio mensualizado por pack (para stat 'Ingreso/mes').
+// Precios por pack: setup (pago único) + monthly (recurrente).
 // Para packs RAG, mantenimiento mensual recurrente (setup se cobra aparte vía pendingPayments).
 var PACK_PRICES={
-  spark:199,                  // 199€/mes (setup 499€ aparte)
-  core:199,                   // 199€/mes (setup 1.800€ aparte)
-  scale:449,                  // 449€/mes (setup 4.500€ aparte)
-  elite:799,                  // 799€/mes (setup 8.500€ aparte)
-  auditoria:0,                // 899€ pago único, sin recurrente
-  gestoria_ia:299             // 299€/mes (setup 599€ aparte) - chatbot ITP conversacional
+  spark:           {setup:499,  monthly:199},
+  core:            {setup:1800, monthly:199},
+  scale:           {setup:4500, monthly:449},
+  elite:           {setup:8500, monthly:799},
+  auditoria:       {setup:899,  monthly:0},
+  gestoria_ia:     {setup:599,  monthly:299}
 };
 var CHATBOT_PACKS={spark:1};
 var GESTORIA_IA_PACKS={gestoria_ia:1};
-var OBSOLETE_PACKS={basic:1,advance:1,pyme:1,enterprise_n8n:1,consultor_rag:1,empresa_rag:1,premium_rag:1,scout:1,itp:1};
+var OBSOLETE_PACKS={basic:1,advance:1,pyme:1,enterprise_n8n:1,consultor_rag:1,empresa_rag:1,premium_rag:1,itp:1};
 var ghToken='';
 var lics={};
 var sha='';
@@ -473,7 +473,7 @@ function render(){
   var ks=Object.keys(lics),ac=0,ex=0,rev=0,pt=0;
   ks.forEach(function(k){
     var l=lics[k];
-    if(l.active){ac++;rev+=PACK_PRICES[l.pack]||0;var d=daysUntil(l.expires);if(d!==null&&d>=0&&d<=30)ex++}
+    if(l.active){ac++;rev+=(PACK_PRICES[l.pack]&&PACK_PRICES[l.pack].monthly)||0;var d=daysUntil(l.expires);if(d!==null&&d>=0&&d<=30)ex++}
     if(l.pendingPayments&&l.pendingPayments.length)l.pendingPayments.forEach(function(p){if(!p.paid&&p.amount>0)pt+=parseFloat(p.amount)||0});
   });
   $('sT').textContent=ks.length;$('sA').textContent=ac;$('sI').textContent=ks.length-ac;$('sE').textContent=ex;$('sR').textContent=Math.round(rev)+'€';$('sP').textContent=Math.round(pt)+'€';
@@ -746,8 +746,6 @@ function showInstall(p){
   var el=$('installContent');
   if(el){el.innerHTML=i[p]||'';el.style.display='block';}
 }
-
-var PACK_PRICES={spark:{setup:499,monthly:199},core:{setup:1800,monthly:199},scale:{setup:4500,monthly:449},elite:{setup:8500,monthly:799},auditoria:{setup:899,monthly:0},gestoria_ia:{setup:599,monthly:299}};
 
 function fmtDateES(s){if(!s)return'';var d=new Date(s);if(isNaN(d))return s;return d.toLocaleDateString('es-ES')}
 

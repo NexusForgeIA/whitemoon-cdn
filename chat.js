@@ -89,11 +89,17 @@
       askName:    (licResp && licResp._ask_name)  || (tplResp && tplResp._ask_name)  || 'Para continuar, ¿me dices tu nombre?',
       askPhone:   (licResp && licResp._ask_phone) || (tplResp && tplResp._ask_phone) || 'Gracias {nombre} 👋 ¿Tu teléfono de contacto? (9 dígitos)',
       summary:    (licResp && licResp._summary)   || (tplResp && tplResp._summary)   || 'Perfecto {nombre}. Te contactamos en breve.',
-      template:   lic.template || ''
+      template:   lic.template || '',
+      token:      token,
+      aiEnabled:  !!lic.aiEnabled
     };
 
     var widget = buildWidget(cfg);
     var flowName = lic.template || 'generic';
+    if (lic.aiEnabled) {
+      loadFlow('ai-claude', widget, cfg);
+      return;
+    }
     loadFlow(flowName, widget, cfg);
   }
 

@@ -756,20 +756,41 @@ function showInstall(p){
   if(el){el.innerHTML=i[p]||'';el.style.display='block';}
 }
 
+var PACK_PRICES={spark:{setup:499,monthly:199},core:{setup:1800,monthly:199},scale:{setup:4500,monthly:449},elite:{setup:8500,monthly:799},auditoria:{setup:899,monthly:0},scout_starter:{setup:299,monthly:299},scout_agency:{setup:499,monthly:399},scout_enterprise:{setup:699,monthly:699},gestoria_ia:{setup:599,monthly:299}};
+
+function fmtDateES(s){if(!s)return'';var d=new Date(s);if(isNaN(d))return s;return d.toLocaleDateString('es-ES')}
+
 function exportCSV(){
   var ks=Object.keys(lics);if(!ks.length){toast('No hay clientes','err');return}
-  var rows=[['Token','Negocio','Dominio','Pack','Estado','Alta','Expira','Email','Teléfono','ITP activo','Pagos pendientes (€)','Notas']];
-  ks.forEach(function(k){var l=lics[k],pt=0;if(l.pendingPayments)l.pendingPayments.forEach(function(p){if(!p.paid)pt+=parseFloat(p.amount)||0});rows.push([k,l.biz||'',l.domain||'',l.pack||'',l.active?'Activa':'Inactiva',l.created||'',l.expires||'',l.contact||'',l.phone||'',l.itp?'Sí':'No',pt.toFixed(2),l.notes||''])});
-  var csv=rows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"'}).join(',')}).join('\n');
-  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='whitemoon-clientes-'+new Date().toISOString().split('T')[0]+'.csv';a.click();URL.revokeObjectURL(url);toast('CSV descargado');
+  var rows=[['Token','Negocio','Dominio','Pack','Estado','Email','Teléfono','Fecha Alta','Fecha Expiración','Setup (€)','Cuota Mensual (€)','Ingreso Anual (€)','Pagos Pendientes (€)','Notas']];
+  var soon=new Date(Date.now()+30*86400000);
+  ks.forEach(function(k){
+    var l=lics[k];
+    var pack=PACK_PRICES[l.pack]||{setup:'',monthly:''};
+    var estado=!l.active?'Inactivo':((l.expires && new Date(l.expires)<soon)?'Expira pronto':'Activo');
+    var pt=0;
+    if(l.pendingPayments)l.pendingPayments.forEach(function(p){if(!p.paid)pt+=parseFloat(p.amount)||0});
+    rows.push([k,l.biz||'',l.domain||'',l.pack||'',estado,l.contact||'',l.phone||'',fmtDateES(l.created),l.expires?fmtDateES(l.expires):'Sin expiración',pack.setup,pack.monthly,pack.monthly?pack.monthly*12:'',pt.toFixed(2),(l.notes||'').replace(/\n/g,' ')]);
+  });
+  var csv=rows.map(function(r){return r.map(function(c){return'"'+String(c==null?'':c).replace(/"/g,'""')+'"'}).join(';')}).join('\r\n');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='WhiteMoon_Clientes_'+new Date().toISOString().split('T')[0]+'.csv';a.click();URL.revokeObjectURL(url);toast('✅ CSV exportado — '+ks.length+' clientes');
 }
 
 function exportPaymentsCSV(){
-  var ks=Object.keys(lics),rows=[['Cliente','Token','Teléfono','Concepto','Importe (€)','Fecha vencimiento','Días restantes','Estado']],count=0;
-  ks.forEach(function(k){var l=lics[k];if(l.pendingPayments&&l.pendingPayments.length)l.pendingPayments.forEach(function(p){if(!p.paid){var d=daysUntil(p.dueDate),est=d!==null?(d<0?'VENCIDO':(d===0?'HOY':(d<=7?'URGENTE':(d<=30?'PRÓXIMO':'FUTURO')))):'-';rows.push([l.biz||'',k,l.phone||'',p.concept||'',(parseFloat(p.amount)||0).toFixed(2),p.dueDate||'',d!==null?d:'-',est]);count++}})});
-  if(!count){toast('No hay pagos pendientes','err');return}
-  var csv=rows.map(function(r){return r.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"'}).join(',')}).join('\n');
-  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='whitemoon-pagos-pendientes-'+new Date().toISOString().split('T')[0]+'.csv';a.click();URL.revokeObjectURL(url);toast(count+' pagos exportados');
+  var headers=['Negocio','Token','Dominio','Pack','Concepto Pago','Importe (€)','Fecha Vencimiento','Días Restantes','Estado','Email Contacto','Teléfono','Notas'];
+  var rows=[];
+  Object.keys(lics).forEach(function(k){
+    var l=lics[k];
+    if(!l.pendingPayments||!l.pendingPayments.length)return;
+    l.pendingPayments.forEach(function(p){
+      var d=daysUntil(p.dueDate);
+      var estado=p.paid?'Pagado':(d!==null?(d<0?'⚠️ Vencido':(d===0?'Vence Hoy':(d<=7?'Urgente':(d<=30?'Próximo':'Futuro')))):'Pendiente');
+      rows.push([l.biz||'',k,l.domain||'',l.pack||'',p.concept||'',(parseFloat(p.amount)||0).toFixed(2),fmtDateES(p.dueDate),d!==null?d:'',estado,l.contact||'',l.phone||'',(l.notes||'').replace(/\n/g,' ')]);
+    });
+  });
+  if(!rows.length){toast('No hay pagos pendientes','err');return}
+  var csv=[headers].concat(rows).map(function(r){return r.map(function(c){return'"'+String(c==null?'':c).replace(/"/g,'""')+'"'}).join(';')}).join('\r\n');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='WhiteMoon_Pagos_'+new Date().toISOString().split('T')[0]+'.csv';a.click();URL.revokeObjectURL(url);toast('✅ '+rows.length+' pagos exportados');
 }
 
 function exportJSON(){

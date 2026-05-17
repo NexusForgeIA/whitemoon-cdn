@@ -238,8 +238,8 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
         <div><label>Color principal</label><input type="color" id="fCo" value="#7c3aed"></div>
         <div><label>Calendario</label><select id="fCal"><option value="true">Sí</option><option value="false">No</option></select></div>
       </div>
-      <div class="mb"><label>Saludo inicial</label><input type="text" id="fGr" placeholder="¡Hola! 👋 Bienvenido/a. ¿En qué puedo ayudarte?" maxlength="200"></div>
-      <div class="mb"><label>Botones rápidos (separados por coma)</label><input type="text" id="fBt" placeholder="Implantes, Ortodoncia, Blanqueamiento, Pedir cita" maxlength="300"></div>
+      <div class="mb" id="secSaludo"><label>Saludo inicial</label><input type="text" id="fGr" placeholder="¡Hola! 👋 Bienvenido/a. ¿En qué puedo ayudarte?" maxlength="200"></div>
+      <div class="mb" id="secBotones"><label>Botones rápidos (separados por coma)</label><input type="text" id="fBt" placeholder="Implantes, Ortodoncia, Blanqueamiento, Pedir cita" maxlength="300"></div>
 
       <div class="stitle">🤖 Agente IA (Claude)</div>
       <div class="srow">
@@ -265,12 +265,21 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
       </div>
       <script>
       document.getElementById('fAI').addEventListener('change', function(){
+        toggleAISections(this.value === '1');
         document.getElementById('aiPromptSection').style.display =
           this.value === '1' ? 'block' : 'none';
         if(this.value === '1' && !document.getElementById('fAIPrompt').value){
           loadDefaultPrompt();
         }
       });
+
+      function toggleAISections(isAI) {
+        var scripted = ['secSaludo','secBotones','secMensajes'];
+        scripted.forEach(function(id){
+          var el = document.getElementById(id);
+          if(el) el.style.display = isAI ? 'none' : '';
+        });
+      }
 
       function loadDefaultPrompt(){
         var biz = document.getElementById('fBiz') ?
@@ -309,11 +318,13 @@ REGLAS:
       <div id="rList"></div>
       <button class="btn btn-sm btn-c" onclick="addR()" style="margin:8px 0 16px">+ Añadir respuesta</button>
 
+      <div id="secMensajes">
       <div class="stitle">Mensajes del flujo</div>
       <div class="mb"><label>Pedir nombre</label><textarea id="fAN" rows="2" placeholder="¿Me dices tu nombre y apellidos?"></textarea></div>
       <div class="mb"><label>Pedir teléfono (usa {nombre})</label><textarea id="fAP" rows="2" placeholder="Perfecto {nombre}. ¿Un teléfono móvil?"></textarea></div>
       <div class="mb"><label>Resumen cita</label><textarea id="fSu" rows="4" placeholder="Perfecto {nombre}. He tomado nota..."></textarea></div>
       <div class="mb"><label>Despedida</label><textarea id="fBy" rows="2" placeholder="Nuestro equipo te contactará por WhatsApp. ¡Saludos!"></textarea></div>
+      </div><!-- /secMensajes -->
       </div><!-- /chatbotSection -->
 
       <!-- MÓDULO ITP -->
@@ -605,6 +616,7 @@ function showAdd(){
   $('fAN').value='';$('fAP').value='';$('fSu').value='';$('fBy').value='';
   $('rList').innerHTML='';$('paysList').innerHTML='';
   $('fAI').value='';$('fAIPrompt').value='';$('aiPromptSection').style.display='none';
+  toggleAISections(false);
   $('fItp').checked=false;$('itpBody').className='itp-body';
   $('fItpNombre').value='';$('fItpColor').value='#1565C0';$('fItpTel').value='';$('fItpLogo').value='';$('fItpCta').value='Solicitar gestión del ITP';
   $('fGiaHonorarios').value='0';$('fGiaTasas').checked=true;$('fGiaCcaa').value='';$('fGiaDireccion').value='';
@@ -632,6 +644,7 @@ function edit(k){
   if(l.pendingPayments&&l.pendingPayments.length)l.pendingPayments.forEach(function(p){if(!p.paid)addPay(p.concept,p.amount,p.dueDate)});
   // Agente IA
   $('fAI').value = l.aiEnabled ? '1' : '';
+  toggleAISections(!!l.aiEnabled);
   $('fAIPrompt').value = l.aiPrompt || '';
   if(l.aiEnabled){
     document.getElementById('aiPromptSection').style.display='block';

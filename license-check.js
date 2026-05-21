@@ -10,8 +10,8 @@
   var token = s && s.getAttribute('data-token');
   if(!token) return;
 
-  // Edge Function pública: usa service role server-side (nunca expuesto).
-  // NINGUNA API key / anon key / service role key vive en este archivo público.
+  // Edge Function pública: usa una clave de servidor (nunca expuesta).
+  // Este archivo público NO incluye ninguna credencial de Supabase.
   var VERIFY_ENDPOINT = 'https://mlaqtniujnvfxcvcourm.supabase.co/functions/v1/verify-token';
 
   checkToken(function(active){

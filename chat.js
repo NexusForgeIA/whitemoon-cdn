@@ -11,9 +11,9 @@
   var BASE = script.src.replace(/\/chat\.js.*$/, '');
 
   // ─── 1. VALIDAR LICENCIA — Edge Function pública → fallback licenses.json ─────
-  // La verificación se hace contra una Edge Function pública. La función usa el
-  // service role server-side (NUNCA expuesto) y responde {active,nombre,sector,pack,url}.
-  // NINGUNA API key / anon key / service role key vive en este archivo público.
+  // La verificación se hace contra una Edge Function pública. La función usa una
+  // clave de servidor (NUNCA expuesta) y responde {active,nombre,sector,pack,url}.
+  // Este archivo público NO incluye ninguna credencial de Supabase.
   // licenses.json se mantiene como fallback para no interrumpir clientes instalados.
   var VERIFY_ENDPOINT = 'https://mlaqtniujnvfxcvcourm.supabase.co/functions/v1/verify-token';
 

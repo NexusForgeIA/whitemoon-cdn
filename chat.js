@@ -10,30 +10,28 @@
   if(!token){ console.warn('[WM-CHAT] Sin token'); return; }
   var BASE = script.src.replace(/\/chat\.js.*$/, '');
 
-  // ─── 1. VALIDAR LICENCIA — dual source: Supabase (autoritativo) → licenses.json
-  // Lectura segura vía RPC verificar_token_cdn (sólo devuelve campos públicos:
-  // token/estado/nombre/sector/pack/url). El anon key es público; el endurecido
-  // de RLS queda pendiente (ver SECURITY.md). licenses.json se mantiene como
-  // fallback de seguridad para que ningún cliente ya instalado se interrumpa.
-  var SUPABASE_URL  = 'https://mlaqtniujnvfxcvcourm.supabase.co';
-  var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sYXF0bml1am52ZnhjdmNvdXJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4MzUyMzIsImV4cCI6MjA5MzQxMTIzMn0.Neh7VUS8ADsxf0DPab0JoJyGXOAXnLIaXzXbKzj2BGs';
+  // ─── 1. VALIDAR LICENCIA — Edge Function pública → fallback licenses.json ─────
+  // La verificación se hace contra una Edge Function pública. La función usa el
+  // service role server-side (NUNCA expuesto) y responde {active,nombre,sector,pack,url}.
+  // NINGUNA API key / anon key / service role key vive en este archivo público.
+  // licenses.json se mantiene como fallback para no interrumpir clientes instalados.
+  var VERIFY_ENDPOINT = 'https://mlaqtniujnvfxcvcourm.supabase.co/functions/v1/verify-token';
 
   verifyToken();
 
   function verifyToken(){
-    fetchSupabaseToken(token).then(function(sb){
-      if(sb && sb.found){
-        // Supabase conoce el token → fuente de verdad para activo/pausado.
-        if(sb.estado === 'pausado'){ console.warn('[WM-CHAT] Licencia pausada'); return; }
-        // Activo: usa la config rica de licenses.json si existe (no cambia el
-        // comportamiento de clientes ya instalados); si no, config mínima de Supabase.
+    verifyEdge(token).then(function(res){
+      if(res && res.active === true){
+        // Activo: si el token ya existe en licenses.json usa su config rica (no
+        // cambia el comportamiento de clientes ya instalados, p.ej. Bambú); si no,
+        // construye config mínima con los datos de la Edge Function.
         fetchLicensesJson().then(function(licenses){
           var rich = licenses && licenses[token];
-          proceed(rich || licFromSupabase(sb));
+          proceed(rich || licFromEdge(res));
         });
         return;
       }
-      // Supabase falló o no encontró el token → fallback a licenses.json (comportamiento actual).
+      // active === false o falló la llamada → fallback a licenses.json (comportamiento actual).
       fetchLicensesJson().then(function(licenses){
         var lic = licenses && licenses[token];
         if(!lic){ console.warn('[WM-CHAT] Token inválido'); return; }
@@ -43,21 +41,11 @@
     });
   }
 
-  function fetchSupabaseToken(tk){
-    return fetch(SUPABASE_URL + '/rest/v1/rpc/verificar_token_cdn', {
-      method: 'POST',
-      headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ p_token: tk })
-    })
-    .then(function(r){ if(!r.ok) throw new Error('supabase ' + r.status); return r.json(); })
-    .then(function(rows){
-      if(rows && rows.length){
-        var row = rows[0];
-        return { found: true, estado: row.estado, biz: row.cliente_nombre, domain: row.url_web_cliente, sector: row.sector, pack: row.pack };
-      }
-      return { found: false };
-    })
-    .catch(function(){ return null; }); // null → Supabase no disponible → fallback a licenses.json
+  function verifyEdge(tk){
+    return fetch(VERIFY_ENDPOINT + '?token=' + encodeURIComponent(tk))
+    .then(function(r){ if(!r.ok) throw new Error('verify ' + r.status); return r.json(); })
+    .then(function(data){ return data || null; })
+    .catch(function(){ return null; }); // null → Edge Function no disponible → fallback
   }
 
   function fetchLicensesJson(){
@@ -67,8 +55,8 @@
     .catch(function(){ return null; });
   }
 
-  function licFromSupabase(sb){
-    return { biz: sb.biz || '', domain: sb.domain || '', pack: sb.pack || '', template: sb.sector || '', active: true, _source: 'supabase' };
+  function licFromEdge(res){
+    return { biz: res.nombre || '', domain: res.url || '', pack: res.pack || '', template: res.sector || '', active: true, _source: 'edge' };
   }
 
   function proceed(lic){

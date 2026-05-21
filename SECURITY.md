@@ -4,13 +4,15 @@
 
 El chatbot (`chat.js`) y el comprobador (`license-check.js`) verifican el token así:
 
-1. **Supabase (autoritativo)** — llamada al RPC `verificar_token_cdn(p_token)`.
-   - El RPC es `SECURITY DEFINER` y devuelve **solo campos públicos**
-     (`token_cdn, estado, cliente_nombre, sector, pack, url_web_cliente`).
-     Nunca expone email, teléfono ni notas.
-   - Si `estado = 'pausado'` → licencia inactiva.
-   - Si `estado != 'pausado'` → activa.
-2. **Fallback `licenses.json`** — si Supabase falla o no encuentra el token,
+1. **Edge Function pública `verify-token`** (sin keys en el cliente):
+   `GET https://mlaqtniujnvfxcvcourm.supabase.co/functions/v1/verify-token?token={TOKEN}`
+   - La función usa el **service role key server-side** (nunca expuesto) para
+     llamar al RPC `verificar_token_cdn` (`SECURITY DEFINER`, solo campos públicos:
+     `cliente_nombre, sector, pack, url_web_cliente`; nunca email/teléfono/notas).
+   - Responde `{ active, nombre, sector, pack, url }`. `active = (estado != 'pausado')`.
+   - **Ninguna API key / anon key / service role key vive en `chat.js` ni
+     `license-check.js`** (archivos públicos servidos en webs de clientes).
+2. **Fallback `licenses.json`** — si `active === false` o la llamada falla,
    se usa `licenses.json` (comportamiento histórico). Se mantiene como **backup
    de seguridad** y no debe eliminarse.
 
@@ -24,9 +26,11 @@ Por petición de no tocar las políticas RLS existentes (la base de datos se
 comparte con Scout/CRM y endurecerlas podría romperlos), quedan abiertos:
 
 - **`onboarding_clientes` tiene una política `anon_all` (`USING true`) para `ALL`.**
-  Cualquiera con el anon key público puede leer/insertar/actualizar/borrar la
-  tabla directamente (no solo vía el RPC). El anon key se publica ahora en
-  `chat.js`, `license-check.js` y `admin/panel.html`.
+  Cualquiera con el anon key puede leer/insertar/actualizar/borrar la tabla.
+  Los scripts públicos del CDN (`chat.js`, `license-check.js`) **ya no llevan
+  el anon key** (usan la Edge Function). El anon key **sigue presente en
+  `admin/panel.html`** porque el panel necesita escritura (estado, pagos,
+  alta) y la Edge Function `verify-token` es solo de lectura.
 - **`users` es legible por `anon`** (incluye `password_hash`).
 - El panel admin se protege con un *gate* por GitHub PAT (secreto del admin),
   pero las escrituras a Supabase usan el anon key directo.

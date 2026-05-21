@@ -1,7 +1,7 @@
 /**
  * WhiteMoon · license-check.js — comprobación de licencia para clientes
  * Core/Scale/Elite (solo registro). Oculta el chatbot si la licencia no está
- * activa. Dual source: Supabase (autoritativo) → licenses.json (fallback).
+ * activa. Verificación vía Edge Function pública (sin keys) → fallback licenses.json.
  * Si todo falla NO desactiva nada (nunca interrumpe a un cliente que paga).
  */
 (function(){
@@ -10,25 +10,22 @@
   var token = s && s.getAttribute('data-token');
   if(!token) return;
 
-  var SUPABASE_URL  = 'https://mlaqtniujnvfxcvcourm.supabase.co';
-  var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sYXF0bml1am52ZnhjdmNvdXJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4MzUyMzIsImV4cCI6MjA5MzQxMTIzMn0.Neh7VUS8ADsxf0DPab0JoJyGXOAXnLIaXzXbKzj2BGs';
+  // Edge Function pública: usa service role server-side (nunca expuesto).
+  // NINGUNA API key / anon key / service role key vive en este archivo público.
+  var VERIFY_ENDPOINT = 'https://mlaqtniujnvfxcvcourm.supabase.co/functions/v1/verify-token';
 
   checkToken(function(active){
     if(active === false) disableChat();
   });
 
   function checkToken(cb){
-    fetch(SUPABASE_URL + '/rest/v1/rpc/verificar_token_cdn', {
-      method: 'POST',
-      headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ p_token: token })
+    fetch(VERIFY_ENDPOINT + '?token=' + encodeURIComponent(token))
+    .then(function(r){ if(!r.ok) throw new Error('verify ' + r.status); return r.json(); })
+    .then(function(data){
+      if(data && data.active === true){ cb(true); return; }
+      fallback(cb); // active:false o sin datos → consultar licenses.json
     })
-    .then(function(r){ if(!r.ok) throw new Error('supabase ' + r.status); return r.json(); })
-    .then(function(rows){
-      if(rows && rows.length){ cb(rows[0].estado !== 'pausado'); return; }
-      fallback(cb); // token no está en Supabase → consultar licenses.json
-    })
-    .catch(function(){ fallback(cb); }); // Supabase no disponible → fallback
+    .catch(function(){ fallback(cb); }); // Edge Function no disponible → fallback
   }
 
   function fallback(cb){

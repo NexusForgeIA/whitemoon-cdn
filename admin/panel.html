@@ -3,786 +3,357 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>WhiteMoon — Panel de Licencias</title>
+<title>WhiteMoon · Panel CDN (Supabase)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+:root{
+  --bg:#08080d; --bg2:#101019; --line:#1c1c2b;
+  --primary:#7c4dff; --accent:#00d4aa; --text:#f0f0f5; --muted:#8a8aa0;
+  --danger:#ff5470; --warn:#f5a524;
+}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:#07070e;color:#ccc;min-height:100vh}
-.top{background:#111;border-bottom:1px solid #1a1a2e;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:100}
-.logo{font-size:1.1rem;font-weight:700;color:#fff}.logo span{color:#7c3aed}
-.top-right{display:flex;gap:10px;align-items:center}
-.status{font-size:.7rem;padding:4px 12px;border-radius:12px;font-weight:600}
-.status.on{background:rgba(34,197,94,.15);color:#22c55e}
-.wrap{max-width:1100px;margin:0 auto;padding:24px}
-h2{color:#7c3aed;font-size:.95rem;margin:24px 0 12px;display:flex;align-items:center;gap:8px}
-.card{background:#111;border:1px solid #1a1a2e;border-radius:12px;padding:20px;margin-bottom:16px}
-.login-card{max-width:500px;margin:80px auto;text-align:center}
-.login-card h1{color:#fff;font-size:1.3rem;margin-bottom:6px}
-.login-card p{font-size:.82rem;color:#888;margin-bottom:20px}
-label{font-size:.7rem;color:#888;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px}
-input[type="password"],input[type="text"],input[type="date"],input[type="email"],input[type="tel"],input[type="color"],select,textarea{width:100%;background:#0a0a14;border:1px solid #222;border-radius:8px;padding:10px 14px;color:#fff;font-size:.85rem;font-family:inherit;outline:none;transition:border .2s}
-input:focus,textarea:focus,select:focus{border-color:#7c3aed}
-input[type="color"]{padding:4px;height:42px;cursor:pointer}
-textarea{resize:vertical;min-height:60px;line-height:1.5}
-.btn{padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-weight:600;font-size:.82rem;transition:all .2s}
-.btn-p{background:#7c3aed;color:#fff}.btn-p:hover{background:#6d28d9}
-.btn-g{background:rgba(34,197,94,.15);color:#22c55e;border:1px solid rgba(34,197,94,.2)}.btn-g:hover{background:rgba(34,197,94,.25)}
-.btn-r{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.2)}.btn-r:hover{background:rgba(239,68,68,.25)}
-.btn-o{background:rgba(124,58,237,.1);color:#a78bfa;border:1px solid rgba(124,58,237,.2)}.btn-o:hover{background:rgba(124,58,237,.2)}
-.btn-c{background:rgba(6,182,212,.1);color:#06b6d4;border:1px solid rgba(6,182,212,.2)}.btn-c:hover{background:rgba(6,182,212,.2)}
-.btn-y{background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.2)}.btn-y:hover{background:rgba(245,158,11,.2)}
-.btn-sm{padding:6px 14px;font-size:.74rem}.btn-xs{padding:4px 10px;font-size:.68rem}
+body{font-family:'Sora',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+a{color:var(--primary)}
+.top{background:var(--bg2);border-bottom:1px solid var(--line);padding:14px 22px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:50}
+.logo{font-size:1.05rem;font-weight:800;letter-spacing:.02em}.logo span{color:var(--primary)}
+.top-right{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.wrap{max-width:1180px;margin:0 auto;padding:22px}
+.muted{color:var(--muted)}
+h2{font-size:.92rem;font-weight:700;margin:22px 0 12px;color:var(--text);display:flex;align-items:center;gap:8px}
+label{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px;font-weight:600}
+input,select{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:10px 13px;color:var(--text);font-size:.85rem;font-family:inherit;outline:none;transition:border .15s}
+input:focus,select:focus{border-color:var(--primary)}
+.btn{padding:9px 16px;border-radius:9px;border:none;cursor:pointer;font-family:inherit;font-weight:600;font-size:.8rem;transition:all .15s;background:#1a1a28;color:var(--text)}
+.btn:hover{filter:brightness(1.15)}
 .btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-p{background:var(--primary);color:#fff}
+.btn-a{background:rgba(0,212,170,.14);color:var(--accent);border:1px solid rgba(0,212,170,.3)}
+.btn-d{background:rgba(255,84,112,.12);color:var(--danger);border:1px solid rgba(255,84,112,.3)}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.btn-sm{padding:6px 11px;font-size:.72rem}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:18px}
+.grid-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:8px}
+.stat .v{font-size:1.7rem;font-weight:800;line-height:1}
+.stat .l{font-size:.7rem;color:var(--muted);margin-top:7px;text-transform:uppercase;letter-spacing:.05em}
+.stat .v.p{color:var(--primary)}.stat .v.a{color:var(--accent)}.stat .v.w{color:var(--warn)}
 table{width:100%;border-collapse:collapse}
-th{text-align:left;padding:10px 12px;color:#666;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid #1a1a2e;cursor:pointer;user-select:none}
-th:hover{color:#a78bfa}
-td{padding:10px 12px;border-bottom:1px solid #111;font-size:.82rem;vertical-align:middle}
-tr:hover td{background:#0a0a14}
-.token{font-family:'Courier New',monospace;color:#a78bfa;font-size:.72rem;word-break:break-all}
-.biz{font-weight:600;color:#fff}.domain{color:#888;font-size:.74rem}
-.badge{padding:3px 10px;border-radius:12px;font-size:.66rem;font-weight:600;display:inline-block;white-space:nowrap}
-.badge-on{background:rgba(34,197,94,.15);color:#22c55e}
-.badge-off{background:rgba(239,68,68,.15);color:#ef4444}
-.badge-itp{background:rgba(6,182,212,.15);color:#06b6d4}
-.empty{text-align:center;padding:40px;color:#555;font-size:.88rem}
-.flex{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-.mb{margin-bottom:12px}
-.info{background:rgba(124,58,237,.06);border:1px solid rgba(124,58,237,.15);border-radius:8px;padding:12px;font-size:.78rem;color:#a78bfa;margin:8px 0 12px}
-.warn{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:8px;padding:12px;font-size:.78rem;color:#f59e0b;margin:12px 0}
-.err{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:8px;padding:12px;font-size:.78rem;color:#ef4444;margin:12px 0}
-.toast{position:fixed;top:20px;right:20px;padding:12px 20px;border-radius:10px;font-size:.82rem;font-weight:600;display:none;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.3);color:#fff;max-width:320px}
-.toast.ok{background:#22c55e}.toast.err{background:#ef4444}.toast.info{background:#7c3aed}
-.resp-row{display:flex;gap:8px;margin-bottom:8px;align-items:flex-start}
-.resp-row input{flex:1}.resp-row textarea{flex:2}
-.resp-del{background:none;border:none;color:#ef4444;cursor:pointer;font-size:1.1rem;padding:8px}
-.pay-row{display:grid;grid-template-columns:1fr 110px 110px 40px;gap:8px;margin-bottom:8px;align-items:center}
-.pay-row input{width:100%}
-.pay-item{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-.pay-item .pi-biz{font-weight:600;color:#fff;font-size:.88rem}
-.pay-item .pi-d{font-size:.76rem;color:#aaa}
-.pay-item .pi-amt{font-weight:700;color:#f59e0b;font-size:1rem}
-.pay-item.overdue{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.2)}
-.pay-item.overdue .pi-amt{color:#ef4444}
-.pay-item.soon{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.3)}
-code{background:#1a1a2e;padding:2px 6px;border-radius:4px;font-size:.78rem;color:#a78bfa}
-pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font-size:.76rem;color:#e0e0e0;overflow-x:auto;white-space:pre-wrap;margin:8px 0}
-.stitle{font-size:.78rem;font-weight:700;color:#fff;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid #1a1a2e}
-.search-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
-.search-bar input,.search-bar select{flex:1;min-width:140px}
-.token-gen{display:flex;gap:4px;align-items:stretch}
-.token-gen input{flex:1}
-.token-gen button{padding:0 14px;background:#1a1a2e;color:#a78bfa;border:1px solid #2a2a3e;border-radius:8px;cursor:pointer;font-family:inherit;font-size:.74rem;font-weight:600}
-.token-gen button:hover{background:#2a2a3e}
-.stat-card{flex:1;min-width:120px;text-align:center}
-.stat-card .v{font-size:1.6rem;font-weight:700}
-.stat-card .l{font-size:.68rem;color:#888;margin-top:2px}
-.expire-soon{color:#f59e0b!important}.expired{color:#ef4444!important}
-.modal-bg{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+th{text-align:left;padding:11px 12px;color:var(--muted);font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--line);font-weight:600;white-space:nowrap}
+td{padding:11px 12px;border-bottom:1px solid #14141f;font-size:.82rem;vertical-align:middle}
+tr:hover td{background:#0d0d16}
+.biz{font-weight:600}.dom{color:var(--muted);font-size:.74rem}
+.token{font-family:ui-monospace,Menlo,monospace;color:var(--primary);font-size:.72rem;word-break:break-all}
+.badge{padding:3px 10px;border-radius:20px;font-size:.66rem;font-weight:700;display:inline-block;white-space:nowrap}
+.badge-on{background:rgba(0,212,170,.15);color:var(--accent)}
+.badge-off{background:rgba(255,84,112,.15);color:var(--danger)}
+.badge-pack{background:rgba(124,77,255,.15);color:#b39dff;text-transform:capitalize}
+.pay-input{width:148px}
+.pay-soon{color:var(--warn)!important;font-weight:700}
+.pay-over{color:var(--danger)!important;font-weight:700}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.toolbar input{flex:1;min-width:160px}
+.switch{display:flex;align-items:center;gap:9px;font-size:.76rem;color:var(--muted);font-weight:600}
+.sw{position:relative;width:42px;height:23px;flex-shrink:0}
+.sw input{display:none}
+.sw .slider{position:absolute;inset:0;background:#26263a;border-radius:20px;transition:.2s;cursor:pointer}
+.sw .slider:before{content:"";position:absolute;width:17px;height:17px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.sw input:checked + .slider{background:var(--accent)}
+.sw input:checked + .slider:before{transform:translateX(19px)}
+.toast{position:fixed;top:18px;right:18px;padding:12px 18px;border-radius:11px;font-size:.82rem;font-weight:600;display:none;z-index:9999;box-shadow:0 8px 30px rgba(0,0,0,.5);color:#fff;max-width:330px}
+.toast.ok{background:var(--accent);color:#04221c}.toast.err{background:var(--danger)}.toast.info{background:var(--primary)}
+.empty{text-align:center;padding:38px;color:var(--muted)}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.74);z-index:200;display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
 .modal-bg.show{display:flex}
-.modal{background:#111;border:1px solid #1a1a2e;border-radius:12px;padding:24px;max-width:450px;width:100%;text-align:center}
-.modal h3{color:#fff;margin-bottom:12px}
-.modal p{font-size:.85rem;color:#aaa;margin-bottom:18px;line-height:1.5}
-.ddown{position:relative;display:inline-block}
-.dmenu{display:none;position:absolute;right:0;top:100%;margin-top:4px;background:#111;border:1px solid #1a1a2e;border-radius:8px;min-width:160px;box-shadow:0 8px 24px rgba(0,0,0,.5);z-index:50}
-.dmenu.show{display:block}
-.dmenu a{display:block;padding:10px 14px;color:#ccc;text-decoration:none;font-size:.8rem;cursor:pointer;border-bottom:1px solid #1a1a2e}
-.dmenu a:hover{background:#0a0a14;color:#a78bfa}
-.dmenu a:last-child{border:none}
-.pw-toggle{position:relative}
-.pw-toggle .eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#666;cursor:pointer;font-size:1rem;padding:4px}
-.install-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
-.install-content{font-size:.78rem;color:#ccc;line-height:1.9;background:#0a0a14;border:1px solid #1a1a2e;border-radius:8px;padding:14px;display:none;margin-top:4px}
-.install-step{display:flex;gap:8px;align-items:flex-start;margin-bottom:6px}
-.install-num{background:#7c3aed;color:#fff;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;flex-shrink:0;margin-top:1px}
-/* === MÓDULO CALCULADORA ITP === */
-.itp-wrap{background:rgba(6,182,212,.04);border:1px solid rgba(6,182,212,.18);border-radius:10px;padding:16px;margin-top:4px}
-.itp-header{display:flex;align-items:center;gap:10px}
-.itp-header input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:#06b6d4;flex-shrink:0}
-.itp-header label{font-size:.82rem;color:#06b6d4;font-weight:600;cursor:pointer;margin:0}
-.itp-body{display:none;margin-top:14px;border-top:1px solid rgba(6,182,212,.12);padding-top:14px}
-.itp-body.show{display:block}
-.itp-info{background:rgba(6,182,212,.06);border:1px solid rgba(6,182,212,.15);border-radius:8px;padding:10px 12px;font-size:.76rem;color:#06b6d4;margin-bottom:12px}
-@media(max-width:700px){.g2,.g3{grid-template-columns:1fr}table{font-size:.75rem}.wrap{padding:12px}}
-@media(max-width:600px){.pay-row{grid-template-columns:1fr 1fr 40px}.pay-row input:first-child{grid-column:1 / span 2}}
+.modal{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:24px;max-width:540px;width:100%}
+.modal h3{margin-bottom:16px;font-size:1rem}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:13px}
+.mb{margin-bottom:13px}
+.login{max-width:430px;margin:9vh auto;text-align:center}
+.login h1{font-size:1.3rem;font-weight:800;margin-bottom:6px}
+.warn-box{background:rgba(245,165,36,.08);border:1px solid rgba(245,165,36,.25);border-radius:10px;padding:11px 13px;font-size:.74rem;color:var(--warn);text-align:left;line-height:1.5;margin:14px 0}
+.tokgen{display:flex;gap:6px}.tokgen input{flex:1}
+.pill{font-size:.64rem;padding:2px 8px;border-radius:10px;background:rgba(0,212,170,.12);color:var(--accent);font-weight:700}
+.src-note{font-size:.68rem;color:var(--muted);margin-top:4px}
+@media(max-width:760px){.g2{grid-template-columns:1fr}table{font-size:.74rem}.token{font-size:.66rem}}
 </style>
-<!-- cache-bust: 2026-05-08T22:04:57Z -->
 </head>
 <body>
 <div class="toast" id="toast"></div>
 
 <!-- LOGIN -->
 <div id="loginView">
-  <div class="card login-card">
-    <div style="font-size:2rem;margin-bottom:12px">🔐</div>
-    <h1>Panel de Licencias</h1>
-    <p>WhiteMoon · Gestión de chatbots IA</p>
-    <div class="mb">
-      <label>GitHub Personal Access Token</label>
-      <div class="pw-toggle">
-        <input type="password" id="ghToken" placeholder="github_pat_... o ghp_...">
-        <button type="button" class="eye" onclick="togglePw()" title="Mostrar/ocultar">👁</button>
-      </div>
+  <div class="card login">
+    <div style="font-size:2rem;margin-bottom:10px">🌙</div>
+    <h1>White<span style="color:var(--primary)">Moon</span> · Panel CDN</h1>
+    <p class="muted" style="font-size:.82rem;margin-bottom:18px">Gestión de licencias · Supabase en tiempo real</p>
+    <div class="mb" style="text-align:left">
+      <label>Acceso — GitHub Personal Access Token</label>
+      <input type="password" id="ghToken" placeholder="github_pat_... o ghp_...">
     </div>
-    <div class="warn" style="text-align:left">🔒 El token se guarda SOLO en tu navegador (localStorage). Recomendado: usa un token <b>Fine-grained</b> con permisos limitados al repo y expiración de 90 días.</div>
-    <button class="btn btn-p" onclick="doLogin()" style="width:100%;margin-top:8px">Conectar</button>
+    <div class="warn-box">🔒 El token se guarda solo en tu navegador (localStorage) y se usa como llave de acceso al panel. Los datos de clientes viven en Supabase.</div>
+    <button class="btn btn-p" style="width:100%" onclick="doLogin()">Entrar</button>
   </div>
 </div>
 
 <!-- PANEL -->
 <div id="panelView" style="display:none">
   <div class="top">
-    <div class="logo">White<span>Moon</span> · Panel</div>
+    <div class="logo">White<span>Moon</span> · CDN</div>
     <div class="top-right">
-      <span class="status on" id="statusDot">Conectado</span>
-      <div class="ddown">
-        <button class="btn btn-xs btn-o" onclick="toggleMenu(event)">⋮ Más</button>
-        <div class="dmenu" id="dmenu">
-          <a onclick="showPendingPayments()">💸 Ver pagos pendientes</a>
-          <a onclick="exportCSV()">📥 Exportar CSV</a>
-          <a onclick="exportPaymentsCSV()">📥 Exportar pagos pendientes</a>
-          <a onclick="exportJSON()">💾 Backup JSON</a>
-          <a onclick="reloadData()">🔄 Recargar</a>
-          <a onclick="doLogout()">🚪 Salir</a>
-        </div>
-      </div>
+      <span class="switch">Modo automático pagos
+        <span class="sw"><input type="checkbox" id="autoPay" onchange="toggleAutoPay()"><span class="slider"></span></span>
+        <span id="autoPayLbl" class="muted">OFF</span>
+      </span>
+      <button class="btn btn-ghost btn-sm" onclick="loadData()">🔄 Recargar</button>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()">Salir</button>
     </div>
   </div>
 
   <div class="wrap">
-    <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
-      <div class="card stat-card"><div class="v" style="color:#fff" id="sT">0</div><div class="l">Total clientes</div></div>
-      <div class="card stat-card"><div class="v" style="color:#22c55e" id="sA">0</div><div class="l">Activos</div></div>
-      <div class="card stat-card"><div class="v" style="color:#ef4444" id="sI">0</div><div class="l">Inactivos</div></div>
-      <div class="card stat-card"><div class="v" style="color:#f59e0b" id="sE">0</div><div class="l">Expiran ≤30d</div></div>
-      <div class="card stat-card"><div class="v" style="color:#06b6d4" id="sR">0€</div><div class="l">Ingreso/mes</div></div>
-      <div class="card stat-card" style="cursor:pointer" onclick="showPendingPayments()"><div class="v" style="color:#f59e0b" id="sP">0€</div><div class="l">💸 Pendiente cobrar</div></div>
+    <div class="grid-stats">
+      <div class="card stat"><div class="v a" id="sActive">0</div><div class="l">Tokens activos</div></div>
+      <div class="card stat"><div class="v p" id="sMrr">0€</div><div class="l">MRR real /mes</div></div>
+      <div class="card stat"><div class="v w" id="sDue">0</div><div class="l">Vencen ≤7 días</div></div>
+      <div class="card stat"><div class="v" id="sTotal">0</div><div class="l">Total clientes</div></div>
     </div>
 
-    <div class="card" id="pendingCard" style="display:none">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <h2 style="margin:0">💸 Pagos pendientes</h2>
-        <button class="btn btn-xs btn-o" onclick="$('pendingCard').style.display='none'">Ocultar</button>
-      </div>
-      <div id="pendingList"></div>
-    </div>
+    <h2>📅 Próximos vencimientos</h2>
+    <div class="card" id="dueCard"><div class="empty">—</div></div>
 
+    <h2 style="justify-content:space-between">
+      <span>🤖 Clientes (Supabase · onboarding_clientes)</span>
+      <button class="btn btn-p btn-sm" onclick="openNew()">+ Nuevo cliente</button>
+    </h2>
     <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
-        <h2 style="margin:0">🤖 Licencias</h2>
-        <button class="btn btn-p btn-sm" onclick="showAdd()">+ Nuevo cliente</button>
-      </div>
-      <div class="search-bar">
-        <input type="text" id="searchQ" placeholder="🔍 Buscar por nombre, token, dominio, email..." oninput="render()">
-        <select id="filterPack" onchange="render()">
-          <option value="">Todos los packs</option>
-          <option value="spark">Spark — 499€ setup + 199€/mes (chatbot IA)</option>
-          <option value="core">Core — 1.800€ setup + 199€/mes (web + chatbot + SEO)</option>
-          <option value="scale">Scale — 4.500€ setup + 449€/mes (RAG + automatizaciones)</option>
-          <option value="elite">Elite — 8.500€ setup + desde 599€/mes (RAG premium + CRM)</option>
-          <option value="auditoria">Auditoría IA — 899€ pago único</option>
-        </select>
-        <select id="filterStatus" onchange="render()">
+      <div class="toolbar">
+        <input type="text" id="search" placeholder="🔍 Buscar nombre, dominio, token, sector..." oninput="render()">
+        <select id="fEstado" style="max-width:180px" onchange="render()">
           <option value="">Todos los estados</option>
-          <option value="active">Activos</option>
-          <option value="inactive">Inactivos</option>
-          <option value="expiring">Expiran pronto</option>
+          <option value="activos">Solo activos</option>
+          <option value="pausado">Solo pausados</option>
         </select>
       </div>
-      <div id="tbl"><div class="empty">Cargando...</div></div>
-    </div>
-
-    <div class="card" id="frm" style="display:none">
-      <h2 style="margin-top:0" id="frmTitle">➕ Nuevo cliente</h2>
-      <input type="hidden" id="fMode" value="add">
-      <input type="hidden" id="fOrig" value="">
-
-      <div class="stitle">Datos del negocio</div>
-      <div class="g2 mb">
-        <div>
-          <label>Token <span style="color:#f59e0b">*</span></label>
-          <div class="token-gen">
-            <input type="text" id="fTk" placeholder="WM-..." maxlength="60">
-            <button type="button" onclick="genTk()">🎲 Generar</button>
-          </div>
-        </div>
-        <div><label>Nombre negocio <span style="color:#f59e0b">*</span></label><input type="text" id="fBiz" placeholder="Clínica Dental Sonríe" maxlength="100"></div>
-      </div>
-      <div class="g2 mb">
-        <div><label>Dominio</label><input type="text" id="fDom" placeholder="clinicasonrie.es" maxlength="100"></div>
-        <div><label>Pack</label><select id="fPk" onchange="onPackChange()"><option value="spark" selected>Spark — 499€ setup + 199€/mes (chatbot IA)</option><option value="core">Core — 1.800€ setup + 199€/mes (web + chatbot + SEO)</option><option value="core-rag">Core RAG — 3.200€ setup + 349€/mes (Agente IA + documentos propios)</option><option value="scale">Scale — 4.500€ setup + 449€/mes (RAG + automatizaciones)</option><option value="elite">Elite — 8.500€ setup + desde 599€/mes (RAG premium + CRM)</option><option value="auditoria">Auditoría IA — 899€ pago único</option></select></div>
-      </div>
-      <div class="g2 mb">
-        <div><label>Email contacto</label><input type="email" id="fEm" placeholder="info@cliente.es" maxlength="100"></div>
-        <div><label>Teléfono</label><input type="tel" id="fPh" placeholder="912345678" maxlength="20"></div>
-      </div>
-      <div class="g2 mb">
-        <div><label>Fecha alta</label><input type="date" id="fCr"></div>
-        <div><label>Fecha expiración</label><input type="date" id="fEx"></div>
-      </div>
-      <div class="mb"><label>Notas internas</label><input type="text" id="fNo" placeholder="Observaciones..." maxlength="300"></div>
-
-      <div class="stitle">💸 Pagos pendientes (opcional)</div>
-      <div class="info">Para setup inicial, renovaciones anuales o cualquier pago futuro.</div>
-      <div id="paysList"></div>
-      <button class="btn btn-sm btn-y" onclick="addPay()" style="margin:8px 0 16px">+ Añadir pago pendiente</button>
-
-      <div id="nonChatbotMsg" style="display:none;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.25);border-radius:8px;padding:14px 16px;margin:10px 0 16px;color:#a78bfa;font-size:.85rem;line-height:1.5">
-        📋 Este pack se registra para facturación y seguimiento. No genera script embebido.
-      </div>
-      <div id="chatbotSection">
-      <div class="stitle">Configuración chatbot</div>
-      <div class="g3 mb">
-        <div><label>Nombre asistente</label><input type="text" id="fBn" placeholder="Lucía" value="Asistente" maxlength="30"></div>
-        <div><label>Color principal</label><input type="color" id="fCo" value="#7c3aed"></div>
-        <div><label>Calendario</label><select id="fCal"><option value="true">Sí</option><option value="false">No</option></select></div>
-      </div>
-      <div class="mb" id="secSaludo"><label>Saludo inicial</label><input type="text" id="fGr" placeholder="¡Hola! 👋 Bienvenido/a. ¿En qué puedo ayudarte?" maxlength="200"></div>
-      <div class="mb" id="secBotones"><label>Botones rápidos (separados por coma)</label><input type="text" id="fBt" placeholder="Implantes, Ortodoncia, Blanqueamiento, Pedir cita" maxlength="300"></div>
-
-      <div class="stitle">🤖 Agente IA (Claude)</div>
-      <div class="srow">
-        <label class="slabel">Activar Agente IA conversacional</label>
-        <select id="fAI">
-          <option value="">No (chatbot scripted)</option>
-          <option value="1">Sí (Claude Haiku — conversacional)</option>
-        </select>
-      </div>
-      <div id="aiPromptSection" style="display:none">
-        <div class="srow">
-          <label class="slabel">System Prompt del Agente</label>
-          <textarea id="fAIPrompt" rows="10"
-            style="width:100%;font-family:monospace;font-size:.8rem;background:#0d0d1a;border:1px solid rgba(124,77,255,.3);color:#fff;border-radius:8px;padding:12px;resize:vertical"
-            placeholder="Eres el agente IA de [NOMBRE NEGOCIO]..."></textarea>
-        </div>
-        <div class="srow">
-          <button type="button" onclick="loadDefaultPrompt()"
-            style="background:rgba(124,77,255,.2);border:1px solid rgba(124,77,255,.4);color:#c084fc;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:.8rem;font-family:inherit">
-            📋 Cargar plantilla base
-          </button>
-        </div>
-      </div>
-      <script>
-      document.getElementById('fAI').addEventListener('change', function(){
-        toggleAISections(this.value === '1');
-        document.getElementById('aiPromptSection').style.display =
-          this.value === '1' ? 'block' : 'none';
-        if(this.value === '1' && !document.getElementById('fAIPrompt').value){
-          loadDefaultPrompt();
-        }
-      });
-
-      function toggleAISections(isAI) {
-        var scripted = ['secSaludo','secBotones','secMensajes'];
-        scripted.forEach(function(id){
-          var el = document.getElementById(id);
-          if(el) el.style.display = isAI ? 'none' : '';
-        });
-      }
-
-      function loadDefaultPrompt(){
-        var biz = document.getElementById('fBiz') ?
-          document.getElementById('fBiz').value : '[NOMBRE NEGOCIO]';
-        var domain = document.getElementById('fDom') ?
-          document.getElementById('fDom').value : '[DOMINIO]';
-        var phone = document.getElementById('fPh') ?
-          document.getElementById('fPh').value : '[TELÉFONO]';
-        document.getElementById('fAIPrompt').value =
-`Eres el agente IA de ${biz||'[NOMBRE NEGOCIO]'}.
-Ubicación: [CIUDAD]
-Sector: [SECTOR]
-Servicios: [SERVICIOS — describe brevemente cada uno]
-Horario: [HORARIO — ej: Lunes a Viernes 9h-20h]
-Teléfono: ${phone||'[TELÉFONO]'}
-Web: ${domain||'[DOMINIO]'}
-WhatsApp: [WHATSAPP si tiene]
-
-MISIÓN: Responder consultas, cualificar leads y captar
-nombre + teléfono del cliente de forma natural y empática.
-
-REGLAS:
-- Máximo 2-3 frases por mensaje
-- Una sola pregunta a la vez
-- Cuando tengas nombre Y teléfono:
-  "Perfecto [nombre], te contactamos hoy. ¡Que vaya genial!"
-- Si el cliente se despide sin dar datos:
-  "¡Sin problema! Cuando quieras estamos aquí. [TELÉFONO]"
-- Nunca inventes servicios que no estén en este prompt
-- Tono: cercano, profesional, orientado a resultados`;
-      }
-      </script>
-
-      <div class="stitle">Respuestas personalizadas</div>
-      <div class="info">Cada fila: <b>palabras clave</b> → <b>respuesta</b> del chatbot.</div>
-      <div id="rList"></div>
-      <button class="btn btn-sm btn-c" onclick="addR()" style="margin:8px 0 16px">+ Añadir respuesta</button>
-
-      <div id="secMensajes">
-      <div class="stitle">Mensajes del flujo</div>
-      <div class="mb"><label>Pedir nombre</label><textarea id="fAN" rows="2" placeholder="¿Me dices tu nombre y apellidos?"></textarea></div>
-      <div class="mb"><label>Pedir teléfono (usa {nombre})</label><textarea id="fAP" rows="2" placeholder="Perfecto {nombre}. ¿Un teléfono móvil?"></textarea></div>
-      <div class="mb"><label>Resumen cita</label><textarea id="fSu" rows="4" placeholder="Perfecto {nombre}. He tomado nota..."></textarea></div>
-      <div class="mb"><label>Despedida</label><textarea id="fBy" rows="2" placeholder="Nuestro equipo te contactará por WhatsApp. ¡Saludos!"></textarea></div>
-      </div><!-- /secMensajes -->
-      </div><!-- /chatbotSection -->
-
-      <!-- MÓDULO ITP -->
-      <div class="stitle">🧮 Calculadora ITP (white label)</div>
-      <div class="itp-wrap">
-        <div class="itp-header">
-          <input type="checkbox" id="fItp" onchange="toggleItp()">
-          <label for="fItp">Activar calculadora ITP white label para este cliente</label>
-        </div>
-        <div class="itp-body" id="itpBody">
-          <div class="itp-info">Se generará un bloque HTML personalizado con la marca del cliente, listo para instalar en su web. El cliente usa la calculadora con su imagen de marca.</div>
-          <div class="g2 mb">
-            <div><label>Nombre gestoría (en el HTML)</label><input type="text" id="fItpNombre" placeholder="Gestoría Martínez" maxlength="80"></div>
-            <div><label>Color principal</label><input type="color" id="fItpColor" value="#1565C0"></div>
-          </div>
-          <div class="g2 mb">
-            <div><label>Teléfono / WhatsApp</label><input type="tel" id="fItpTel" placeholder="612345678" maxlength="20"></div>
-            <div><label>Logo URL (opcional)</label><input type="text" id="fItpLogo" placeholder="https://sugestoria.es/logo.png" maxlength="200"></div>
-          </div>
-          <div class="mb"><label>Texto botón WhatsApp</label><input type="text" id="fItpCta" placeholder="Solicitar gestión del ITP" maxlength="60" value="Solicitar gestión del ITP"></div>
-        </div>
-      </div>
-
-      <div class="flex" style="margin-top:16px;justify-content:space-between">
-        <div class="flex">
-          <button class="btn btn-p" onclick="saveF()" id="saveBtn">Guardar</button>
-          <button class="btn btn-o" onclick="hideF()">Cancelar</button>
-        </div>
-        <small style="color:#666;font-size:.7rem">Ctrl+S para guardar · Esc para cancelar</small>
-      </div>
-    </div>
-
-    <!-- CÓDIGO -->
-    <div class="card" id="codeC" style="display:none">
-      <h2 style="margin-top:0" id="codeCTitle">📋 Código para el cliente</h2>
-      <p style="font-size:.78rem;color:#888;margin-bottom:8px" id="codeCDesc">Pegar antes de <code>&lt;/body&gt;</code> en la web del cliente:</p>
-      <pre id="codeO"></pre>
-      <div class="flex" style="margin-top:8px">
-        <button class="btn btn-sm btn-o" onclick="cpCode()">📋 Copiar código</button>
-        <button class="btn btn-sm btn-c" onclick="emailCode()">✉️ Email al cliente</button>
-      </div>
-      <div style="margin-top:20px;border-top:1px solid #1a1a2e;padding-top:16px">
-        <div style="font-size:.78rem;font-weight:700;color:#fff;margin-bottom:10px">📖 ¿Cómo instalarlo en la web del cliente?</div>
-        <div class="install-tabs">
-          <button class="btn btn-xs btn-o" onclick="showInstall('wp')">WordPress</button>
-          <button class="btn btn-xs btn-c" onclick="showInstall('joomla')">Joomla</button>
-          <button class="btn btn-xs btn-y" onclick="showInstall('html')">HTML puro</button>
-          <button class="btn btn-xs btn-g" onclick="showInstall('shopify')">Shopify</button>
-          <button class="btn btn-xs" style="background:rgba(124,58,237,.1);color:#a78bfa;border:1px solid rgba(124,58,237,.2)" onclick="showInstall('wix')">Wix</button>
-        </div>
-        <div class="install-content" id="installContent"></div>
-      </div>
+      <div style="overflow-x:auto"><div id="tbl"><div class="empty">Cargando…</div></div></div>
     </div>
   </div>
 </div>
 
-<!-- MODAL -->
-<div class="modal-bg" id="confirmModal">
+<!-- NUEVO CLIENTE -->
+<div class="modal-bg" id="newBg">
   <div class="modal">
-    <h3 id="cmTitle">¿Confirmar?</h3>
-    <p id="cmText">Esta acción no se puede deshacer.</p>
-    <div class="flex" style="justify-content:center">
-      <button class="btn btn-r" id="cmOk">Sí, confirmar</button>
-      <button class="btn btn-o" onclick="closeCm()">Cancelar</button>
+    <h3>➕ Nuevo cliente</h3>
+    <div class="mb">
+      <label>Token CDN <span style="color:var(--warn)">*</span></label>
+      <div class="tokgen">
+        <input type="text" id="nToken" placeholder="WM-...">
+        <button type="button" class="btn btn-ghost" onclick="genToken()">🎲 Generar</button>
+      </div>
+    </div>
+    <div class="g2">
+      <div><label>Nombre cliente *</label><input type="text" id="nNombre" placeholder="Clínica Dental Sonríe"></div>
+      <div><label>Dominio web</label><input type="text" id="nUrl" placeholder="clinicasonrie.es"></div>
+    </div>
+    <div class="g2">
+      <div><label>Sector</label><select id="nSector"></select></div>
+      <div><label>Pack</label><select id="nPack"></select></div>
+    </div>
+    <div class="g2">
+      <div><label>Estado</label><select id="nEstado">
+        <option value="completado">Activo (completado)</option>
+        <option value="pendiente">Pendiente</option>
+        <option value="pausado">Pausado</option>
+      </select></div>
+      <div><label>Próximo pago</label><input type="date" id="nPago"></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-ghost" onclick="closeNew()">Cancelar</button>
+      <button class="btn btn-p" id="nSave" onclick="saveNew()">Crear cliente</button>
     </div>
   </div>
 </div>
 
 <script>
-var REPO='NexusForgeIA/whitemoon-cdn';
-var FILE='licenses.json';
-var CDN_BASE='https://nexusforgeia.github.io/whitemoon-cdn';
-// Precios por pack: setup (pago único) + monthly (recurrente).
-// Para packs RAG, mantenimiento mensual recurrente (setup se cobra aparte vía pendingPayments).
-var PACK_PRICES={
-  spark:           {setup:499,  monthly:199},
-  core:            {setup:1800, monthly:199},
-  'core-rag':      {setup:3200, monthly:349},
-  scale:           {setup:4500, monthly:449},
-  elite:           {setup:8500, monthly:599},
-  auditoria:       {setup:899,  monthly:0}
-};
-var CHATBOT_PACKS={spark:1};
-var OBSOLETE_PACKS={basic:1,advance:1,pyme:1,enterprise_n8n:1,consultor_rag:1,empresa_rag:1,premium_rag:1,itp:1};
-var ghToken='';
-var lics={};
-var sha='';
-var currentSort={col:'created',dir:'desc'};
+// ─── CONFIG ──────────────────────────────────────────────────────────────────
+var SUPABASE_URL  = 'https://mlaqtniujnvfxcvcourm.supabase.co';
+var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sYXF0bml1am52ZnhjdmNvdXJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4MzUyMzIsImV4cCI6MjA5MzQxMTIzMn0.Neh7VUS8ADsxf0DPab0JoJyGXOAXnLIaXzXbKzj2BGs';
+var CDN_BASE = 'https://nexusforgeia.github.io/whitemoon-cdn';
+var REPO = 'NexusForgeIA/whitemoon-cdn';
+// MRR mensual por pack (alineado con el panel de precios).
+var PACK_MRR = { spark:199, core:199, 'core-rag':349, scale:449, elite:599 };
+var SECTORES = ['dental','legal','restaurante','gestoria','clinica','inmobiliaria','gimnasio','peluqueria','veterinaria','formacion','taller','podologia','automovil','abogados'];
+var PACKS = ['spark','core','scale','elite'];
 
-function $(i){return document.getElementById(i)}
+var clientes = [];
+var ghToken = '';
 
-function toast(m,type){
-  type=type||'ok';
-  var t=$('toast');
-  t.className='toast '+type;
-  t.innerHTML=(type==='err'?'⚠ ':type==='info'?'ℹ ':'✓ ')+m;
-  t.style.display='block';
-  clearTimeout(window._toastT);
-  window._toastT=setTimeout(function(){t.style.display='none'},3500);
+function $(id){ return document.getElementById(id); }
+function toast(m,type){ var t=$('toast'); t.className='toast '+(type||'ok'); t.textContent=m; t.style.display='block'; clearTimeout(window._tt); window._tt=setTimeout(function(){t.style.display='none';},3200); }
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function daysUntil(d){ if(!d) return null; var dt=new Date(d); if(isNaN(dt)) return null; var n=new Date(); n.setHours(0,0,0,0); return Math.floor((dt-n)/86400000); }
+function fmtDate(s){ if(!s) return '—'; var d=new Date(s); return isNaN(d)?'—':d.toLocaleDateString('es-ES'); }
+function isActive(c){ return c.estado !== 'pausado'; }
+
+// ─── SUPABASE REST ───────────────────────────────────────────────────────────
+function sbHeaders(extra){
+  var h = { 'apikey':SUPABASE_ANON, 'Authorization':'Bearer '+SUPABASE_ANON, 'Content-Type':'application/json' };
+  if(extra) Object.keys(extra).forEach(function(k){ h[k]=extra[k]; });
+  return h;
 }
+function sbGet(path){ return fetch(SUPABASE_URL+'/rest/v1/'+path, { headers:sbHeaders() }).then(function(r){ if(!r.ok) throw new Error('GET '+r.status); return r.json(); }); }
+function sbPatch(table, query, body){ return fetch(SUPABASE_URL+'/rest/v1/'+table+'?'+query, { method:'PATCH', headers:sbHeaders({ Prefer:'return=representation' }), body:JSON.stringify(body) }).then(function(r){ if(!r.ok) throw new Error('PATCH '+r.status); return r.json(); }); }
+function sbInsert(table, body){ return fetch(SUPABASE_URL+'/rest/v1/'+table, { method:'POST', headers:sbHeaders({ Prefer:'return=representation' }), body:JSON.stringify(body) }).then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t||('POST '+r.status)); }); return r.json(); }); }
 
-function escapeHtml(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
-function sanitizeToken(t){return String(t||'').replace(/[^A-Za-z0-9\-_]/g,'').substring(0,60)}
-function genTkValue(){var a=new Uint8Array(12);crypto.getRandomValues(a);var h=Array.from(a,function(b){return b.toString(16).padStart(2,'0')}).join('');return'WM-'+h}
-function genTk(){$('fTk').value=genTkValue();toast('Token seguro generado','info')}
-function togglePw(){var i=$('ghToken');i.type=i.type==='password'?'text':'password'}
-function toggleMenu(e){e.stopPropagation();$('dmenu').classList.toggle('show')}
-document.addEventListener('click',function(){$('dmenu').classList.remove('show')});
-function daysUntil(d){if(!d)return null;var dt=new Date(d);if(isNaN(dt))return null;var n=new Date();n.setHours(0,0,0,0);return Math.floor((dt-n)/(1000*60*60*24))}
-
-// === MÓDULO ITP ===
-function toggleItp(){
-  var cb=$('fItp');
-  var body=$('itpBody');
-  if(cb&&body)body.className='itp-body'+(cb.checked?' show':'');
-}
-
-// === FIN MÓDULO ITP ===
-
+// ─── LOGIN (gate por GitHub PAT) ─────────────────────────────────────────────
 function doLogin(){
-  var t=$('ghToken').value.trim();
-  if(!t){toast('Introduce un token','err');return}
-  if(!t.match(/^(ghp_|github_pat_)/)){if(!confirm('El token no tiene formato estándar. ¿Continuar?'))return}
-  ghToken=t;localStorage.setItem('wm_t',ghToken);
-  $('loginView').style.display='none';$('panelView').style.display='block';load();
+  var t = $('ghToken').value.trim();
+  if(!t){ toast('Introduce tu token de acceso','err'); return; }
+  toast('Verificando…','info');
+  fetch('https://api.github.com/repos/'+REPO, { headers:{ 'Authorization':'Bearer '+t, 'Accept':'application/vnd.github+json' } })
+  .then(function(r){ if(!r.ok) throw new Error('Token inválido ('+r.status+')'); return r.json(); })
+  .then(function(){ ghToken=t; localStorage.setItem('wm_cdn_t', t); enterPanel(); })
+  .catch(function(e){ toast(e.message,'err'); });
 }
-function doLogout(){if(!confirm('¿Cerrar sesión?'))return;localStorage.removeItem('wm_t');location.reload()}
-var sv=localStorage.getItem('wm_t');
-if(sv){ghToken=sv;$('loginView').style.display='none';$('panelView').style.display='block';load()}
+function doLogout(){ if(!confirm('¿Cerrar sesión?')) return; localStorage.removeItem('wm_cdn_t'); location.reload(); }
+function enterPanel(){ $('loginView').style.display='none'; $('panelView').style.display='block'; fillSelects(); loadData(); }
+(function(){ var sv=localStorage.getItem('wm_cdn_t'); if(sv){ ghToken=sv; enterPanel(); } })();
 
-function load(){
-  $('tbl').innerHTML='<div class="empty">Cargando...</div>';
-  fetch('https://api.github.com/repos/'+REPO+'/contents/'+FILE,{headers:{'Authorization':'Bearer '+ghToken,'Accept':'application/vnd.github+json'}})
-  .then(function(r){if(r.status===401)throw new Error('Token inválido o caducado');if(r.status===404)throw new Error('Archivo licenses.json no existe');if(!r.ok)throw new Error('Error '+r.status);return r.json()})
-  .then(function(d){sha=d.sha;var dec=decodeURIComponent(escape(atob(d.content.replace(/\n/g,''))));var p=JSON.parse(dec);lics=p.licenses||{};render()})
-  .catch(function(e){$('tbl').innerHTML='<div class="err">❌ '+escapeHtml(e.message)+'</div>';toast(e.message,'err')});
-}
-function reloadData(){toast('Recargando...','info');load()}
-
-function save(msg){
-  var sb=$('saveBtn');if(sb)sb.disabled=true;
-  var c=JSON.stringify({licenses:lics},null,2);
-  var e=btoa(unescape(encodeURIComponent(c)));
-  return fetch('https://api.github.com/repos/'+REPO+'/contents/'+FILE,{method:'PUT',headers:{'Authorization':'Bearer '+ghToken,'Content-Type':'application/json','Accept':'application/vnd.github+json'},body:JSON.stringify({message:msg,content:e,sha:sha})})
-  .then(function(r){if(!r.ok)throw new Error('Error al guardar ('+r.status+')');return r.json()})
-  .then(function(d){sha=d.content.sha;render();if(sb)sb.disabled=false;return d})
-  .catch(function(e){if(sb)sb.disabled=false;toast(e.message,'err');throw e});
-}
-
-function render(){
-  var ks=Object.keys(lics),ac=0,ex=0,rev=0,pt=0;
-  ks.forEach(function(k){
-    var l=lics[k];
-    if(l.active){ac++;rev+=(PACK_PRICES[l.pack]&&PACK_PRICES[l.pack].monthly)||0;var d=daysUntil(l.expires);if(d!==null&&d>=0&&d<=30)ex++}
-    if(l.pendingPayments&&l.pendingPayments.length)l.pendingPayments.forEach(function(p){if(!p.paid&&p.amount>0)pt+=parseFloat(p.amount)||0});
+// ─── CARGA DE DATOS ──────────────────────────────────────────────────────────
+function loadData(){
+  $('tbl').innerHTML='<div class="empty">Cargando…</div>';
+  Promise.all([
+    sbGet('onboarding_clientes?select=id,token_cdn,estado,cliente_nombre,sector,pack,url_web_cliente,fecha_proximo_pago,fecha_inicio,created_at&order=created_at.desc'),
+    sbGet('cdn_config?id=eq.true&select=modo_automatico_pagos')
+  ]).then(function(res){
+    clientes = res[0] || [];
+    var cfg = (res[1] && res[1][0]) || { modo_automatico_pagos:false };
+    setAutoPayUI(!!cfg.modo_automatico_pagos);
+    render();
+  }).catch(function(e){
+    $('tbl').innerHTML='<div class="empty" style="color:var(--danger)">❌ '+esc(e.message)+'</div>';
+    toast('Error al cargar de Supabase','err');
   });
-  $('sT').textContent=ks.length;$('sA').textContent=ac;$('sI').textContent=ks.length-ac;$('sE').textContent=ex;$('sR').textContent=Math.round(rev)+'€';$('sP').textContent=Math.round(pt)+'€';
-  var q=($('searchQ').value||'').toLowerCase().trim();
-  var fP=$('filterPack').value,fS=$('filterStatus').value;
-  var filtered=ks.filter(function(k){
-    var l=lics[k];
-    if(fP&&l.pack!==fP)return false;
-    if(fS==='active'&&!l.active)return false;
-    if(fS==='inactive'&&l.active)return false;
-    if(fS==='expiring'){var d=daysUntil(l.expires);if(d===null||d<0||d>30)return false}
-    if(q){var h=(k+' '+(l.biz||'')+' '+(l.domain||'')+' '+(l.contact||'')+' '+(l.phone||'')).toLowerCase();if(h.indexOf(q)===-1)return false}
+}
+
+// ─── DASHBOARD + LISTA ───────────────────────────────────────────────────────
+function render(){
+  var activos = clientes.filter(isActive);
+  var mrr = activos.reduce(function(s,c){ return s + (PACK_MRR[c.pack]||0); }, 0);
+  var due = clientes.filter(function(c){ var d=daysUntil(c.fecha_proximo_pago); return d!==null && d<=7; });
+  $('sActive').textContent = activos.length;
+  $('sMrr').textContent = mrr.toLocaleString('es-ES')+'€';
+  $('sDue').textContent = due.length;
+  $('sTotal').textContent = clientes.length;
+  renderDue();
+
+  var q = ($('search').value||'').toLowerCase().trim();
+  var fe = $('fEstado').value;
+  var rows = clientes.filter(function(c){
+    if(fe==='activos' && !isActive(c)) return false;
+    if(fe==='pausado' && c.estado!=='pausado') return false;
+    if(q){ var h=((c.cliente_nombre||'')+' '+(c.url_web_cliente||'')+' '+(c.token_cdn||'')+' '+(c.sector||'')+' '+(c.pack||'')).toLowerCase(); if(h.indexOf(q)===-1) return false; }
     return true;
   });
-  filtered.sort(function(a,b){var la=lics[a],lb=lics[b],va,vb;switch(currentSort.col){case'biz':va=la.biz||'';vb=lb.biz||'';break;case'pack':va=la.pack||'';vb=lb.pack||'';break;case'expires':va=la.expires||'';vb=lb.expires||'';break;default:va=la.created||'';vb=lb.created||''}if(va<vb)return currentSort.dir==='asc'?-1:1;if(va>vb)return currentSort.dir==='asc'?1:-1;return 0});
-  if(!ks.length){$('tbl').innerHTML='<div class="empty">Sin clientes. Pulsa "+ Nuevo cliente" para empezar.</div>';return}
-  if(!filtered.length){$('tbl').innerHTML='<div class="empty">Ningún cliente coincide con los filtros.</div>';return}
-  var h='<table><thead><tr><th onclick="sortBy(\'biz\')">Negocio</th><th>Token</th><th onclick="sortBy(\'pack\')">Pack</th><th>Estado</th><th onclick="sortBy(\'expires\')">Expira</th><th>Resp.</th><th>Acciones</th></tr></thead><tbody>';
-  filtered.forEach(function(k){
-    var l=lics[k],rc=l.responses?Object.keys(l.responses).filter(function(x){return!x.startsWith('_')}).length:0;
-    var d=daysUntil(l.expires),ec='',eb='';
-    if(d!==null){if(d<0){ec='expired';eb='<br><small style="color:#ef4444">⚠ Expirada hace '+Math.abs(d)+'d</small>'}else if(d<=30){ec='expire-soon';eb='<br><small style="color:#f59e0b">⏰ En '+d+'d</small>'}}
-    h+='<tr><td><span class="biz">'+escapeHtml(l.biz)+'</span>'+(l.domain?'<br><span class="domain">'+escapeHtml(l.domain)+'</span>':'')+(l.aiEnabled?'<br><span style="background:rgba(124,77,255,.2);color:#c084fc;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:700;margin-top:3px;display:inline-block">🤖 Claude</span>':'')+'</td>';
-    h+='<td class="token">'+escapeHtml(k)+'</td><td>'+escapeHtml(l.pack||'—')+(OBSOLETE_PACKS[l.pack]?'<br><small style="color:#f59e0b">⚠ Pack obsoleto - migrar</small>':'')+'</td>';
-    h+='<td><span class="badge '+(l.active?'badge-on':'badge-off')+'">'+(l.active?'ACTIVA':'INACTIVA')+'</span></td>';
-    h+='<td class="'+ec+'">'+escapeHtml(l.expires||'—')+eb+'</td><td style="color:#06b6d4">'+rc+'</td>';
-    h+='<td class="flex">';
-    h+=l.active?'<button class="btn btn-r btn-xs" onclick="tog(\''+escapeHtml(k)+'\',false)">Desactivar</button>':'<button class="btn btn-g btn-xs" onclick="tog(\''+escapeHtml(k)+'\',true)">Activar</button>';
-    h+='<button class="btn btn-c btn-xs" onclick="edit(\''+escapeHtml(k)+'\')">✎</button>';
-    h+='<button class="btn btn-o btn-xs" onclick="code(\''+escapeHtml(k)+'\')"><\/></button>';
-    h+='<button class="btn btn-y btn-xs" onclick="dupl(\''+escapeHtml(k)+'\')">⎘</button>';
-    h+='<button class="btn btn-xs" style="background:rgba(239,68,68,.06);color:#ef4444;border:1px solid rgba(239,68,68,.12)" onclick="del(\''+escapeHtml(k)+'\')">✕</button>';
+  if(!clientes.length){ $('tbl').innerHTML='<div class="empty">Sin clientes en Supabase todavía.</div>'; return; }
+  if(!rows.length){ $('tbl').innerHTML='<div class="empty">Ningún cliente coincide con el filtro.</div>'; return; }
+
+  var h='<table><thead><tr><th>Cliente</th><th>Pack</th><th>Token</th><th>Estado</th><th>Alta</th><th>Próximo pago</th><th>Acciones</th></tr></thead><tbody>';
+  rows.forEach(function(c){
+    var d=daysUntil(c.fecha_proximo_pago), payCls='';
+    if(d!==null){ if(d<0) payCls='pay-over'; else if(d<=7) payCls='pay-soon'; }
+    var mrr=PACK_MRR[c.pack]||0;
+    h+='<tr>';
+    h+='<td><div class="biz">'+esc(c.cliente_nombre||'—')+'</div>'+(c.url_web_cliente?'<div class="dom">'+esc(c.url_web_cliente)+'</div>':'')+(c.sector?'<div class="dom">'+esc(c.sector)+'</div>':'')+'</td>';
+    h+='<td><span class="badge badge-pack">'+esc(c.pack||'—')+'</span><div class="src-note">'+(mrr?mrr+'€/mes':'—')+'</div></td>';
+    h+='<td class="token">'+esc(c.token_cdn||'—')+'</td>';
+    h+='<td><span class="badge '+(isActive(c)?'badge-on':'badge-off')+'">'+(isActive(c)?'ACTIVA':'PAUSADA')+'</span><div class="src-note">'+esc(c.estado)+'</div></td>';
+    h+='<td>'+fmtDate(c.created_at)+'</td>';
+    h+='<td><input type="date" class="pay-input '+payCls+'" value="'+esc(c.fecha_proximo_pago||'')+'" onchange="setPago(\''+esc(c.id)+'\',this.value)">'+(d!==null&&d<=7?'<div class="src-note '+payCls+'">'+(d<0?('vencido '+Math.abs(d)+'d'):(d===0?'hoy':'en '+d+'d'))+'</div>':'')+'</td>';
+    h+='<td style="white-space:nowrap">';
+    h+= isActive(c)
+      ? '<button class="btn btn-d btn-sm" onclick="setEstado(\''+esc(c.id)+'\',false)">Desactivar</button>'
+      : '<button class="btn btn-a btn-sm" onclick="setEstado(\''+esc(c.id)+'\',true)">Activar</button>';
+    h+=' <button class="btn btn-ghost btn-sm" onclick="copyCode(\''+esc(c.token_cdn)+'\')">📋 Código</button>';
     h+='</td></tr>';
   });
   h+='</tbody></table>';
   $('tbl').innerHTML=h;
 }
-function sortBy(col){if(currentSort.col===col){currentSort.dir=currentSort.dir==='asc'?'desc':'asc'}else{currentSort.col=col;currentSort.dir='asc'}render()}
 
-function showPendingPayments(){
-  var ks=Object.keys(lics),items=[];
-  ks.forEach(function(k){var l=lics[k];if(l.pendingPayments&&l.pendingPayments.length)l.pendingPayments.forEach(function(p,idx){if(!p.paid)items.push({token:k,biz:l.biz,phone:l.phone,concept:p.concept,amount:p.amount,dueDate:p.dueDate,idx:idx})})});
-  items.sort(function(a,b){return(a.dueDate||'').localeCompare(b.dueDate||'')});
-  var container=$('pendingList');
-  if(!items.length){container.innerHTML='<div class="empty">No tienes pagos pendientes. 🎉</div>'}
-  else{var h='';items.forEach(function(it){var d=daysUntil(it.dueDate),cls='',lbl='';if(d!==null){if(d<0){cls='overdue';lbl='⚠ Vencido hace '+Math.abs(d)+' días'}else if(d===0){cls='soon';lbl='🔴 HOY'}else if(d<=7){cls='soon';lbl='🟡 En '+d+' días'}else{lbl='📅 En '+d+' días'}}h+='<div class="pay-item '+cls+'"><div><div class="pi-biz">'+escapeHtml(it.biz)+'</div><div class="pi-d">'+escapeHtml(it.concept)+' · '+escapeHtml(it.dueDate||'sin fecha')+' · '+lbl+'</div>'+(it.phone?'<div class="pi-d">📞 <a href="tel:'+escapeHtml(it.phone)+'" style="color:#a78bfa;text-decoration:none">'+escapeHtml(it.phone)+'</a></div>':'')+'</div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span class="pi-amt">'+it.amount.toFixed(2)+'€</span><button class="btn btn-xs btn-g" onclick="markPaid(\''+escapeHtml(it.token)+'\','+it.idx+')">✓ Cobrado</button></div></div>';});container.innerHTML=h;}
-  $('pendingCard').style.display='block';$('pendingCard').scrollIntoView({behavior:'smooth'});
-}
-
-function markPaid(token,idx){
-  if(!lics[token]||!lics[token].pendingPayments||!lics[token].pendingPayments[idx])return;
-  var p=lics[token].pendingPayments[idx];
-  confirmAction('¿Marcar como cobrado?','Vas a marcar "'+p.concept+'" de '+p.amount+'€ para '+lics[token].biz+' como cobrado.',function(){
-    lics[token].pendingPayments[idx].paid=true;lics[token].pendingPayments[idx].paidDate=new Date().toISOString().split('T')[0];
-    save('Pago cobrado: '+p.concept+' ('+lics[token].biz+')').then(function(){toast('Pago marcado como cobrado ✅');showPendingPayments()});
+function renderDue(){
+  var items = clientes.filter(function(c){ return c.fecha_proximo_pago && daysUntil(c.fecha_proximo_pago)<=30; })
+    .sort(function(a,b){ return (a.fecha_proximo_pago||'').localeCompare(b.fecha_proximo_pago||''); });
+  if(!items.length){ $('dueCard').innerHTML='<div class="empty">Sin pagos en los próximos 30 días. 🎉</div>'; return; }
+  var h='';
+  items.forEach(function(c){
+    var d=daysUntil(c.fecha_proximo_pago), cls = d<0?'pay-over':(d<=7?'pay-soon':'');
+    var lbl = d<0?('⚠ vencido hace '+Math.abs(d)+'d') : (d===0?'🔴 hoy' : (d<=7?('🟡 en '+d+'d'):('📅 en '+d+'d')));
+    h+='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid #14141f">'
+      +'<div><b>'+esc(c.cliente_nombre||'—')+'</b> <span class="muted">· '+esc(c.pack||'')+' · '+(PACK_MRR[c.pack]||0)+'€/mes</span></div>'
+      +'<div class="'+cls+'" style="font-weight:700">'+fmtDate(c.fecha_proximo_pago)+' · '+lbl+'</div></div>';
   });
+  $('dueCard').innerHTML=h;
 }
 
-function confirmAction(title,text,onOk){$('cmTitle').textContent=title;$('cmText').textContent=text;$('confirmModal').classList.add('show');$('cmOk').onclick=function(){closeCm();onOk()}}
-function closeCm(){$('confirmModal').classList.remove('show')}
-
-function tog(k,a){
-  if(!lics[k])return;
-  confirmAction('¿'+(a?'Reactivar':'Desactivar')+' cliente?',(a?'El chatbot volverá a funcionar.':'El chatbot dejará de funcionar inmediatamente.'),function(){
-    lics[k].active=a;save((a?'Activar':'Desactivar')+': '+lics[k].biz).then(function(){toast(lics[k].biz+(a?' activado ✅':' desactivado 🚫'))});
-  });
+// ─── ACCIONES ────────────────────────────────────────────────────────────────
+function setEstado(id, activate){
+  var c = clientes.filter(function(x){ return x.id===id; })[0]; if(!c) return;
+  var nuevo = activate ? 'completado' : 'pausado';
+  if(!confirm((activate?'Activar':'Desactivar')+' "'+(c.cliente_nombre||c.token_cdn)+'"?\n\nEstado → '+nuevo)) return;
+  sbPatch('onboarding_clientes','id=eq.'+encodeURIComponent(id), { estado:nuevo })
+  .then(function(){ c.estado=nuevo; render(); toast((activate?'Activado ✅':'Pausado 🚫')); })
+  .catch(function(e){ toast('Error: '+e.message,'err'); });
 }
 
-function del(k){
-  if(!lics[k])return;var n=lics[k].biz;
-  confirmAction('¿Eliminar cliente definitivamente?','Se borrará "'+n+'" del sistema. Esta acción NO se puede deshacer.',function(){delete lics[k];save('Eliminar: '+n).then(function(){toast(n+' eliminado')})});
+function setPago(id, value){
+  sbPatch('onboarding_clientes','id=eq.'+encodeURIComponent(id), { fecha_proximo_pago: value || null })
+  .then(function(){ var c=clientes.filter(function(x){return x.id===id;})[0]; if(c) c.fecha_proximo_pago=value||null; render(); toast('Fecha de pago guardada'); })
+  .catch(function(e){ toast('Error: '+e.message,'err'); });
 }
 
-function dupl(k){
-  if(!lics[k])return;var orig=lics[k],newTk=genTkValue();
-  lics[newTk]=JSON.parse(JSON.stringify(orig));lics[newTk].biz=orig.biz+' (copia)';lics[newTk].domain='';lics[newTk].active=false;lics[newTk].created=new Date().toISOString().split('T')[0];
-  save('Duplicar: '+orig.biz).then(function(){toast('Cliente duplicado.','info');edit(newTk)});
+function copyCode(token){
+  var code = '<script src="'+CDN_BASE+'/chat.js" data-token="'+token+'"><\/script>';
+  navigator.clipboard.writeText(code).then(function(){ toast('Código de instalación copiado 📋'); })
+  .catch(function(){ toast('No se pudo copiar','err'); });
 }
 
-function showAdd(){
-  $('fMode').value='add';$('fOrig').value='';$('frmTitle').innerHTML='➕ Nuevo cliente';
-  $('fTk').value=genTkValue();$('fTk').readOnly=false;
-  $('fBiz').value='';$('fDom').value='';$('fPk').value='spark';$('fEm').value='';$('fPh').value='';$('fNo').value='';
-  $('fBn').value='Asistente';$('fCo').value='#7c3aed';$('fCal').value='true';$('fGr').value='';$('fBt').value='';
-  $('fAN').value='';$('fAP').value='';$('fSu').value='';$('fBy').value='';
-  $('rList').innerHTML='';$('paysList').innerHTML='';
-  $('fAI').value='';$('fAIPrompt').value='';$('aiPromptSection').style.display='none';
-  toggleAISections(false);
-  $('fItp').checked=false;$('itpBody').className='itp-body';
-  $('fItpNombre').value='';$('fItpColor').value='#1565C0';$('fItpTel').value='';$('fItpLogo').value='';$('fItpCta').value='Solicitar gestión del ITP';
-  var t=new Date().toISOString().split('T')[0];$('fCr').value=t;
-  $('fEx').value=new Date(new Date().setFullYear(new Date().getFullYear()+1)).toISOString().split('T')[0];
-  $('frm').style.display='block';$('frm').scrollIntoView({behavior:'smooth'});
-  _toggleChatbotSection();
-  setTimeout(function(){$('fBiz').focus()},300);
+// ─── MODO AUTOMÁTICO PAGOS (global) ──────────────────────────────────────────
+function setAutoPayUI(on){ $('autoPay').checked=on; $('autoPayLbl').textContent=on?'ON':'OFF'; $('autoPayLbl').style.color=on?'var(--accent)':'var(--muted)'; }
+function toggleAutoPay(){
+  var on = $('autoPay').checked;
+  sbPatch('cdn_config','id=eq.true', { modo_automatico_pagos:on, updated_at:new Date().toISOString() })
+  .then(function(){ setAutoPayUI(on); toast('Modo automático pagos: '+(on?'ON':'OFF')+(on?'':' · no se desactiva nada automáticamente')); })
+  .catch(function(e){ setAutoPayUI(!on); toast('Error: '+e.message,'err'); });
 }
 
-function edit(k){
-  var l=lics[k];if(!l)return;
-  $('fMode').value='edit';$('fOrig').value=k;$('frmTitle').innerHTML='✏️ '+escapeHtml(l.biz);
-  $('fTk').value=k;$('fTk').readOnly=true;
-  $('fBiz').value=l.biz||'';$('fDom').value=l.domain||'';$('fPk').value=l.pack||'spark';
-  $('fEm').value=l.contact||'';$('fPh').value=l.phone||'';$('fCr').value=l.created||new Date().toISOString().split('T')[0];
-  $('fEx').value=l.expires||'';$('fNo').value=l.notes||'';$('fBn').value=l.botName||'Asistente';
-  $('fCo').value=l.color||'#7c3aed';$('fCal').value=l.calendar===false?'false':'true';
-  $('fGr').value=l.greeting||'';$('fBt').value=(l.serviceButtons||[]).join(', ');
-  $('fAN').value=(l.responses&&l.responses._ask_name)||'';$('fAP').value=(l.responses&&l.responses._ask_phone)||'';
-  $('fSu').value=(l.responses&&l.responses._summary)||'';$('fBy').value=(l.responses&&l.responses._goodbye)||'';
-  $('rList').innerHTML='';
-  if(l.responses)Object.keys(l.responses).forEach(function(x){if(!x.startsWith('_'))addR(x,l.responses[x])});
-  $('paysList').innerHTML='';
-  if(l.pendingPayments&&l.pendingPayments.length)l.pendingPayments.forEach(function(p){if(!p.paid)addPay(p.concept,p.amount,p.dueDate)});
-  // Agente IA
-  $('fAI').value = l.aiEnabled ? '1' : '';
-  toggleAISections(!!l.aiEnabled);
-  $('fAIPrompt').value = l.aiPrompt || '';
-  if(l.aiEnabled){
-    document.getElementById('aiPromptSection').style.display='block';
-  } else {
-    document.getElementById('aiPromptSection').style.display='none';
-  }
-  // ITP
-  var itp=l.itp||{};
-  $('fItp').checked=!!l.itp;$('itpBody').className='itp-body'+(l.itp?' show':'');
-  $('fItpNombre').value=itp.nombre||'';$('fItpColor').value=itp.color||'#1565C0';
-  $('fItpTel').value=itp.tel||'';$('fItpLogo').value=itp.logo||'';$('fItpCta').value=itp.cta||'Solicitar gestión del ITP';
-  _toggleChatbotSection();
-  $('frm').style.display='block';$('frm').scrollIntoView({behavior:'smooth'});
+// ─── NUEVO CLIENTE ───────────────────────────────────────────────────────────
+function fillSelects(){
+  $('nSector').innerHTML = '<option value="">—</option>' + SECTORES.map(function(s){ return '<option value="'+s+'">'+s+'</option>'; }).join('');
+  $('nPack').innerHTML = PACKS.map(function(p){ return '<option value="'+p+'">'+p+' ('+(PACK_MRR[p]||0)+'€/mes)</option>'; }).join('');
 }
-
-function hideF(){$('frm').style.display='none'}
-
-function addR(k,v){
-  var d=document.createElement('div');d.className='resp-row';
-  d.innerHTML='<input type="text" class="rk" placeholder="Palabras clave (coma)" value="'+escapeHtml(k||'').replace(/"/g,'&quot;')+'" maxlength="150"><textarea class="rv" rows="2" placeholder="Respuesta del chatbot..." maxlength="500">'+escapeHtml(v||'')+'</textarea><button class="resp-del" onclick="this.parentElement.remove()">×</button>';
-  $('rList').appendChild(d);
-}
-
-function addPay(concept,amount,dueDate){
-  var d=document.createElement('div');d.className='pay-row';
-  var dd=new Date();dd.setMonth(dd.getMonth()+6);var dds=dd.toISOString().split('T')[0];
-  d.innerHTML='<input type="text" class="pay-concept" placeholder="Concepto" value="'+escapeHtml(concept||'').replace(/"/g,'&quot;')+'" maxlength="100"><input type="number" class="pay-amount" placeholder="€" value="'+escapeHtml(String(amount||''))+'" min="0" step="0.01"><input type="date" class="pay-date" value="'+escapeHtml(dueDate||dds)+'"><button class="resp-del" onclick="this.parentElement.remove()">×</button>';
-  $('paysList').appendChild(d);
-}
-
-function _toggleChatbotSection(){
-  var pack=$('fPk').value;
-  var isChatbot=!!CHATBOT_PACKS[pack];
-  $('chatbotSection').style.display=isChatbot?'':'none';
-  $('nonChatbotMsg').style.display=isChatbot?'none':'block';
-}
-
-// Defaults (setup + recurrente mensual) por pack
-var PACK_DEFAULTS={
-  spark:           {label:'Spark',            setup:499,  mrr:199},
-  core:            {label:'Core',             setup:1800, mrr:199},
-  'core-rag':      {label:'Core RAG',         setup:3200, mrr:349},
-  scale:           {label:'Scale',            setup:4500, mrr:449},
-  elite:           {label:'Elite',            setup:8500, mrr:599},
-  auditoria:       {label:'Auditoría IA',     setup:899,  mrr:0}
-};
-
-function onPackChange(){
-  _toggleChatbotSection();
-  suggestPayments();
-}
-
-function suggestPayments(){
-  var pack=$('fPk').value,mode=$('fMode').value;
-  if(mode!=='add')return;
-  if($('paysList').children.length>0)return;
-  var base=new Date($('fCr').value||new Date().toISOString().split('T')[0]);
-  var def=PACK_DEFAULTS[pack];
-  if(!def)return;
-
-  if(pack==='auditoria'){
-    addPay('Auditoría IA (pago único)',def.setup,base.toISOString().split('T')[0]);
-    toast('Pago único sugerido para Auditoría IA','info');
-    return;
-  }
-
-  if(def.setup>0){
-    addPay('Setup inicial Pack '+def.label,def.setup,base.toISOString().split('T')[0]);
-    toast('Pago de setup sugerido para '+def.label,'info');
-  }
-}
-
-function saveF(){
-  var tk=sanitizeToken($('fTk').value.trim()),biz=$('fBiz').value.trim();
-  if(!tk||!biz){toast('Token y nombre obligatorios','err');return}
-  if(tk.length<5){toast('Token mínimo 5 caracteres','err');return}
-  var mode=$('fMode').value;
-  if(mode==='add'&&lics[tk]){toast('Ya existe ese token','err');return}
-  var resp={};
-  document.querySelectorAll('.resp-row').forEach(function(r){var k=r.querySelector('.rk').value.trim(),v=r.querySelector('.rv').value.trim();if(k&&v)resp[k]=v});
-  if($('fAN').value.trim())resp._ask_name=$('fAN').value.trim();
-  if($('fAP').value.trim())resp._ask_phone=$('fAP').value.trim();
-  if($('fSu').value.trim())resp._summary=$('fSu').value.trim();
-  if($('fBy').value.trim())resp._goodbye=$('fBy').value.trim();
-  var pp=[];
-  document.querySelectorAll('.pay-row').forEach(function(r){var c=r.querySelector('.pay-concept').value.trim(),a=parseFloat(r.querySelector('.pay-amount').value)||0,d=r.querySelector('.pay-date').value;if(c&&a>0&&d)pp.push({concept:c,amount:a,dueDate:d,paid:false})});
-  var bt=$('fBt').value.trim();
-  // Guardar datos ITP
-  var itpData=null;
-  if($('fItp').checked){
-    itpData={
-      nombre:$('fItpNombre').value.trim()||biz,
-      color:$('fItpColor').value||'#1565C0',
-      tel:$('fItpTel').value.trim(),
-      logo:$('fItpLogo').value.trim(),
-      cta:$('fItpCta').value.trim()||'Solicitar gestión del ITP'
-    };
-  }
-  lics[tk]={biz:biz,domain:$('fDom').value.trim(),pack:$('fPk').value,active:mode==='edit'?(lics[$('fOrig').value]?lics[$('fOrig').value].active:true):true,created:$('fCr').value,expires:$('fEx').value,contact:$('fEm').value.trim(),phone:$('fPh').value.trim(),notes:$('fNo').value.trim(),botName:$('fBn').value.trim()||'Asistente',color:$('fCo').value.trim()||'#7c3aed',calendar:$('fCal').value!=='false',greeting:$('fGr').value.trim(),serviceButtons:bt?bt.split(',').map(function(s){return s.trim()}).filter(function(s){return s}):[],responses:Object.keys(resp).length?resp:undefined,pendingPayments:pp.length?pp:undefined,aiEnabled:$('fAI').value==='1'||undefined,aiPrompt:$('fAI').value==='1'?$('fAIPrompt').value:undefined,itp:itpData||undefined,updated:new Date().toISOString()};
-  save((mode==='add'?'Alta':'Editar')+': '+biz).then(function(){toast(biz+(mode==='add'?' dado de alta ✅':' actualizado ✅'));hideF();if(mode==='add')code(tk)});
-}
-
-function code(k){
-  var l=lics[k];if(!l)return;
-  if(!CHATBOT_PACKS[l.pack]){
-    var def=PACK_DEFAULTS[l.pack];
-    var packLabel=def?def.label:(l.pack||'Pack');
-    $('codeCTitle').innerHTML='ℹ Cliente registrado · '+escapeHtml(l.biz);
-    $('codeCDesc').innerHTML='El pack <b>'+escapeHtml(packLabel)+'</b> no incluye chatbot embebido. El cliente queda registrado para facturación y seguimiento.';
-    $('codeO').textContent='— Sin código embebido para este pack —';
-    $('codeC').style.display='block';
-    var ic2=$('installContent');if(ic2){ic2.style.display='none';ic2.innerHTML=''}
-    $('codeC').scrollIntoView({behavior:'smooth'});
-    return;
-  }
-  var sv=l.serviceButtons&&l.serviceButtons.length?'\n  data-services="'+l.serviceButtons.join(',')+'"':'';
-  var c='<!-- WhiteMoon Chatbot IA · '+l.biz+' -->\n<script src="'+CDN_BASE+'/chat.js"\n  data-token="'+k+'"'+(l.color&&l.color!=='#7c3aed'?'\n  data-color="'+l.color+'"':'')+sv+(l.botName&&l.botName!=='Asistente'?'\n  data-bot-name="'+l.botName+'"':'')+'><\/script>';
-  $('codeCTitle').innerHTML='📋 Código para el cliente';
-  $('codeCDesc').innerHTML='Pegar antes de <code>&lt;/body&gt;</code> en la web del cliente:';
-  $('codeO').textContent=c;
-  $('codeC').style.display='block';
-  var ic=$('installContent');if(ic){ic.style.display='none';ic.innerHTML=''}
-  $('codeC').scrollIntoView({behavior:'smooth'});
-}
-
-function cpCode(){navigator.clipboard.writeText($('codeO').textContent).then(function(){toast('Código copiado al portapapeles')}).catch(function(){toast('No se pudo copiar. Selecciónalo manualmente.','err')})}
-
-function emailCode(){
-  var c=$('codeO').textContent;
-  var sub='Tu chatbot WhiteMoon está listo';
-  var bod='Hola,\n\nTu chatbot IA ya está configurado y listo para instalar en tu web.\n\nPega este código antes de la etiqueta </body>:\n\n'+c+'\n\nSi necesitas ayuda para instalarlo, contáctanos.\n\nUn saludo,\nEquipo WhiteMoon\nhttps://whitemoon.es';
-  window.location.href='mailto:?subject='+encodeURIComponent(sub)+'&body='+encodeURIComponent(bod);
-}
-
-function showInstall(p){
-  var i={
-    wp:'<b>WordPress — Insert Headers and Footers</b><div class="install-step"><div class="install-num">1</div><div>Instala el plugin <b>Insert Headers and Footers</b></div></div><div class="install-step"><div class="install-num">2</div><div>Ajustes → Insert Headers and Footers → <b>Scripts in Footer</b></div></div><div class="install-step"><div class="install-num">3</div><div>Pega el código y guarda ✅</div></div>',
-    joomla:'<b>Joomla — Módulo HTML personalizado</b><div class="install-step"><div class="install-num">1</div><div>Extensiones → Módulos → Nuevo → <b>HTML personalizado</b></div></div><div class="install-step"><div class="install-num">2</div><div>Pega el código · Posición: bottom · Todas las páginas</div></div><div class="install-step"><div class="install-num">3</div><div>Guardar y publicar ✅</div></div>',
-    html:'<b>HTML puro</b><div class="install-step"><div class="install-num">1</div><div>Abre el archivo HTML de la web</div></div><div class="install-step"><div class="install-num">2</div><div>Pega el código justo antes de <code>&lt;/body&gt;</code></div></div><div class="install-step"><div class="install-num">3</div><div>Guarda y sube al servidor ✅</div></div>',
-    shopify:'<b>Shopify</b><div class="install-step"><div class="install-num">1</div><div>Tienda Online → Temas → Editar código → <b>theme.liquid</b></div></div><div class="install-step"><div class="install-num">2</div><div>Pega el código antes de <code>&lt;/body&gt;</code> y guarda ✅</div></div>',
-    wix:'<b>Wix — Custom Code</b><div class="install-step"><div class="install-num">1</div><div>Settings → Advanced → <b>Custom Code</b></div></div><div class="install-step"><div class="install-num">2</div><div>Añadir código → Body end → Todas las páginas ✅</div></div>'
+function genTokenValue(){ var a=new Uint8Array(12); crypto.getRandomValues(a); return 'WM-'+Array.from(a,function(b){return b.toString(16).padStart(2,'0');}).join(''); }
+function genToken(){ $('nToken').value=genTokenValue(); }
+function openNew(){ $('nToken').value=genTokenValue(); $('nNombre').value=''; $('nUrl').value=''; $('nSector').value=''; $('nPack').value='spark'; $('nEstado').value='completado'; $('nPago').value=''; $('newBg').classList.add('show'); }
+function closeNew(){ $('newBg').classList.remove('show'); }
+function saveNew(){
+  var token=($('nToken').value||'').trim().replace(/[^A-Za-z0-9\-_]/g,'');
+  var nombre=($('nNombre').value||'').trim();
+  if(!token){ toast('Token obligatorio','err'); return; }
+  if(!nombre){ toast('Nombre obligatorio','err'); return; }
+  var body = {
+    token_cdn: token,
+    cliente_nombre: nombre,
+    url_web_cliente: ($('nUrl').value||'').trim() || null,
+    sector: $('nSector').value || null,
+    pack: $('nPack').value || null,
+    estado: $('nEstado').value || 'completado',
+    fecha_proximo_pago: $('nPago').value || null
   };
-  var el=$('installContent');
-  if(el){el.innerHTML=i[p]||'';el.style.display='block';}
+  $('nSave').disabled=true;
+  sbInsert('onboarding_clientes', body)
+  .then(function(){ $('nSave').disabled=false; closeNew(); toast('Cliente creado ✅'); loadData(); })
+  .catch(function(e){ $('nSave').disabled=false; toast('Error: '+String(e.message).slice(0,120),'err'); });
 }
-
-function fmtDateES(s){if(!s)return'';var d=new Date(s);if(isNaN(d))return s;return d.toLocaleDateString('es-ES')}
-
-function exportCSV(){
-  var ks=Object.keys(lics);if(!ks.length){toast('No hay clientes','err');return}
-  var rows=[['Token','Negocio','Dominio','Pack','Estado','Email','Teléfono','Fecha Alta','Fecha Expiración','Setup (€)','Cuota Mensual (€)','Ingreso Anual (€)','Pagos Pendientes (€)','Notas']];
-  var soon=new Date(Date.now()+30*86400000);
-  ks.forEach(function(k){
-    var l=lics[k];
-    var pack=PACK_PRICES[l.pack]||{setup:'',monthly:''};
-    var estado=!l.active?'Inactivo':((l.expires && new Date(l.expires)<soon)?'Expira pronto':'Activo');
-    var pt=0;
-    if(l.pendingPayments)l.pendingPayments.forEach(function(p){if(!p.paid)pt+=parseFloat(p.amount)||0});
-    rows.push([k,l.biz||'',l.domain||'',l.pack||'',estado,l.contact||'',l.phone||'',fmtDateES(l.created),l.expires?fmtDateES(l.expires):'Sin expiración',pack.setup,pack.monthly,pack.monthly?pack.monthly*12:'',pt.toFixed(2),(l.notes||'').replace(/\n/g,' ')]);
-  });
-  var csv=rows.map(function(r){return r.map(function(c){return'"'+String(c==null?'':c).replace(/"/g,'""')+'"'}).join(';')}).join('\r\n');
-  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='WhiteMoon_Clientes_'+new Date().toISOString().split('T')[0]+'.csv';a.click();URL.revokeObjectURL(url);toast('✅ CSV exportado — '+ks.length+' clientes');
-}
-
-function exportPaymentsCSV(){
-  var headers=['Negocio','Token','Dominio','Pack','Concepto Pago','Importe (€)','Fecha Vencimiento','Días Restantes','Estado','Email Contacto','Teléfono','Notas'];
-  var rows=[];
-  Object.keys(lics).forEach(function(k){
-    var l=lics[k];
-    if(!l.pendingPayments||!l.pendingPayments.length)return;
-    l.pendingPayments.forEach(function(p){
-      var d=daysUntil(p.dueDate);
-      var estado=p.paid?'Pagado':(d!==null?(d<0?'⚠️ Vencido':(d===0?'Vence Hoy':(d<=7?'Urgente':(d<=30?'Próximo':'Futuro')))):'Pendiente');
-      rows.push([l.biz||'',k,l.domain||'',l.pack||'',p.concept||'',(parseFloat(p.amount)||0).toFixed(2),fmtDateES(p.dueDate),d!==null?d:'',estado,l.contact||'',l.phone||'',(l.notes||'').replace(/\n/g,' ')]);
-    });
-  });
-  if(!rows.length){toast('No hay pagos pendientes','err');return}
-  var csv=[headers].concat(rows).map(function(r){return r.map(function(c){return'"'+String(c==null?'':c).replace(/"/g,'""')+'"'}).join(';')}).join('\r\n');
-  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='WhiteMoon_Pagos_'+new Date().toISOString().split('T')[0]+'.csv';a.click();URL.revokeObjectURL(url);toast('✅ '+rows.length+' pagos exportados');
-}
-
-function exportJSON(){
-  var blob=new Blob([JSON.stringify({exported:new Date().toISOString(),licenses:lics},null,2)],{type:'application/json'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='whitemoon-backup-'+new Date().toISOString().split('T')[0]+'.json';a.click();URL.revokeObjectURL(url);toast('Backup JSON descargado');
-}
-
-document.addEventListener('keydown',function(e){
-  if((e.ctrlKey||e.metaKey)&&e.key==='n'&&$('panelView').style.display!=='none'){e.preventDefault();showAdd()}
-  if((e.ctrlKey||e.metaKey)&&e.key==='s'&&$('frm').style.display!=='none'){e.preventDefault();saveF()}
-  if(e.key==='Escape'){if($('confirmModal').classList.contains('show'))closeCm();else if($('frm').style.display!=='none')hideF()}
-});
 </script>
 </body>
 </html>

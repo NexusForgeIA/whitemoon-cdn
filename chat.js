@@ -10,13 +10,68 @@
   if(!token){ console.warn('[WM-CHAT] Sin token'); return; }
   var BASE = script.src.replace(/\/chat\.js.*$/, '');
 
-  // ─── 1. VALIDAR LICENCIA ────────────────────────────────────────────────────
-  fetch(BASE + '/licenses.json?_=' + Date.now())
-  .then(function(r){ if(!r.ok) throw new Error('Sin conexión'); return r.json(); })
-  .then(function(data){
-    var lic = data.licenses[token];
-    if(!lic){ console.warn('[WM-CHAT] Token inválido'); return; }
-    if(!lic.active){ console.warn('[WM-CHAT] Licencia inactiva'); return; }
+  // ─── 1. VALIDAR LICENCIA — dual source: Supabase (autoritativo) → licenses.json
+  // Lectura segura vía RPC verificar_token_cdn (sólo devuelve campos públicos:
+  // token/estado/nombre/sector/pack/url). El anon key es público; el endurecido
+  // de RLS queda pendiente (ver SECURITY.md). licenses.json se mantiene como
+  // fallback de seguridad para que ningún cliente ya instalado se interrumpa.
+  var SUPABASE_URL  = 'https://mlaqtniujnvfxcvcourm.supabase.co';
+  var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sYXF0bml1am52ZnhjdmNvdXJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4MzUyMzIsImV4cCI6MjA5MzQxMTIzMn0.Neh7VUS8ADsxf0DPab0JoJyGXOAXnLIaXzXbKzj2BGs';
+
+  verifyToken();
+
+  function verifyToken(){
+    fetchSupabaseToken(token).then(function(sb){
+      if(sb && sb.found){
+        // Supabase conoce el token → fuente de verdad para activo/pausado.
+        if(sb.estado === 'pausado'){ console.warn('[WM-CHAT] Licencia pausada'); return; }
+        // Activo: usa la config rica de licenses.json si existe (no cambia el
+        // comportamiento de clientes ya instalados); si no, config mínima de Supabase.
+        fetchLicensesJson().then(function(licenses){
+          var rich = licenses && licenses[token];
+          proceed(rich || licFromSupabase(sb));
+        });
+        return;
+      }
+      // Supabase falló o no encontró el token → fallback a licenses.json (comportamiento actual).
+      fetchLicensesJson().then(function(licenses){
+        var lic = licenses && licenses[token];
+        if(!lic){ console.warn('[WM-CHAT] Token inválido'); return; }
+        if(!lic.active){ console.warn('[WM-CHAT] Licencia inactiva'); return; }
+        proceed(lic);
+      });
+    });
+  }
+
+  function fetchSupabaseToken(tk){
+    return fetch(SUPABASE_URL + '/rest/v1/rpc/verificar_token_cdn', {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_token: tk })
+    })
+    .then(function(r){ if(!r.ok) throw new Error('supabase ' + r.status); return r.json(); })
+    .then(function(rows){
+      if(rows && rows.length){
+        var row = rows[0];
+        return { found: true, estado: row.estado, biz: row.cliente_nombre, domain: row.url_web_cliente, sector: row.sector, pack: row.pack };
+      }
+      return { found: false };
+    })
+    .catch(function(){ return null; }); // null → Supabase no disponible → fallback a licenses.json
+  }
+
+  function fetchLicensesJson(){
+    return fetch(BASE + '/licenses.json?_=' + Date.now())
+    .then(function(r){ if(!r.ok) throw new Error('Sin conexión'); return r.json(); })
+    .then(function(data){ return data.licenses || {}; })
+    .catch(function(){ return null; });
+  }
+
+  function licFromSupabase(sb){
+    return { biz: sb.biz || '', domain: sb.domain || '', pack: sb.pack || '', template: sb.sector || '', active: true, _source: 'supabase' };
+  }
+
+  function proceed(lic){
     var host = window.location.hostname;
     var local = host === 'localhost' || host === '127.0.0.1' || host === '' || host.includes('github.io');
     if(!local && lic.domain && !host.includes(lic.domain)){ console.warn('[WM-CHAT] Dominio no autorizado'); return; }
@@ -30,8 +85,7 @@
     } else {
       boot(script, lic, null);
     }
-  })
-  .catch(function(e){ console.error('[WM-CHAT]', e); });
+  }
 
   // ─── HELPERS ────────────────────────────────────────────────────────────────
   function parseServices(str){

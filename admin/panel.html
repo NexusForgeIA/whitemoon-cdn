@@ -23,8 +23,12 @@ a{color:var(--primary)}
 .muted{color:var(--muted)}
 h2{font-size:.92rem;font-weight:700;margin:22px 0 12px;color:var(--text);display:flex;align-items:center;gap:8px}
 label{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px;font-weight:600}
-input,select{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:10px 13px;color:var(--text);font-size:.85rem;font-family:inherit;outline:none;transition:border .15s}
-input:focus,select:focus{border-color:var(--primary)}
+input,select,textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:10px 13px;color:var(--text);font-size:.85rem;font-family:inherit;outline:none;transition:border .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--primary)}
+textarea{resize:vertical;min-height:64px;line-height:1.5}
+.agente-box{border-top:1px solid var(--line);margin-top:6px;padding-top:14px}
+.agente-tag{display:inline-block;font-size:.66rem;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(124,77,255,.15);color:#b39dff;margin-bottom:10px}
+.code-box{background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:11px 13px;font-family:ui-monospace,Menlo,monospace;font-size:.72rem;color:var(--accent);white-space:pre-wrap;word-break:break-all;margin-top:6px}
 .btn{padding:9px 16px;border-radius:9px;border:none;cursor:pointer;font-family:inherit;font-weight:600;font-size:.8rem;transition:all .15s;background:#1a1a28;color:var(--text)}
 .btn:hover{filter:brightness(1.15)}
 .btn:disabled{opacity:.5;cursor:not-allowed}
@@ -182,6 +186,12 @@ tr:hover td{background:#0d0d16}
       </select></div>
       <div><label>Próximo pago</label><input type="date" id="nPago"></div>
     </div>
+    <div class="agente-box">
+      <span class="agente-tag">🧠 Agente: Laura IA (Claude API · key central de agencia)</span>
+      <div class="mb"><label>Edge Function URL</label><input type="text" id="nEdge" placeholder="https://mlaqtniujnvfxcvcourm.supabase.co/functions/v1/client-chat"></div>
+      <div class="mb"><label>System prompt de Laura</label><textarea id="nPrompt" rows="6" placeholder="Eres Laura, la asistente de [NEGOCIO]..."></textarea>
+        <button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="loadPromptTpl('nPrompt','nNombre')">📋 Cargar plantilla base</button></div>
+    </div>
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
       <button class="btn btn-ghost" onclick="closeNew()">Cancelar</button>
       <button class="btn btn-p" id="nSave" onclick="saveNew()">Crear cliente</button>
@@ -207,6 +217,26 @@ tr:hover td{background:#0d0d16}
   </div>
 </div>
 
+<!-- AGENTE DEL CLIENTE -->
+<div class="modal-bg" id="agenteBg">
+  <div class="modal">
+    <h3 id="agenteTitle">🧠 Agente</h3>
+    <span class="agente-tag">Laura IA (Claude API · key central de agencia)</span>
+    <div class="mb"><label>Edge Function URL</label><input type="text" id="aEdge" placeholder="https://mlaqtniujnvfxcvcourm.supabase.co/functions/v1/client-chat"></div>
+    <div class="mb"><label>System prompt de Laura</label><textarea id="aPrompt" rows="8" placeholder="Eres Laura, la asistente de [NEGOCIO]..."></textarea>
+      <button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="loadPromptTpl('aPrompt',null)">📋 Cargar plantilla base</button></div>
+    <div class="mb">
+      <label>Script de instalación</label>
+      <div class="code-box" id="aScript">—</div>
+      <button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="copyAgenteScript()">📋 Copiar script</button>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-ghost" onclick="closeAgente()">Cerrar</button>
+      <button class="btn btn-p" id="aSave" onclick="saveAgente()">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
 var SUPABASE_URL  = 'https://mlaqtniujnvfxcvcourm.supabase.co';
@@ -221,6 +251,7 @@ var PACKS = ['spark','core','scale','elite'];
 var clientes = [];
 var pagosByCliente = {};   // cliente_id -> [pagos]
 var currentPagoCli = null; // id del cliente abierto en el modal de pagos
+var currentAgenteCli = null; // id del cliente abierto en el modal de agente
 var ghToken = '';
 
 function $(id){ return document.getElementById(id); }
@@ -259,7 +290,7 @@ function enterPanel(){ $('loginView').style.display='none'; $('panelView').style
 function loadData(){
   $('tbl').innerHTML='<div class="empty">Cargando…</div>';
   Promise.all([
-    sbGet('onboarding_clientes?select=id,token_cdn,estado,cliente_nombre,cliente_email,cliente_telefono,sector,pack,url_web_cliente,fecha_proximo_pago,fecha_inicio,created_at&order=created_at.desc'),
+    sbGet('onboarding_clientes?select=id,token_cdn,estado,cliente_nombre,cliente_email,cliente_telefono,sector,pack,url_web_cliente,fecha_proximo_pago,fecha_inicio,created_at,agente_tipo,agente_edge_function,agente_system_prompt&order=created_at.desc'),
     sbGet('cdn_config?id=eq.true&select=modo_automatico_pagos'),
     sbGet('historial_pagos?select=id,cliente_id,concepto,importe,fecha_vencimiento,pagado,fecha_pago,created_at&order=fecha_vencimiento.asc')
   ]).then(function(res){
@@ -323,6 +354,7 @@ function render(){
       ? '<button class="btn btn-d btn-sm" onclick="setEstado(\''+esc(c.id)+'\',false)">Desactivar</button>'
       : '<button class="btn btn-a btn-sm" onclick="setEstado(\''+esc(c.id)+'\',true)">Activar</button>';
     h+=' <button class="btn btn-ghost btn-sm" onclick="openPagos(\''+esc(c.id)+'\')">💸 Pagos'+pagosPill(c.id)+'</button>';
+    h+=' <button class="btn btn-ghost btn-sm" onclick="openAgente(\''+esc(c.id)+'\')">🧠 Agente</button>';
     h+=' <button class="btn btn-ghost btn-sm" onclick="copyCode(\''+esc(c.token_cdn)+'\')">📋 Código</button>';
     h+='</td></tr>';
   });
@@ -450,6 +482,58 @@ function deletePago(pagoId){
   .catch(function(e){ toast('Error: '+e.message,'err'); });
 }
 
+// ─── AGENTE IA (Laura · onboarding_clientes) ─────────────────────────────────
+function agenteScript(c){
+  var edge = (c.agente_edge_function||'').trim();
+  return '<script src="'+CDN_BASE+'/chat.js"\n  data-token="'+esc(c.token_cdn||'')+'"'
+    + (edge ? '\n  data-edge="'+esc(edge)+'"' : '')
+    + '><\/script>';
+}
+function openAgente(id){
+  var c = clientes.filter(function(x){ return x.id===id; })[0]; if(!c) return;
+  currentAgenteCli = id;
+  $('agenteTitle').innerHTML = '🧠 Agente · '+esc(c.cliente_nombre||'cliente');
+  $('aEdge').value = c.agente_edge_function || '';
+  $('aPrompt').value = c.agente_system_prompt || '';
+  $('aScript').textContent = agenteScript(c);
+  $('agenteBg').classList.add('show');
+}
+function closeAgente(){ $('agenteBg').classList.remove('show'); currentAgenteCli=null; }
+function saveAgente(){
+  if(!currentAgenteCli) return;
+  var body = {
+    agente_tipo: 'laura',
+    agente_edge_function: ($('aEdge').value||'').trim() || null,
+    agente_system_prompt: ($('aPrompt').value||'').trim() || null
+  };
+  $('aSave').disabled=true;
+  sbPatch('onboarding_clientes','id=eq.'+encodeURIComponent(currentAgenteCli), body)
+  .then(function(){
+    var c=clientes.filter(function(x){return x.id===currentAgenteCli;})[0];
+    if(c){ c.agente_tipo='laura'; c.agente_edge_function=body.agente_edge_function; c.agente_system_prompt=body.agente_system_prompt; $('aScript').textContent=agenteScript(c); }
+    $('aSave').disabled=false; toast('Agente guardado ✅');
+  })
+  .catch(function(e){ $('aSave').disabled=false; toast('Error: '+e.message,'err'); });
+}
+function copyAgenteScript(){
+  navigator.clipboard.writeText($('aScript').textContent).then(function(){ toast('Script copiado 📋'); })
+  .catch(function(){ toast('No se pudo copiar','err'); });
+}
+function loadPromptTpl(targetId, nameId){
+  var nombre = (nameId && $(nameId) && $(nameId).value.trim()) || (currentAgenteCli && (clientes.filter(function(x){return x.id===currentAgenteCli;})[0]||{}).cliente_nombre) || '[NEGOCIO]';
+  $(targetId).value =
+'Eres Laura, la asistente virtual de '+nombre+'.\n\n'+
+'MISIÓN: responder consultas, cualificar leads y captar nombre + teléfono\n'+
+'del cliente de forma natural y empática.\n\n'+
+'REGLAS:\n'+
+'- Máximo 2-3 frases por mensaje.\n'+
+'- Una sola pregunta a la vez.\n'+
+'- Cuando tengas nombre Y teléfono: "Perfecto [nombre], te contactamos hoy."\n'+
+'- Si se despide sin dar datos: "¡Sin problema! Cuando quieras estamos aquí."\n'+
+'- Nunca inventes servicios o precios que no estén en este prompt.\n'+
+'- Tono: cercano, profesional, orientado a resultados.';
+}
+
 // ─── MODO AUTOMÁTICO PAGOS (global) ──────────────────────────────────────────
 function setAutoPayUI(on){ $('autoPay').checked=on; $('autoPayLbl').textContent=on?'ON':'OFF'; $('autoPayLbl').style.color=on?'var(--accent)':'var(--muted)'; }
 function toggleAutoPay(){
@@ -466,7 +550,7 @@ function fillSelects(){
 }
 function genTokenValue(){ var a=new Uint8Array(12); crypto.getRandomValues(a); return 'WM-'+Array.from(a,function(b){return b.toString(16).padStart(2,'0');}).join(''); }
 function genToken(){ $('nToken').value=genTokenValue(); }
-function openNew(){ $('nToken').value=genTokenValue(); $('nNombre').value=''; $('nUrl').value=''; $('nSector').value=''; $('nPack').value='spark'; $('nEstado').value='completado'; $('nPago').value=''; $('newBg').classList.add('show'); }
+function openNew(){ $('nToken').value=genTokenValue(); $('nNombre').value=''; $('nUrl').value=''; $('nSector').value=''; $('nPack').value='spark'; $('nEstado').value='completado'; $('nPago').value=''; $('nEdge').value=''; $('nPrompt').value=''; $('newBg').classList.add('show'); }
 function closeNew(){ $('newBg').classList.remove('show'); }
 function saveNew(){
   var token=($('nToken').value||'').trim().replace(/[^A-Za-z0-9\-_]/g,'');
@@ -480,7 +564,10 @@ function saveNew(){
     sector: $('nSector').value || null,
     pack: $('nPack').value || null,
     estado: $('nEstado').value || 'completado',
-    fecha_proximo_pago: $('nPago').value || null
+    fecha_proximo_pago: $('nPago').value || null,
+    agente_tipo: 'laura',
+    agente_edge_function: ($('nEdge').value||'').trim() || null,
+    agente_system_prompt: ($('nPrompt').value||'').trim() || null
   };
   $('nSave').disabled=true;
   sbInsert('onboarding_clientes', body)

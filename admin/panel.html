@@ -225,7 +225,7 @@ tr:hover td{background:#0d0d16}
     <span class="agente-tag">Laura IA (Claude API · key central de agencia)</span>
     <div class="mb"><label>Edge Function URL</label><input type="text" id="aEdge" placeholder="https://mlaqtniujnvfxcvcourm.supabase.co/functions/v1/client-chat"></div>
     <div class="mb"><label>System prompt de Laura</label><textarea id="aPrompt" rows="8" placeholder="Eres Laura, la asistente de [NEGOCIO]..."></textarea>
-      <button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="loadPromptTpl('aPrompt',null)">📋 Cargar plantilla base</button></div>
+      <button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="loadSectorTemplate()">📋 Cargar plantilla</button></div>
     <div class="mb">
       <label>Script de instalación</label>
       <div class="code-box" id="aScript">—</div>
@@ -547,6 +547,29 @@ function loadPromptTpl(targetId, nameId){
 '- Si se despide sin dar datos: "¡Sin problema! Cuando quieras estamos aquí."\n'+
 '- Nunca inventes servicios o precios que no estén en este prompt.\n'+
 '- Tono: cercano, profesional, orientado a resultados.';
+}
+
+// Plantilla de system prompt según el sector del cliente. {ciudad} se deja como
+// marcador para rellenar a mano (onboarding_clientes no guarda ciudad).
+function sectorTemplate(sector, nombre){
+  var n = nombre || '{nombre}';
+  var T = {
+    restaurante: 'Eres el asistente virtual de '+n+', un restaurante en {ciudad}. Ayudas a los clientes con reservas, carta y horarios. Cuando tengas nombre y teléfono, confirma que el equipo les contactará. Máximo 3 frases por mensaje. Solo en español.',
+    abogado: 'Eres el asistente virtual de '+n+', despacho de abogados en {ciudad}. Ayudas a los clientes a entender sus opciones legales y agendar consultas. Cuando tengas nombre y teléfono, confirma que un abogado les llamará. Máximo 3 frases por mensaje. Solo en español.',
+    dental: 'Eres el asistente virtual de '+n+', clínica dental en {ciudad}. Ayudas con citas, tratamientos y precios orientativos. Cuando tengas nombre y teléfono, confirma que el equipo les contactará. Máximo 3 frases por mensaje. Solo en español.',
+    podologia: 'Eres el asistente virtual de '+n+', clínica de podología en {ciudad}. Ayudas con citas y tratamientos. Cuando tengas nombre y teléfono, confirma que el equipo les contactará. Máximo 3 frases por mensaje. Solo en español.',
+    automovil: 'Eres el asistente virtual de '+n+', concesionario/taller en {ciudad}. Ayudas con vehículos, servicios y citas de taller. Cuando tengas nombre y teléfono, confirma que un asesor les contactará. Máximo 3 frases por mensaje. Solo en español.',
+    gestoria: 'Eres el asistente virtual de '+n+', gestoría en {ciudad}. Ayudas con trámites, ITP y gestiones administrativas. Cuando tengas nombre y teléfono, confirma que un gestor les llamará. Máximo 3 frases por mensaje. Solo en español.',
+    general: 'Eres el asistente virtual de '+n+'. Ayudas a los clientes con información y consultas. Cuando tengas nombre y teléfono, confirma que el equipo les contactará. Máximo 3 frases por mensaje. Solo en español.'
+  };
+  var map = { restaurante:'restaurante', legal:'abogado', abogados:'abogado', dental:'dental', podologia:'podologia', automovil:'automovil', taller:'automovil', gestoria:'gestoria' };
+  return T[ map[String(sector||'').toLowerCase()] || 'general' ];
+}
+function loadSectorTemplate(){
+  var c = clientes.filter(function(x){ return x.id===currentAgenteCli; })[0];
+  if(!c){ toast('Abre el agente de un cliente primero','err'); return; }
+  $('aPrompt').value = sectorTemplate(c.sector, c.cliente_nombre);
+  toast('Plantilla del sector '+(c.sector||'general')+' cargada');
 }
 
 // ─── MODO AUTOMÁTICO PAGOS (global) ──────────────────────────────────────────

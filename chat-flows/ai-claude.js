@@ -6,7 +6,10 @@
  */
 window.WMFlow = { init: function(cfg, api) {
   var history = [];
-  var ENDPOINT = 'https://mlaqtniujnvfxcvcourm.supabase.co/functions/v1/client-chat';
+  // Edge Function por defecto de WhiteMoon. Si el cliente tiene una propia
+  // (cfg.agentEndpoint, desde verify-token → agente_edge_function), se usa esa.
+  var DEFAULT_ENDPOINT = 'https://mlaqtniujnvfxcvcourm.supabase.co/functions/v1/client-chat';
+  var ENDPOINT = (cfg && cfg.agentEndpoint) ? cfg.agentEndpoint : DEFAULT_ENDPOINT;
 
   function botAsync(html) {
     return new Promise(function(resolve){ api.bot(html, resolve); });
@@ -23,7 +26,8 @@ window.WMFlow = { init: function(cfg, api) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           token: cfg.token,
-          messages: history.slice(-10)
+          messages: history.slice(-10),
+          system_prompt: (cfg && cfg.aiPrompt) || undefined
         })
       });
       var data = await res.json();

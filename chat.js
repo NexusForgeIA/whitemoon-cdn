@@ -56,7 +56,15 @@
   }
 
   function licFromEdge(res){
-    return { biz: res.nombre || '', domain: res.url || '', pack: res.pack || '', template: res.sector || '', active: true, _source: 'edge' };
+    var agentEndpoint = res.agente_edge_function || '';
+    var aiPrompt = res.agente_system_prompt || '';
+    return {
+      biz: res.nombre || '', domain: res.url || '', pack: res.pack || '', template: res.sector || '',
+      active: true, _source: 'edge',
+      agentEndpoint: agentEndpoint,        // '' → ai-claude usa la Edge Function por defecto
+      aiPrompt: aiPrompt,
+      aiEnabled: !!(aiPrompt || agentEndpoint)  // cliente Laura si tiene prompt o endpoint propio
+    };
   }
 
   function proceed(lic){
@@ -133,7 +141,9 @@
       summary:    (licResp && licResp._summary)   || (tplResp && tplResp._summary)   || 'Perfecto {nombre}. Te contactamos en breve.',
       template:   lic.template || '',
       token:      token,
-      aiEnabled:  !!lic.aiEnabled
+      aiEnabled:  !!lic.aiEnabled,
+      agentEndpoint: lic.agentEndpoint || '',  // Edge Function propia del cliente ('' = por defecto)
+      aiPrompt:   lic.aiPrompt || ''
     };
 
     var widget = buildWidget(cfg);

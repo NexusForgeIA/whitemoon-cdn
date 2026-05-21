@@ -10,13 +10,56 @@
   if(!token){ console.warn('[WM-CHAT] Sin token'); return; }
   var BASE = script.src.replace(/\/chat\.js.*$/, '');
 
-  // ─── 1. VALIDAR LICENCIA ────────────────────────────────────────────────────
-  fetch(BASE + '/licenses.json?_=' + Date.now())
-  .then(function(r){ if(!r.ok) throw new Error('Sin conexión'); return r.json(); })
-  .then(function(data){
-    var lic = data.licenses[token];
-    if(!lic){ console.warn('[WM-CHAT] Token inválido'); return; }
-    if(!lic.active){ console.warn('[WM-CHAT] Licencia inactiva'); return; }
+  // ─── 1. VALIDAR LICENCIA — Edge Function pública → fallback licenses.json ─────
+  // La verificación se hace contra una Edge Function pública. La función usa una
+  // clave de servidor (NUNCA expuesta) y responde {active,nombre,sector,pack,url}.
+  // Este archivo público NO incluye ninguna credencial de Supabase.
+  // licenses.json se mantiene como fallback para no interrumpir clientes instalados.
+  var VERIFY_ENDPOINT = 'https://mlaqtniujnvfxcvcourm.supabase.co/functions/v1/verify-token';
+
+  verifyToken();
+
+  function verifyToken(){
+    verifyEdge(token).then(function(res){
+      if(res && res.active === true){
+        // Activo: si el token ya existe en licenses.json usa su config rica (no
+        // cambia el comportamiento de clientes ya instalados, p.ej. Bambú); si no,
+        // construye config mínima con los datos de la Edge Function.
+        fetchLicensesJson().then(function(licenses){
+          var rich = licenses && licenses[token];
+          proceed(rich || licFromEdge(res));
+        });
+        return;
+      }
+      // active === false o falló la llamada → fallback a licenses.json (comportamiento actual).
+      fetchLicensesJson().then(function(licenses){
+        var lic = licenses && licenses[token];
+        if(!lic){ console.warn('[WM-CHAT] Token inválido'); return; }
+        if(!lic.active){ console.warn('[WM-CHAT] Licencia inactiva'); return; }
+        proceed(lic);
+      });
+    });
+  }
+
+  function verifyEdge(tk){
+    return fetch(VERIFY_ENDPOINT + '?token=' + encodeURIComponent(tk))
+    .then(function(r){ if(!r.ok) throw new Error('verify ' + r.status); return r.json(); })
+    .then(function(data){ return data || null; })
+    .catch(function(){ return null; }); // null → Edge Function no disponible → fallback
+  }
+
+  function fetchLicensesJson(){
+    return fetch(BASE + '/licenses.json?_=' + Date.now())
+    .then(function(r){ if(!r.ok) throw new Error('Sin conexión'); return r.json(); })
+    .then(function(data){ return data.licenses || {}; })
+    .catch(function(){ return null; });
+  }
+
+  function licFromEdge(res){
+    return { biz: res.nombre || '', domain: res.url || '', pack: res.pack || '', template: res.sector || '', active: true, _source: 'edge' };
+  }
+
+  function proceed(lic){
     var host = window.location.hostname;
     var local = host === 'localhost' || host === '127.0.0.1' || host === '' || host.includes('github.io');
     if(!local && lic.domain && !host.includes(lic.domain)){ console.warn('[WM-CHAT] Dominio no autorizado'); return; }
@@ -30,8 +73,7 @@
     } else {
       boot(script, lic, null);
     }
-  })
-  .catch(function(e){ console.error('[WM-CHAT]', e); });
+  }
 
   // ─── HELPERS ────────────────────────────────────────────────────────────────
   function parseServices(str){

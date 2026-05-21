@@ -98,7 +98,7 @@ Ejemplos:
 |-------|-------------|-------------|
 | `biz` | Sí | Nombre del negocio |
 | `domain` | Sí | Dominio donde funciona (sin https://) |
-| `pack` | No | basic / advance / pyme |
+| `pack` | No | spark / core / core-rag / scale / elite |
 | `active` | Sí | `true` = activa, `false` = desactivada |
 | `created` | No | Fecha de alta |
 | `expires` | No | Fecha de expiración (se desactiva solo) |
@@ -154,7 +154,6 @@ Esto es lo ÚNICO que se pega en la web del cliente, antes de `</body>`:
 | `data-bot-name` | No | Nombre asistente | `Lucía` |
 | `data-position` | No | Posición | `right` o `left` |
 | `data-greeting` | No | Saludo custom | `¡Hola!` |
-| `data-calendar` | No | Calendario citas | `true` o `false` |
 
 Si no se pone `data-biz`, usa el nombre del `licenses.json`.
 

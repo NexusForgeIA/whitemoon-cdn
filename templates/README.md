@@ -21,7 +21,6 @@ precargar estos valores y ahorrar tiempo de configuración.
 | `legal.json` | ⚖️ Despacho de abogados con triage *(próximamente)* |
 | `peluqueria.json` | ✂️ Peluquería / Estética *(próximamente)* |
 | `restaurante.json` | 🍽️ Restaurante / Hostelería *(próximamente)* |
-| `gestoria.json` | 📋 Gestoría / Asesoría *(próximamente)* |
 | `taller.json` | 🔧 Taller / Automoción *(próximamente)* |
 | `veterinaria.json` | 🐾 Veterinaria *(próximamente)* |
 

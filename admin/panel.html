@@ -179,9 +179,8 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
           <option value="spark">Spark — 499€ setup + 199€/mes (chatbot IA)</option>
           <option value="core">Core — 1.800€ setup + 199€/mes (web + chatbot + SEO)</option>
           <option value="scale">Scale — 4.500€ setup + 449€/mes (RAG + automatizaciones)</option>
-          <option value="elite">Elite — 8.500€ setup + 799€/mes (RAG premium + CRM)</option>
+          <option value="elite">Elite — 8.500€ setup + desde 599€/mes (RAG premium + CRM)</option>
           <option value="auditoria">Auditoría IA — 899€ pago único</option>
-          <option value="gestoria_ia">Gestoría IA — 599€ setup + 299€/mes</option>
         </select>
         <select id="filterStatus" onchange="render()">
           <option value="">Todos los estados</option>
@@ -211,7 +210,7 @@ pre{background:#0a0a14;border:1px solid #222;border-radius:8px;padding:14px;font
       </div>
       <div class="g2 mb">
         <div><label>Dominio</label><input type="text" id="fDom" placeholder="clinicasonrie.es" maxlength="100"></div>
-        <div><label>Pack</label><select id="fPk" onchange="onPackChange()"><option value="spark" selected>Spark — 499€ setup + 199€/mes (chatbot IA)</option><option value="core">Core — 1.800€ setup + 199€/mes (web + chatbot + SEO)</option><option value="core-rag">Core RAG — 3.200€ setup + 349€/mes (Agente IA + documentos propios)</option><option value="scale">Scale — 4.500€ setup + 449€/mes (RAG + automatizaciones)</option><option value="elite">Elite — 8.500€ setup + 799€/mes (RAG premium + CRM)</option><option value="auditoria">Auditoría IA — 899€ pago único</option><option value="gestoria_ia">Gestoría IA — 599€ setup + 299€/mes (chatbot + calculadora ITP)</option></select></div>
+        <div><label>Pack</label><select id="fPk" onchange="onPackChange()"><option value="spark" selected>Spark — 499€ setup + 199€/mes (chatbot IA)</option><option value="core">Core — 1.800€ setup + 199€/mes (web + chatbot + SEO)</option><option value="core-rag">Core RAG — 3.200€ setup + 349€/mes (Agente IA + documentos propios)</option><option value="scale">Scale — 4.500€ setup + 449€/mes (RAG + automatizaciones)</option><option value="elite">Elite — 8.500€ setup + desde 599€/mes (RAG premium + CRM)</option><option value="auditoria">Auditoría IA — 899€ pago único</option></select></div>
       </div>
       <div class="g2 mb">
         <div><label>Email contacto</label><input type="email" id="fEm" placeholder="info@cliente.es" maxlength="100"></div>
@@ -348,17 +347,6 @@ REGLAS:
         </div>
       </div>
 
-      <div class="card" id="giaSection" style="display:none;background:#0f1726;border-color:#1e293b;margin-top:14px">
-        <div class="stitle">⚙️ Configuración Gestoría IA</div>
-        <div class="itp-info" style="margin-bottom:12px">Honorarios y tasas que se sumarán al cálculo del ITP en el widget conversacional.</div>
-        <div class="g2 mb">
-          <div><label>Honorarios gestoría (€)</label><input type="number" id="fGiaHonorarios" placeholder="150" min="0" step="0.01" value="0"></div>
-          <div><label>CCAA por defecto</label><select id="fGiaCcaa"><option value="">— Sin preselección —</option><option value="Andalucía">Andalucía</option><option value="Aragón">Aragón</option><option value="Asturias">Asturias</option><option value="Baleares">Baleares</option><option value="Canarias">Canarias</option><option value="Cantabria">Cantabria</option><option value="Castilla-La Mancha">Castilla-La Mancha</option><option value="Castilla y León">Castilla y León</option><option value="Cataluña">Cataluña</option><option value="C. Valenciana">C. Valenciana</option><option value="Extremadura">Extremadura</option><option value="Galicia">Galicia</option><option value="La Rioja">La Rioja</option><option value="Madrid">Madrid</option><option value="Murcia">Murcia</option><option value="Navarra">Navarra</option><option value="País Vasco">País Vasco</option><option value="Ceuta">Ceuta</option><option value="Melilla">Melilla</option></select></div>
-        </div>
-        <div class="flex" style="align-items:center;gap:10px"><input type="checkbox" id="fGiaTasas" checked><label for="fGiaTasas" style="text-transform:none;letter-spacing:0;font-size:.82rem;color:#ccc;margin:0">Incluir tasas DGT (55,70 €) en el total estimado</label></div>
-        <div class="mb" style="margin-top:12px"><label>Dirección</label><input type="text" id="fGiaDireccion" placeholder="C/ ejemplo 1, Madrid (opcional)" value=""></div>
-      </div>
-
       <div class="flex" style="margin-top:16px;justify-content:space-between">
         <div class="flex">
           <button class="btn btn-p" onclick="saveF()" id="saveBtn">Guardar</button>
@@ -416,11 +404,9 @@ var PACK_PRICES={
   'core-rag':      {setup:3200, monthly:349},
   scale:           {setup:4500, monthly:449},
   elite:           {setup:8500, monthly:799},
-  auditoria:       {setup:899,  monthly:0},
-  gestoria_ia:     {setup:599,  monthly:299}
+  auditoria:       {setup:899,  monthly:0}
 };
 var CHATBOT_PACKS={spark:1};
-var GESTORIA_IA_PACKS={gestoria_ia:1};
 var OBSOLETE_PACKS={basic:1,advance:1,pyme:1,enterprise_n8n:1,consultor_rag:1,empresa_rag:1,premium_rag:1,itp:1};
 var ghToken='';
 var lics={};
@@ -453,43 +439,6 @@ function toggleItp(){
   var cb=$('fItp');
   var body=$('itpBody');
   if(cb&&body)body.className='itp-body'+(cb.checked?' show':'');
-}
-
-function codeGestoriaIA(k){
-  var l=lics[k];if(!l)return;
-  var itp=l.itp||{};
-  var nombre=itp.nombre||l.biz||'Gestoría';
-  var color=itp.color||l.color||'#1565C0';
-  var tel=(itp.tel||l.phone||'').replace(/[^0-9]/g,'');
-  var honorarios=parseFloat(itp.honorarios)||0;
-  var tasas=(itp.tasas!==false);
-  var ccaa=itp.ccaa||'';
-  var cta=itp.cta||'Solicitar gestión del ITP';
-  var direccion=itp.direccion||'';
-
-  function attr(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
-  var h='<!-- WhiteMoon · Gestoría IA · '+nombre+' -->\n';
-  h+='<script\n';
-  h+='  src="'+CDN_BASE+'/gestoria-ia.js"\n';
-  h+='  data-token="'+attr(k)+'"\n';
-  h+='  data-nombre="'+attr(nombre)+'"\n';
-  h+='  data-color="'+attr(color)+'"\n';
-  h+='  data-tel="'+attr(tel)+'"\n';
-  h+='  data-honorarios="'+attr(honorarios)+'"\n';
-  h+='  data-tasas="'+(tasas?'true':'false')+'"\n';
-  if(ccaa) h+='  data-ccaa="'+attr(ccaa)+'"\n';
-  h+='  data-direccion="'+attr(direccion)+'"\n';
-  h+='  data-cta="'+attr(cta)+'"><\/script>\n';
-  h+='<!-- Fin Gestoría IA · '+nombre+' -->';
-
-  $('codeCTitle').innerHTML='🧮 Código Gestoría IA — '+escapeHtml(nombre);
-  $('codeCDesc').innerHTML='Pegar donde quieras mostrar el chatbot ITP en la web del cliente. El widget se carga desde el CDN de WhiteMoon y verifica la licencia automáticamente.';
-  $('codeO').textContent=h;
-  $('codeC').style.display='block';
-  var ic=$('installContent');if(ic){ic.style.display='none';ic.innerHTML=''}
-  $('codeC').scrollIntoView({behavior:'smooth'});
-  toast('Código Gestoría IA generado para '+nombre,'info');
 }
 
 // === FIN MÓDULO ITP ===
@@ -551,7 +500,7 @@ function render(){
     var l=lics[k],rc=l.responses?Object.keys(l.responses).filter(function(x){return!x.startsWith('_')}).length:0;
     var d=daysUntil(l.expires),ec='',eb='';
     if(d!==null){if(d<0){ec='expired';eb='<br><small style="color:#ef4444">⚠ Expirada hace '+Math.abs(d)+'d</small>'}else if(d<=30){ec='expire-soon';eb='<br><small style="color:#f59e0b">⏰ En '+d+'d</small>'}}
-    h+='<tr><td><span class="biz">'+escapeHtml(l.biz)+'</span>'+(l.domain?'<br><span class="domain">'+escapeHtml(l.domain)+'</span>':'')+(l.aiEnabled?'<br><span style="background:rgba(124,77,255,.2);color:#c084fc;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:700;margin-top:3px;display:inline-block">🤖 Claude</span>':'')+(GESTORIA_IA_PACKS[l.pack]?'<br><span class="badge badge-itp" style="margin-top:4px">🧮 Gestoría IA</span>':'')+'</td>';
+    h+='<tr><td><span class="biz">'+escapeHtml(l.biz)+'</span>'+(l.domain?'<br><span class="domain">'+escapeHtml(l.domain)+'</span>':'')+(l.aiEnabled?'<br><span style="background:rgba(124,77,255,.2);color:#c084fc;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:700;margin-top:3px;display:inline-block">🤖 Claude</span>':'')+'</td>';
     h+='<td class="token">'+escapeHtml(k)+'</td><td>'+escapeHtml(l.pack||'—')+(OBSOLETE_PACKS[l.pack]?'<br><small style="color:#f59e0b">⚠ Pack obsoleto - migrar</small>':'')+'</td>';
     h+='<td><span class="badge '+(l.active?'badge-on':'badge-off')+'">'+(l.active?'ACTIVA':'INACTIVA')+'</span></td>';
     h+='<td class="'+ec+'">'+escapeHtml(l.expires||'—')+eb+'</td><td style="color:#06b6d4">'+rc+'</td>';
@@ -559,7 +508,6 @@ function render(){
     h+=l.active?'<button class="btn btn-r btn-xs" onclick="tog(\''+escapeHtml(k)+'\',false)">Desactivar</button>':'<button class="btn btn-g btn-xs" onclick="tog(\''+escapeHtml(k)+'\',true)">Activar</button>';
     h+='<button class="btn btn-c btn-xs" onclick="edit(\''+escapeHtml(k)+'\')">✎</button>';
     h+='<button class="btn btn-o btn-xs" onclick="code(\''+escapeHtml(k)+'\')"><\/></button>';
-    if(GESTORIA_IA_PACKS[l.pack])h+='<button class="btn btn-xs" style="background:rgba(6,182,212,.1);color:#06b6d4;border:1px solid rgba(6,182,212,.2)" onclick="codeGestoriaIA(\''+escapeHtml(k)+'\')" title="Generar chatbot Gestoría IA">🧮</button>';
     h+='<button class="btn btn-y btn-xs" onclick="dupl(\''+escapeHtml(k)+'\')">⎘</button>';
     h+='<button class="btn btn-xs" style="background:rgba(239,68,68,.06);color:#ef4444;border:1px solid rgba(239,68,68,.12)" onclick="del(\''+escapeHtml(k)+'\')">✕</button>';
     h+='</td></tr>';
@@ -620,7 +568,6 @@ function showAdd(){
   toggleAISections(false);
   $('fItp').checked=false;$('itpBody').className='itp-body';
   $('fItpNombre').value='';$('fItpColor').value='#1565C0';$('fItpTel').value='';$('fItpLogo').value='';$('fItpCta').value='Solicitar gestión del ITP';
-  $('fGiaHonorarios').value='0';$('fGiaTasas').checked=true;$('fGiaCcaa').value='';$('fGiaDireccion').value='';
   var t=new Date().toISOString().split('T')[0];$('fCr').value=t;
   $('fEx').value=new Date(new Date().setFullYear(new Date().getFullYear()+1)).toISOString().split('T')[0];
   $('frm').style.display='block';$('frm').scrollIntoView({behavior:'smooth'});
@@ -657,10 +604,6 @@ function edit(k){
   $('fItp').checked=!!l.itp;$('itpBody').className='itp-body'+(l.itp?' show':'');
   $('fItpNombre').value=itp.nombre||'';$('fItpColor').value=itp.color||'#1565C0';
   $('fItpTel').value=itp.tel||'';$('fItpLogo').value=itp.logo||'';$('fItpCta').value=itp.cta||'Solicitar gestión del ITP';
-  $('fGiaHonorarios').value=(itp.honorarios!=null?itp.honorarios:0);
-  $('fGiaTasas').checked=(itp.tasas!==false);
-  $('fGiaCcaa').value=itp.ccaa||'';
-  $('fGiaDireccion').value=itp.direccion||'';
   _toggleChatbotSection();
   $('frm').style.display='block';$('frm').scrollIntoView({behavior:'smooth'});
 }
@@ -683,15 +626,8 @@ function addPay(concept,amount,dueDate){
 function _toggleChatbotSection(){
   var pack=$('fPk').value;
   var isChatbot=!!CHATBOT_PACKS[pack];
-  var isGestoria=!!GESTORIA_IA_PACKS[pack];
   $('chatbotSection').style.display=isChatbot?'':'none';
-  $('nonChatbotMsg').style.display=(isChatbot||isGestoria)?'none':'block';
-  $('giaSection').style.display=isGestoria?'':'none';
-  // Para pack Gestoría IA: auto-activar la sección Calculadora ITP en alta
-  if(isGestoria&&$('fMode').value==='add'&&!$('fItp').checked){
-    $('fItp').checked=true;
-    if(typeof toggleItp==='function')toggleItp();
-  }
+  $('nonChatbotMsg').style.display=isChatbot?'none':'block';
 }
 
 // Defaults (setup + recurrente mensual) por pack
@@ -701,8 +637,7 @@ var PACK_DEFAULTS={
   'core-rag':      {label:'Core RAG',         setup:3200, mrr:349},
   scale:           {label:'Scale',            setup:4500, mrr:449},
   elite:           {label:'Elite',            setup:8500, mrr:799},
-  auditoria:       {label:'Auditoría IA',     setup:899,  mrr:0},
-  gestoria_ia:     {label:'Gestoría IA',       setup:599,  mrr:299}
+  auditoria:       {label:'Auditoría IA',     setup:899,  mrr:0}
 };
 
 function onPackChange(){
@@ -755,12 +690,6 @@ function saveF(){
       logo:$('fItpLogo').value.trim(),
       cta:$('fItpCta').value.trim()||'Solicitar gestión del ITP'
     };
-    if(GESTORIA_IA_PACKS[$('fPk').value]){
-      itpData.honorarios=parseFloat($('fGiaHonorarios').value)||0;
-      itpData.tasas=$('fGiaTasas').checked;
-      itpData.ccaa=$('fGiaCcaa').value;
-      itpData.direccion=$('fGiaDireccion').value.trim()||'';
-    }
   }
   lics[tk]={biz:biz,domain:$('fDom').value.trim(),pack:$('fPk').value,active:mode==='edit'?(lics[$('fOrig').value]?lics[$('fOrig').value].active:true):true,created:$('fCr').value,expires:$('fEx').value,contact:$('fEm').value.trim(),phone:$('fPh').value.trim(),notes:$('fNo').value.trim(),botName:$('fBn').value.trim()||'Asistente',color:$('fCo').value.trim()||'#7c3aed',calendar:$('fCal').value!=='false',greeting:$('fGr').value.trim(),serviceButtons:bt?bt.split(',').map(function(s){return s.trim()}).filter(function(s){return s}):[],responses:Object.keys(resp).length?resp:undefined,pendingPayments:pp.length?pp:undefined,aiEnabled:$('fAI').value==='1'||undefined,aiPrompt:$('fAI').value==='1'?$('fAIPrompt').value:undefined,itp:itpData||undefined,updated:new Date().toISOString()};
   save((mode==='add'?'Alta':'Editar')+': '+biz).then(function(){toast(biz+(mode==='add'?' dado de alta ✅':' actualizado ✅'));hideF();if(mode==='add')code(tk)});
@@ -768,7 +697,6 @@ function saveF(){
 
 function code(k){
   var l=lics[k];if(!l)return;
-  if(GESTORIA_IA_PACKS[l.pack]){codeGestoriaIA(k);return}
   if(!CHATBOT_PACKS[l.pack]){
     var def=PACK_DEFAULTS[l.pack];
     var packLabel=def?def.label:(l.pack||'Pack');

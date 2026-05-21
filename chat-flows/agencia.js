@@ -23,7 +23,7 @@
       var ASK_NAME  = 'Para llamarte sin compromiso, ¿me dices tu nombre?';
       var ASK_PHONE = 'Perfecto {nombre} 👋 ¿Tu teléfono de contacto?';
 
-      var DEMO_GESTORIA = 'https://nexusforgeia.github.io/WHITEMOON-REFORMAS-CONSTRUCCION/';
+      var DEMO_URL = 'https://nexusforgeia.github.io/WHITEMOON-REFORMAS-CONSTRUCCION/';
 
       function capture(tramite, sector){
         var detalle = 'Sector: ' + (sector || 'No especificado');
@@ -47,7 +47,6 @@
           function(){
             w.showOpts([
               { label: '🤖 Quiero un chatbot IA para mi negocio', flow: 'chatbot' },
-              { label: '🧮 Gestoría · Calculadora ITP',           flow: 'gestoria' },
               { label: '🌐 Necesito web profesional con IA',      flow: 'web' },
               { label: '📊 Auditoría IA para mi empresa',         flow: 'auditoria' },
               { label: '🔭 Scout para mi agencia',                flow: 'scout' },
@@ -61,7 +60,6 @@
       function runFlow(key){
         switch(key){
           case 'chatbot':   return flowChatbot();
-          case 'gestoria':  return flowGestoria();
           case 'web':       return flowWeb();
           case 'auditoria': return flowAuditoria();
           case 'scout':     return flowScout();
@@ -117,39 +115,6 @@
             });
           });
         });
-      }
-
-      // ─── FLUJO GESTORÍA IA ────────────────────────────────────────────────
-      function flowGestoria(){
-        w.bot(
-          'El <b>Pack Gestoría IA</b> incluye chatbot con calculadora ITP integrada. '+
-          'Tus clientes calculan el ITP y recibes el lead cualificado con todos los datos del vehículo.<br>'+
-          '💰 <b>599€ setup + 299€/mes</b> · Sin permanencia',
-          function(){
-            w.showOpts([
-              { label:'Ver demo',         value:'demo' },
-              { label:'Que me llamen',    value:'llamar' },
-              { label:'Más información',  value:'info' }
-            ], function(o){
-              if(o.value === 'demo'){
-                w.bot(
-                  '👀 Aquí tienes la demo en directo:<br>'+
-                  '<a href="'+DEMO_GESTORIA+'" target="_blank" rel="noopener" style="color:#a78bfa;text-decoration:underline;">Abrir demo Gestoría IA</a>',
-                  function(){ capture('Gestoría IA', 'Gestoría'); }
-                );
-                return;
-              }
-              if(o.value === 'info'){
-                w.botText(
-                  'El chatbot integra una calculadora ITP automática. El cliente introduce sus datos y el sistema calcula el impuesto al instante. Tú recibes el lead listo para gestionar.',
-                  function(){ capture('Gestoría IA', 'Gestoría'); }
-                );
-                return;
-              }
-              capture('Gestoría IA', 'Gestoría');
-            });
-          }
-        );
       }
 
       // ─── FLUJO WEB PROFESIONAL ────────────────────────────────────────────
@@ -221,7 +186,6 @@
           '🌐 Core (web+chatbot): 1.800€ setup + 199€/mes<br>'+
           '📈 Scale (RAG+CRM): 3.500€ setup + 349€/mes<br>'+
           '🚀 Elite (RAG premium): 6.500€ setup + 599€/mes<br>'+
-          '🧮 Gestoría IA: 599€ setup + 299€/mes<br>'+
           '📋 Auditoría IA: 899€ pago único<br>'+
           '🔭 Scout Starter: 299€ setup + 299€/mes',
           function(){
@@ -239,7 +203,6 @@
       // ─── KEYWORD ROUTER ───────────────────────────────────────────────────
       var ROUTE = [
         { kws:['chatbot','bot','asistente'],                          flow:'chatbot' },
-        { kws:['gestoria','itp','transferencia'],                     flow:'gestoria' },
         { kws:['auditoria','analisis','roi'],                         flow:'auditoria' },
         { kws:['scout','crm','prospeccion','agencia'],                flow:'scout' },
         { kws:['web','pagina','wordpress'],                           flow:'web' },
@@ -257,8 +220,8 @@
             if(t.indexOf(u.normalize(entry.kws[j])) !== -1){
               if(entry.flow === 'demo'){
                 w.bot(
-                  '👀 Tenemos demos en vivo de varios sectores. Mira la demo Gestoría IA:<br>'+
-                  '<a href="'+DEMO_GESTORIA+'" target="_blank" rel="noopener" style="color:#a78bfa;text-decoration:underline;">Abrir demo</a>',
+                  '👀 Tenemos demos en vivo de varios sectores:<br>'+
+                  '<a href="'+DEMO_URL+'" target="_blank" rel="noopener" style="color:#a78bfa;text-decoration:underline;">Abrir demo</a>',
                   function(){ setTimeout(showMenu, 800); }
                 );
                 return;

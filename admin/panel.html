@@ -245,6 +245,8 @@ var CDN_BASE = 'https://nexusforgeia.github.io/whitemoon-cdn';
 var REPO = 'NexusForgeIA/whitemoon-cdn';
 // MRR mensual por pack (alineado con el panel de precios).
 var PACK_MRR = { spark:199, core:199, 'core-rag':349, scale:449, elite:599 };
+// Setup (pago único) por pack.
+var PACK_SETUP = { spark:499, core:1800, 'core-rag':3200, scale:4500, elite:8500 };
 var SECTORES = ['dental','legal','restaurante','gestoria','clinica','inmobiliaria','gimnasio','peluqueria','veterinaria','formacion','taller','podologia','automovil','abogados'];
 var PACKS = ['spark','core','scale','elite'];
 
@@ -546,7 +548,7 @@ function toggleAutoPay(){
 // ─── NUEVO CLIENTE ───────────────────────────────────────────────────────────
 function fillSelects(){
   $('nSector').innerHTML = '<option value="">—</option>' + SECTORES.map(function(s){ return '<option value="'+s+'">'+s+'</option>'; }).join('');
-  $('nPack').innerHTML = PACKS.map(function(p){ return '<option value="'+p+'">'+p+' ('+(PACK_MRR[p]||0)+'€/mes)</option>'; }).join('');
+  $('nPack').innerHTML = PACKS.map(function(p){ return '<option value="'+p+'">'+p+' — '+(PACK_SETUP[p]||0).toLocaleString('es-ES')+'€ setup + '+(PACK_MRR[p]||0)+'€/mes</option>'; }).join('');
 }
 function genTokenValue(){ var a=new Uint8Array(12); crypto.getRandomValues(a); return 'WM-'+Array.from(a,function(b){return b.toString(16).padStart(2,'0');}).join(''); }
 function genToken(){ $('nToken').value=genTokenValue(); }

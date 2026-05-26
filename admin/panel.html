@@ -188,10 +188,10 @@ tr:hover td{background:#0d0d16}
       <div><label>Próximo pago</label><input type="date" id="nPago"></div>
     </div>
     <div class="agente-box">
-      <span class="agente-tag">🧠 Agente: Laura IA (Claude API · key central de agencia)</span>
-      <div class="mb"><label>Edge Function URL</label><input type="text" id="nEdge" placeholder="https://mlaqtniujnvfxcvcourm.supabase.co/functions/v1/client-chat"></div>
-      <div class="mb"><label>System prompt de Laura</label><textarea id="nPrompt" rows="6" placeholder="Eres Laura, la asistente de [NEGOCIO]..."></textarea>
-        <button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="loadPromptTpl('nPrompt','nNombre')">📋 Cargar plantilla base</button></div>
+      <span class="agente-tag">🎙️ Agente: Orion IA (Retell + ElevenLabs)</span>
+      <div class="mb"><label>Retell agent ID</label><input type="text" id="nAgentId" placeholder="agent_xxxxxxxxxxxxxxxx"></div>
+      <div class="mb"><label>System prompt de Orion</label><textarea id="nPrompt" rows="6" placeholder="Eres Orion, el agente de voz de [NEGOCIO]..."></textarea>
+        <button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="loadPromptTpl('nPrompt','nNombre','nSector')">📋 Cargar plantilla base</button></div>
     </div>
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
       <button class="btn btn-ghost" onclick="closeNew()">Cancelar</button>
@@ -221,11 +221,11 @@ tr:hover td{background:#0d0d16}
 <!-- AGENTE DEL CLIENTE -->
 <div class="modal-bg" id="agenteBg">
   <div class="modal">
-    <h3 id="agenteTitle">🧠 Agente</h3>
-    <span class="agente-tag">Laura IA (Claude API · key central de agencia)</span>
-    <div class="mb"><label>Edge Function URL</label><input type="text" id="aEdge" placeholder="https://mlaqtniujnvfxcvcourm.supabase.co/functions/v1/client-chat"></div>
-    <div class="mb"><label>System prompt de Laura</label><textarea id="aPrompt" rows="8" placeholder="Eres Laura, la asistente de [NEGOCIO]..."></textarea>
-      <button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="loadSectorTemplate()">📋 Cargar plantilla</button></div>
+    <h3 id="agenteTitle">🎙️ Agente</h3>
+    <span class="agente-tag">Orion IA (Retell + ElevenLabs)</span>
+    <div class="mb"><label>Retell agent ID</label><input type="text" id="aAgentId" placeholder="agent_xxxxxxxxxxxxxxxx"></div>
+    <div class="mb"><label>System prompt de Orion</label><textarea id="aPrompt" rows="8" placeholder="Eres Orion, el agente de voz de [NEGOCIO]..."></textarea>
+      <button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="loadPromptTpl('aPrompt')">📋 Cargar plantilla base</button></div>
     <div class="mb">
       <label>Script de instalación</label>
       <div class="code-box" id="aScript">—</div>
@@ -302,7 +302,7 @@ function enterPanel(){ $('loginView').style.display='none'; $('panelView').style
 function loadData(){
   $('tbl').innerHTML='<div class="empty">Cargando…</div>';
   Promise.all([
-    sbGet('onboarding_clientes?select=id,token_cdn,estado,cliente_nombre,cliente_email,cliente_telefono,sector,pack,url_web_cliente,fecha_proximo_pago,fecha_inicio,created_at,agente_tipo,agente_edge_function,agente_system_prompt&order=created_at.desc'),
+    sbGet('onboarding_clientes?select=id,token_cdn,estado,cliente_nombre,cliente_email,cliente_telefono,sector,pack,url_web_cliente,fecha_proximo_pago,fecha_inicio,created_at,agente_tipo,agente_retell_agent_id,agente_system_prompt&order=created_at.desc'),
     sbGet('cdn_config?id=eq.true&select=modo_automatico_pagos'),
     sbGet('historial_pagos?select=id,cliente_id,concepto,importe,fecha_vencimiento,pagado,fecha_pago,created_at&order=fecha_vencimiento.asc')
   ]).then(function(res){
@@ -370,7 +370,7 @@ function render(){
       : '<button class="btn btn-a btn-sm" onclick="setEstado(\''+esc(c.id)+'\',true)">Activar</button>';
     h+=' <button class="btn btn-ghost btn-sm" onclick="openPagos(\''+esc(c.id)+'\')">💸 Pagos'+pagosPill(c.id)+'</button>';
     h+=' <button class="btn btn-ghost btn-sm" onclick="openAgente(\''+esc(c.id)+'\')">🧠 Agente</button>';
-    h+=' <button class="btn btn-ghost btn-sm" onclick="copyCode(\''+esc(c.token_cdn)+'\')">📋 Código</button>';
+    h+=' <button class="btn btn-ghost btn-sm" onclick="copyCode(\''+esc(c.id)+'\')">📋 Código</button>';
     h+='</td></tr>';
   });
   h+='</tbody></table>';
@@ -408,9 +408,12 @@ function setPago(id, value){
   .catch(function(e){ toast('Error: '+e.message,'err'); });
 }
 
-function copyCode(token){
-  var code = '<script src="'+CDN_BASE+'/chat.js" data-token="'+token+'"><\/script>';
-  navigator.clipboard.writeText(code).then(function(){ toast('Código de instalación copiado 📋'); })
+function copyCode(id){
+  var c = clientes.filter(function(x){ return x.id===id; })[0];
+  if(!c){ toast('Cliente no encontrado','err'); return; }
+  var code = agenteScript(c);
+  if(code.charAt(0) !== '<'){ toast('Falta el Retell agent ID — ábrelo en 🎙️ Agente','err'); return; }
+  navigator.clipboard.writeText(code).then(function(){ toast('Script de Orion copiado 📋'); })
   .catch(function(){ toast('No se pudo copiar','err'); });
 }
 
@@ -497,18 +500,21 @@ function deletePago(pagoId){
   .catch(function(e){ toast('Error: '+e.message,'err'); });
 }
 
-// ─── AGENTE IA (Laura · onboarding_clientes) ─────────────────────────────────
+// ─── AGENTE IA (Orion · onboarding_clientes) ─────────────────────────────────
+// Genera el snippet de instalación que el cliente pega en su web. El widget
+// (orion-widget.js) lee data-token + data-agent del propio <script>.
 function agenteScript(c){
-  var edge = (c.agente_edge_function||'').trim();
-  return '<script src="'+CDN_BASE+'/chat.js"\n  data-token="'+esc(c.token_cdn||'')+'"'
-    + (edge ? '\n  data-edge="'+esc(edge)+'"' : '')
-    + '><\/script>';
+  var agentId = (c.agente_retell_agent_id||'').trim();
+  if(!c.token_cdn || !agentId){
+    return '— Falta token CDN y/o Retell agent ID para generar el script.';
+  }
+  return '<script src="'+CDN_BASE+'/orion-widget.js"\n  data-token="'+esc(c.token_cdn)+'"\n  data-agent="'+esc(agentId)+'"\n  defer><\/script>';
 }
 function openAgente(id){
   var c = clientes.filter(function(x){ return x.id===id; })[0]; if(!c) return;
   currentAgenteCli = id;
-  $('agenteTitle').innerHTML = '🧠 Agente · '+esc(c.cliente_nombre||'cliente');
-  $('aEdge').value = c.agente_edge_function || '';
+  $('agenteTitle').innerHTML = '🎙️ Agente · '+esc(c.cliente_nombre||'cliente');
+  $('aAgentId').value = c.agente_retell_agent_id || '';
   $('aPrompt').value = c.agente_system_prompt || '';
   $('aScript').textContent = agenteScript(c);
   $('agenteBg').classList.add('show');
@@ -517,15 +523,15 @@ function closeAgente(){ $('agenteBg').classList.remove('show'); currentAgenteCli
 function saveAgente(){
   if(!currentAgenteCli) return;
   var body = {
-    agente_tipo: 'laura',
-    agente_edge_function: ($('aEdge').value||'').trim() || null,
+    agente_tipo: 'orion',
+    agente_retell_agent_id: ($('aAgentId').value||'').trim() || null,
     agente_system_prompt: ($('aPrompt').value||'').trim() || null
   };
   $('aSave').disabled=true;
   sbPatch('onboarding_clientes','id=eq.'+encodeURIComponent(currentAgenteCli), body)
   .then(function(){
     var c=clientes.filter(function(x){return x.id===currentAgenteCli;})[0];
-    if(c){ c.agente_tipo='laura'; c.agente_edge_function=body.agente_edge_function; c.agente_system_prompt=body.agente_system_prompt; $('aScript').textContent=agenteScript(c); }
+    if(c){ c.agente_tipo='orion'; c.agente_retell_agent_id=body.agente_retell_agent_id; c.agente_system_prompt=body.agente_system_prompt; $('aScript').textContent=agenteScript(c); }
     $('aSave').disabled=false; toast('Agente guardado ✅');
   })
   .catch(function(e){ $('aSave').disabled=false; toast('Error: '+e.message,'err'); });
@@ -534,42 +540,40 @@ function copyAgenteScript(){
   navigator.clipboard.writeText($('aScript').textContent).then(function(){ toast('Script copiado 📋'); })
   .catch(function(){ toast('No se pudo copiar','err'); });
 }
-function loadPromptTpl(targetId, nameId){
-  var nombre = (nameId && $(nameId) && $(nameId).value.trim()) || (currentAgenteCli && (clientes.filter(function(x){return x.id===currentAgenteCli;})[0]||{}).cliente_nombre) || '[NEGOCIO]';
+function loadPromptTpl(targetId, nameId, sectorId){
+  var ctx = currentAgenteCli ? (clientes.filter(function(x){return x.id===currentAgenteCli;})[0]||{}) : {};
+  var nombre = (nameId && $(nameId) && $(nameId).value.trim()) || ctx.cliente_nombre || '[NEGOCIO]';
+  var sector = (sectorId && $(sectorId) && $(sectorId).value) || ctx.sector || '[SECTOR]';
   $(targetId).value =
-'Eres Laura, la asistente virtual de '+nombre+'.\n\n'+
-'MISIÓN: responder consultas, cualificar leads y captar nombre + teléfono\n'+
-'del cliente de forma natural y empática.\n\n'+
+'Eres Orion, el agente de voz de '+nombre+',\n'+
+'especializado en '+sector+'.\n'+
+'Eres cálido, cercano y profesional.\n\n'+
+'SOBRE '+nombre+':\n'+
+'[Descripción del negocio]\n'+
+'Servicios: [lista de servicios]\n'+
+'Horario: [horario de atención]\n'+
+'Contacto: [teléfono y email]\n'+
+'Web: [url]\n\n'+
+'MISIÓN:\n'+
+'Atender consultas de clientes 24h,\n'+
+'responder preguntas sobre servicios\n'+
+'y precios, y recoger nombre y teléfono\n'+
+'para que el equipo contacte por WhatsApp.\n\n'+
+'GUARDAR LEAD (OBLIGATORIO):\n'+
+'Cuando el cliente dé su teléfono,\n'+
+'llamar a la función guardar_lead con:\n'+
+'nombre, telefono, sector, mensaje.\n\n'+
+'CIERRE:\n'+
+'¿Me das tu nombre y teléfono?\n'+
+'El equipo de '+nombre+' te contactará\n'+
+'por WhatsApp en breve.\n\n'+
 'REGLAS:\n'+
-'- Máximo 2-3 frases por mensaje.\n'+
-'- Una sola pregunta a la vez.\n'+
-'- Cuando tengas nombre Y teléfono: "Perfecto [nombre], te contactamos hoy."\n'+
-'- Si se despide sin dar datos: "¡Sin problema! Cuando quieras estamos aquí."\n'+
-'- Nunca inventes servicios o precios que no estén en este prompt.\n'+
-'- Tono: cercano, profesional, orientado a resultados.';
-}
-
-// Plantilla de system prompt según el sector del cliente. {ciudad} se deja como
-// marcador para rellenar a mano (onboarding_clientes no guarda ciudad).
-function sectorTemplate(sector, nombre){
-  var n = nombre || '{nombre}';
-  var T = {
-    restaurante: 'Eres el asistente virtual de '+n+', un restaurante en {ciudad}. Ayudas a los clientes con reservas, carta y horarios. Cuando tengas nombre y teléfono, confirma que el equipo les contactará. Máximo 3 frases por mensaje. Solo en español.',
-    abogado: 'Eres el asistente virtual de '+n+', despacho de abogados en {ciudad}. Ayudas a los clientes a entender sus opciones legales y agendar consultas. Cuando tengas nombre y teléfono, confirma que un abogado les llamará. Máximo 3 frases por mensaje. Solo en español.',
-    dental: 'Eres el asistente virtual de '+n+', clínica dental en {ciudad}. Ayudas con citas, tratamientos y precios orientativos. Cuando tengas nombre y teléfono, confirma que el equipo les contactará. Máximo 3 frases por mensaje. Solo en español.',
-    podologia: 'Eres el asistente virtual de '+n+', clínica de podología en {ciudad}. Ayudas con citas y tratamientos. Cuando tengas nombre y teléfono, confirma que el equipo les contactará. Máximo 3 frases por mensaje. Solo en español.',
-    automovil: 'Eres el asistente virtual de '+n+', concesionario/taller en {ciudad}. Ayudas con vehículos, servicios y citas de taller. Cuando tengas nombre y teléfono, confirma que un asesor les contactará. Máximo 3 frases por mensaje. Solo en español.',
-    gestoria: 'Eres el asistente virtual de '+n+', gestoría en {ciudad}. Ayudas con trámites, ITP y gestiones administrativas. Cuando tengas nombre y teléfono, confirma que un gestor les llamará. Máximo 3 frases por mensaje. Solo en español.',
-    general: 'Eres el asistente virtual de '+n+'. Ayudas a los clientes con información y consultas. Cuando tengas nombre y teléfono, confirma que el equipo les contactará. Máximo 3 frases por mensaje. Solo en español.'
-  };
-  var map = { restaurante:'restaurante', legal:'abogado', abogados:'abogado', dental:'dental', podologia:'podologia', automovil:'automovil', taller:'automovil', gestoria:'gestoria' };
-  return T[ map[String(sector||'').toLowerCase()] || 'general' ];
-}
-function loadSectorTemplate(){
-  var c = clientes.filter(function(x){ return x.id===currentAgenteCli; })[0];
-  if(!c){ toast('Abre el agente de un cliente primero','err'); return; }
-  $('aPrompt').value = sectorTemplate(c.sector, c.cliente_nombre);
-  toast('Plantilla del sector '+(c.sector||'general')+' cargada');
+'- Siempre en español de España\n'+
+'- Nunca des precios sin confirmar\n'+
+'- Máximo 2 minutos de conversación\n'+
+'- NUNCA menciones competidores\n'+
+'- Si preguntan si eres IA, responde\n'+
+'  con transparencia';
 }
 
 // ─── MODO AUTOMÁTICO PAGOS (global) ──────────────────────────────────────────
@@ -588,7 +592,7 @@ function fillSelects(){
 }
 function genTokenValue(){ var a=new Uint8Array(12); crypto.getRandomValues(a); return 'WM-'+Array.from(a,function(b){return b.toString(16).padStart(2,'0');}).join(''); }
 function genToken(){ $('nToken').value=genTokenValue(); }
-function openNew(){ $('nToken').value=genTokenValue(); $('nNombre').value=''; $('nUrl').value=''; $('nSector').value=''; $('nPack').value='spark'; $('nEstado').value='completado'; $('nPago').value=''; $('nEdge').value=''; $('nPrompt').value=''; $('newBg').classList.add('show'); }
+function openNew(){ $('nToken').value=genTokenValue(); $('nNombre').value=''; $('nUrl').value=''; $('nSector').value=''; $('nPack').value='spark'; $('nEstado').value='completado'; $('nPago').value=''; $('nAgentId').value=''; $('nPrompt').value=''; $('newBg').classList.add('show'); }
 function closeNew(){ $('newBg').classList.remove('show'); }
 function saveNew(){
   var token=($('nToken').value||'').trim().replace(/[^A-Za-z0-9\-_]/g,'');
@@ -603,8 +607,8 @@ function saveNew(){
     pack: $('nPack').value || null,
     estado: $('nEstado').value || 'completado',
     fecha_proximo_pago: $('nPago').value || null,
-    agente_tipo: 'laura',
-    agente_edge_function: ($('nEdge').value||'').trim() || null,
+    agente_tipo: 'orion',
+    agente_retell_agent_id: ($('nAgentId').value||'').trim() || null,
     agente_system_prompt: ($('nPrompt').value||'').trim() || null
   };
   $('nSave').disabled=true;

@@ -167,7 +167,7 @@ tr:hover td{background:#0d0d16}
     <div class="mb">
       <label>Token CDN <span style="color:var(--warn)">*</span></label>
       <div class="tokgen">
-        <input type="text" id="nToken" placeholder="WM-...">
+        <input type="text" id="nToken" placeholder="WM-..." oninput="refreshNewSnippet()">
         <button type="button" class="btn btn-ghost" onclick="genToken()">🎲 Generar</button>
       </div>
     </div>
@@ -177,7 +177,7 @@ tr:hover td{background:#0d0d16}
     </div>
     <div class="g2">
       <div><label>Sector</label><select id="nSector"></select></div>
-      <div><label>Pack</label><select id="nPack"></select></div>
+      <div><label>Pack</label><select id="nPack" onchange="refreshNewSnippet()"></select></div>
     </div>
     <div class="g2">
       <div><label>Estado</label><select id="nEstado">
@@ -188,10 +188,15 @@ tr:hover td{background:#0d0d16}
       <div><label>Próximo pago</label><input type="date" id="nPago"></div>
     </div>
     <div class="agente-box">
-      <span class="agente-tag">🎙️ Agente: Orion IA (Retell + ElevenLabs)</span>
-      <div class="mb"><label>Retell agent ID</label><input type="text" id="nAgentId" placeholder="agent_xxxxxxxxxxxxxxxx"></div>
-      <div class="mb"><label>System prompt de Orion</label><textarea id="nPrompt" rows="6" placeholder="Eres Orion, el agente de voz de [NEGOCIO]..."></textarea>
+      <span class="agente-tag" id="nAgenteBadge">🎙️ Agente: Orion IA (Retell + ElevenLabs)</span>
+      <div class="mb"><label>Retell agent ID <span class="muted" style="text-transform:none;font-size:.66rem">(solo Core / Scale / Elite)</span></label><input type="text" id="nAgentId" placeholder="agent_xxxxxxxxxxxxxxxx" oninput="refreshNewSnippet()"></div>
+      <div class="mb"><label>System prompt</label><textarea id="nPrompt" rows="6" placeholder="Eres Orion, el agente de voz de [NEGOCIO]..."></textarea>
         <button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="loadPromptTpl('nPrompt','nNombre','nSector')">📋 Cargar plantilla base</button></div>
+      <div class="mb">
+        <label>Script de instalación</label>
+        <div class="code-box" id="nScript">—</div>
+        <button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="copyNewSnippet()">📋 Copiar script</button>
+      </div>
     </div>
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
       <button class="btn btn-ghost" onclick="closeNew()">Cancelar</button>
@@ -222,8 +227,8 @@ tr:hover td{background:#0d0d16}
 <div class="modal-bg" id="agenteBg">
   <div class="modal">
     <h3 id="agenteTitle">🎙️ Agente</h3>
-    <span class="agente-tag">Orion IA (Retell + ElevenLabs)</span>
-    <div class="mb"><label>Retell agent ID</label><input type="text" id="aAgentId" placeholder="agent_xxxxxxxxxxxxxxxx"></div>
+    <span class="agente-tag" id="aAgenteBadge">Orion IA (Retell + ElevenLabs)</span>
+    <div class="mb"><label>Retell agent ID <span class="muted" style="text-transform:none;font-size:.66rem">(solo Core / Scale / Elite)</span></label><input type="text" id="aAgentId" placeholder="agent_xxxxxxxxxxxxxxxx" oninput="refreshAgenteSnippet()"></div>
     <div class="mb"><label>System prompt de Orion</label><textarea id="aPrompt" rows="8" placeholder="Eres Orion, el agente de voz de [NEGOCIO]..."></textarea>
       <button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="loadPromptTpl('aPrompt')">📋 Cargar plantilla base</button></div>
     <div class="mb">
@@ -412,8 +417,8 @@ function copyCode(id){
   var c = clientes.filter(function(x){ return x.id===id; })[0];
   if(!c){ toast('Cliente no encontrado','err'); return; }
   var code = agenteScript(c);
-  if(code.charAt(0) !== '<'){ toast('Falta el Retell agent ID — ábrelo en 🎙️ Agente','err'); return; }
-  navigator.clipboard.writeText(code).then(function(){ toast('Script de Orion copiado 📋'); })
+  if(code.charAt(0) !== '<'){ toast(code,'err'); return; }
+  navigator.clipboard.writeText(code).then(function(){ toast('Script copiado 📋'); })
   .catch(function(){ toast('No se pudo copiar','err'); });
 }
 
@@ -500,38 +505,75 @@ function deletePago(pagoId){
   .catch(function(e){ toast('Error: '+e.message,'err'); });
 }
 
-// ─── AGENTE IA (Orion · onboarding_clientes) ─────────────────────────────────
-// Genera el snippet de instalación que el cliente pega en su web. El widget
-// (orion-widget.js) lee data-token + data-agent del propio <script>.
-function agenteScript(c){
-  var agentId = (c.agente_retell_agent_id||'').trim();
-  if(!c.token_cdn || !agentId){
-    return '— Falta token CDN y/o Retell agent ID para generar el script.';
+// ─── AGENTE IA (snippet por pack · onboarding_clientes) ──────────────────────
+// El snippet que se instala en la web del cliente depende del pack:
+//   - spark                        → chat.js (chatbot texto · Laura IA)
+//   - core                         → orion-widget.js (voz · sin RAG)
+//   - core-rag / scale / elite     → orion-widget.js con data-rag="true"
+// El atributo data-agent solo aparece en los snippets de orion-widget.js.
+// El atributo data-rag lo leerá orion-widget.js cuando se cablée RAG; hoy se
+// genera ya en el HTML para que la migración del lado widget no toque el panel.
+var PACKS_WITH_RAG = { 'core-rag':1, 'scale':1, 'elite':1 };
+function snippetForPack(c){
+  var token = (c.token_cdn||'').trim();
+  if(!token) return '— Falta token CDN para generar el script.';
+  var pack = String(c.pack||'').toLowerCase();
+  if(pack === 'spark'){
+    return '<script src="'+CDN_BASE+'/chat.js"\n  data-token="'+esc(token)+'"><\/script>';
   }
-  return '<script src="'+CDN_BASE+'/orion-widget.js"\n  data-token="'+esc(c.token_cdn)+'"\n  data-agent="'+esc(agentId)+'"\n  defer><\/script>';
+  var agentId = (c.agente_retell_agent_id||'').trim();
+  if(!agentId){
+    return '— Falta Retell agent ID para generar el script de Orion.';
+  }
+  var rag = !!PACKS_WITH_RAG[pack];
+  return '<script src="'+CDN_BASE+'/orion-widget.js"\n  data-token="'+esc(token)+'"\n  data-agent="'+esc(agentId)+'"'
+    + (rag ? '\n  data-rag="true"' : '')
+    + '\n  defer><\/script>';
+}
+function agenteScript(c){ return snippetForPack(c); }
+
+// Etiqueta + icono del badge según pack. Spark = Laura (texto); resto = Orion (voz).
+function agenteLabel(pack){
+  return String(pack||'').toLowerCase() === 'spark'
+    ? 'Laura IA (chat texto · Claude API)'
+    : 'Orion IA (Retell + ElevenLabs)';
+}
+function agenteIcon(pack){
+  return String(pack||'').toLowerCase() === 'spark' ? '💬' : '🎙️';
 }
 function openAgente(id){
   var c = clientes.filter(function(x){ return x.id===id; })[0]; if(!c) return;
   currentAgenteCli = id;
-  $('agenteTitle').innerHTML = '🎙️ Agente · '+esc(c.cliente_nombre||'cliente');
+  $('agenteTitle').innerHTML = agenteIcon(c.pack)+' Agente · '+esc(c.cliente_nombre||'cliente');
+  $('aAgenteBadge').textContent = agenteLabel(c.pack);
   $('aAgentId').value = c.agente_retell_agent_id || '';
   $('aPrompt').value = c.agente_system_prompt || '';
   $('aScript').textContent = agenteScript(c);
   $('agenteBg').classList.add('show');
 }
+// Live preview en el modal de agente — refleja cambios en el input del agent ID
+// sin tener que pulsar Guardar.
+function refreshAgenteSnippet(){
+  if(!currentAgenteCli) return;
+  var c = clientes.filter(function(x){ return x.id===currentAgenteCli; })[0]; if(!c) return;
+  var preview = { token_cdn: c.token_cdn, pack: c.pack, agente_retell_agent_id: ($('aAgentId').value||'').trim() };
+  $('aScript').textContent = snippetForPack(preview);
+}
 function closeAgente(){ $('agenteBg').classList.remove('show'); currentAgenteCli=null; }
 function saveAgente(){
   if(!currentAgenteCli) return;
+  var cli = clientes.filter(function(x){return x.id===currentAgenteCli;})[0];
+  // El tipo de agente sigue al pack: Spark = Laura (chat), resto = Orion (voz).
+  var tipo = String((cli&&cli.pack)||'').toLowerCase() === 'spark' ? 'laura' : 'orion';
   var body = {
-    agente_tipo: 'orion',
+    agente_tipo: tipo,
     agente_retell_agent_id: ($('aAgentId').value||'').trim() || null,
     agente_system_prompt: ($('aPrompt').value||'').trim() || null
   };
   $('aSave').disabled=true;
   sbPatch('onboarding_clientes','id=eq.'+encodeURIComponent(currentAgenteCli), body)
   .then(function(){
-    var c=clientes.filter(function(x){return x.id===currentAgenteCli;})[0];
-    if(c){ c.agente_tipo='orion'; c.agente_retell_agent_id=body.agente_retell_agent_id; c.agente_system_prompt=body.agente_system_prompt; $('aScript').textContent=agenteScript(c); }
+    if(cli){ cli.agente_tipo=tipo; cli.agente_retell_agent_id=body.agente_retell_agent_id; cli.agente_system_prompt=body.agente_system_prompt; $('aScript').textContent=agenteScript(cli); }
     $('aSave').disabled=false; toast('Agente guardado ✅');
   })
   .catch(function(e){ $('aSave').disabled=false; toast('Error: '+e.message,'err'); });
@@ -591,23 +633,42 @@ function fillSelects(){
   $('nPack').innerHTML = PACKS.map(function(p){ return '<option value="'+p+'">'+p+' — '+(PACK_SETUP[p]||0).toLocaleString('es-ES')+'€ setup + '+(PACK_MRR[p]||0)+'€/mes</option>'; }).join('');
 }
 function genTokenValue(){ var a=new Uint8Array(12); crypto.getRandomValues(a); return 'WM-'+Array.from(a,function(b){return b.toString(16).padStart(2,'0');}).join(''); }
-function genToken(){ $('nToken').value=genTokenValue(); }
-function openNew(){ $('nToken').value=genTokenValue(); $('nNombre').value=''; $('nUrl').value=''; $('nSector').value=''; $('nPack').value='spark'; $('nEstado').value='completado'; $('nPago').value=''; $('nAgentId').value=''; $('nPrompt').value=''; $('newBg').classList.add('show'); }
+function genToken(){ $('nToken').value=genTokenValue(); refreshNewSnippet(); }
+function openNew(){ $('nToken').value=genTokenValue(); $('nNombre').value=''; $('nUrl').value=''; $('nSector').value=''; $('nPack').value='spark'; $('nEstado').value='completado'; $('nPago').value=''; $('nAgentId').value=''; $('nPrompt').value=''; refreshNewSnippet(); $('newBg').classList.add('show'); }
 function closeNew(){ $('newBg').classList.remove('show'); }
+// Live preview del snippet en el modal de nuevo cliente — se recalcula al
+// cambiar token, pack o agent ID. El badge "Agente: …" también se adapta.
+function refreshNewSnippet(){
+  var c = {
+    token_cdn: ($('nToken').value||'').trim(),
+    pack: $('nPack').value,
+    agente_retell_agent_id: ($('nAgentId').value||'').trim()
+  };
+  $('nScript').textContent = snippetForPack(c);
+  $('nAgenteBadge').textContent = agenteIcon(c.pack)+' Agente: '+agenteLabel(c.pack);
+}
+function copyNewSnippet(){
+  var txt = ($('nScript').textContent||'').trim();
+  if(!txt || txt.charAt(0) !== '<'){ toast(txt||'Snippet no disponible','err'); return; }
+  navigator.clipboard.writeText(txt).then(function(){ toast('Script copiado 📋'); })
+  .catch(function(){ toast('No se pudo copiar','err'); });
+}
 function saveNew(){
   var token=($('nToken').value||'').trim().replace(/[^A-Za-z0-9\-_]/g,'');
   var nombre=($('nNombre').value||'').trim();
   if(!token){ toast('Token obligatorio','err'); return; }
   if(!nombre){ toast('Nombre obligatorio','err'); return; }
+  var pack = $('nPack').value || null;
   var body = {
     token_cdn: token,
     cliente_nombre: nombre,
     url_web_cliente: ($('nUrl').value||'').trim() || null,
     sector: $('nSector').value || null,
-    pack: $('nPack').value || null,
+    pack: pack,
     estado: $('nEstado').value || 'completado',
     fecha_proximo_pago: $('nPago').value || null,
-    agente_tipo: 'orion',
+    // El tipo de agente sigue al pack: Spark = Laura (chat), resto = Orion (voz).
+    agente_tipo: String(pack||'').toLowerCase() === 'spark' ? 'laura' : 'orion',
     agente_retell_agent_id: ($('nAgentId').value||'').trim() || null,
     agente_system_prompt: ($('nPrompt').value||'').trim() || null
   };

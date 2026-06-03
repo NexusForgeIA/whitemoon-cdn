@@ -1,6 +1,21 @@
 /**
  * WHITEMOON CALCULADORA ITP — Widget con Licencia White Label
- * <script src="https://nexusforgeia.github.io/whitemoon-cdn/itp.js" data-token="WM-XXXX"></script>
+ * <script src="https://nexusforgeia.github.io/whitemoon-cdn/itp.js"
+ *   data-token="WM-XXXX"
+ *   data-nombre="Gestoría Ejemplo"
+ *   data-tel="600000000"
+ *   data-color="#1565C0"
+ *   data-logo="https://..."
+ *   defer></script>
+ *
+ * Verificación dual (mismo patrón que chat.js):
+ *   1. Edge Function pública  → Supabase (clientes nuevos del panel CDN)
+ *   2. Fallback licenses.json → estático en repo (clientes legacy)
+ *
+ * El pack 'calculadora-itp' es el gating en la rama Edge Function. El
+ * panel CDN genera el snippet con data-nombre/data-tel ya bakeados desde
+ * cliente_nombre y cliente_telefono — la Edge Function NO los devuelve.
+ *
  * © WhiteMoon · whitemoon.es
  */
 (function(){
@@ -10,15 +25,71 @@
   if(!token){ console.warn('[WM-ITP] Sin token'); return; }
   var BASE = script.src.replace(/\/itp\.js.*$/, '');
 
-  fetch(BASE + '/licenses.json?_=' + Date.now()).then(function(r){
-    if(!r.ok) throw new Error('Sin conexión');
-    return r.json();
-  }).then(function(data){
-    var lic = data.licenses[token];
-    if(!lic){ console.warn('[WM-ITP] Token inválido'); return; }
-    if(!lic.active){ console.warn('[WM-ITP] Licencia inactiva'); return; }
-    if(!lic.itp){ console.warn('[WM-ITP] Módulo ITP no activado para esta licencia'); return; }
+  // ─── 1. VALIDAR LICENCIA — Edge Function pública → fallback licenses.json ────
+  // Mismo patrón que chat.js: la Edge Function usa service role (server-side,
+  // jamás expuesto) y responde {active,nombre,sector,pack,url,...}. El fallback
+  // a licenses.json mantiene compatibilidad con clientes legacy ya instalados.
+  var VERIFY_ENDPOINT = 'https://mlaqtniujnvfxcvcourm.supabase.co/functions/v1/verify-token';
 
+  verifyToken();
+
+  function verifyToken(){
+    verifyEdge(token).then(function(res){
+      if(res && res.active === true){
+        // Activo en Supabase: si además existe en licenses.json (Bambú & co.)
+        // usa la config rica; si no, construye una mínima con licFromEdge().
+        fetchLicensesJson().then(function(licenses){
+          var rich = licenses && licenses[token];
+          proceed(rich || licFromEdge(res));
+        });
+        return;
+      }
+      // active:false o Edge no disponible → fallback a licenses.json (legacy).
+      fetchLicensesJson().then(function(licenses){
+        var lic = licenses && licenses[token];
+        if(!lic){ console.warn('[WM-ITP] Token inválido'); return; }
+        if(!lic.active){ console.warn('[WM-ITP] Licencia inactiva'); return; }
+        proceed(lic);
+      });
+    });
+  }
+
+  function verifyEdge(tk){
+    return fetch(VERIFY_ENDPOINT + '?token=' + encodeURIComponent(tk))
+    .then(function(r){ if(!r.ok) throw new Error('verify ' + r.status); return r.json(); })
+    .then(function(data){ return data || null; })
+    .catch(function(){ return null; }); // null → Edge no disponible → fallback
+  }
+
+  function fetchLicensesJson(){
+    return fetch(BASE + '/licenses.json?_=' + Date.now())
+    .then(function(r){ if(!r.ok) throw new Error('Sin conexión'); return r.json(); })
+    .then(function(data){ return data.licenses || {}; })
+    .catch(function(){ return null; });
+  }
+
+  // Solo construimos un lic "ITP-válido" si pack === 'calculadora-itp'. Para
+  // otros packs (core, scale, etc.) NO devolvemos lic.itp, así que el check de
+  // "módulo ITP activado" en proceed() corta — los clientes de chat no acceden
+  // accidentalmente al widget de la calculadora.
+  // Los datos del negocio (nombre, tel, color, logo) se leen como atributos
+  // del <script> tag, que el panel CDN baja desde Supabase al generar el
+  // snippet (cliente_nombre → data-nombre, cliente_telefono → data-tel). La
+  // Edge Function solo se usa para el gating del token + pack + dominio.
+  function licFromEdge(res){
+    var isItp = String(res.pack||'').toLowerCase() === 'calculadora-itp';
+    return {
+      biz: res.nombre || '',
+      domain: res.url || '',
+      pack: res.pack || '',
+      active: true,
+      _source: 'edge',
+      itp: isItp ? {} : null
+    };
+  }
+
+  function proceed(lic){
+    if(!lic.itp){ console.warn('[WM-ITP] Módulo ITP no activado para esta licencia'); return; }
     var host = window.location.hostname;
     var local = host === 'localhost' || host === '127.0.0.1' || host === '' || host.includes('github.io');
     if(!local && lic.domain && !host.includes(lic.domain)){
@@ -29,9 +100,8 @@
       console.warn('[WM-ITP] Licencia expirada');
       return;
     }
-
     initITP(script, lic);
-  }).catch(function(e){ console.error('[WM-ITP]', e); });
+  }
 
   function initITP(el, lic){
     var itp = lic.itp;

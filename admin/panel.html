@@ -172,7 +172,7 @@ tr:hover td{background:#0d0d16}
       </div>
     </div>
     <div class="g2">
-      <div><label>Nombre cliente *</label><input type="text" id="nNombre" placeholder="Clínica Dental Sonríe"></div>
+      <div><label>Nombre cliente *</label><input type="text" id="nNombre" placeholder="Clínica Dental Sonríe" oninput="refreshNewSnippet()"></div>
       <div><label>Dominio web</label><input type="text" id="nUrl" placeholder="clinicasonrie.es"></div>
     </div>
     <div class="g2">
@@ -250,11 +250,11 @@ var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 var CDN_BASE = 'https://nexusforgeia.github.io/whitemoon-cdn';
 var REPO = 'NexusForgeIA/whitemoon-cdn';
 // MRR mensual por pack (alineado con el panel de precios).
-var PACK_MRR = { spark:199, core:199, 'core-rag':349, scale:449, elite:599 };
+var PACK_MRR = { spark:199, core:199, 'core-rag':349, scale:449, elite:599, 'calculadora-itp':99 };
 // Setup (pago único) por pack.
-var PACK_SETUP = { spark:499, core:1800, 'core-rag':3200, scale:4500, elite:8500 };
+var PACK_SETUP = { spark:499, core:1800, 'core-rag':3200, scale:4500, elite:8500, 'calculadora-itp':599 };
 var SECTORES = ['dental','legal','restaurante','gestoria','clinica','inmobiliaria','gimnasio','peluqueria','veterinaria','formacion','taller','podologia','automovil','abogados'];
-var PACKS = ['spark','core','core-rag','scale','elite'];
+var PACKS = ['spark','core','core-rag','scale','elite','calculadora-itp'];
 
 var clientes = [];
 var pagosByCliente = {};   // cliente_id -> [pagos]
@@ -510,6 +510,7 @@ function deletePago(pagoId){
 //   - spark                        → chat.js (chatbot texto · Laura IA)
 //   - core                         → orion-widget.js (voz · sin RAG)
 //   - core-rag / scale / elite     → orion-widget.js con data-rag="true"
+//   - calculadora-itp              → itp.js (widget de calculadora ITP)
 // El atributo data-agent solo aparece en los snippets de orion-widget.js.
 // El atributo data-rag lo leerá orion-widget.js cuando se cablée RAG; hoy se
 // genera ya en el HTML para que la migración del lado widget no toque el panel.
@@ -520,6 +521,17 @@ function snippetForPack(c){
   var pack = String(c.pack||'').toLowerCase();
   if(pack === 'spark'){
     return '<script src="'+CDN_BASE+'/chat.js"\n  data-token="'+esc(token)+'"><\/script>';
+  }
+  if(pack === 'calculadora-itp'){
+    // itp.js no necesita Retell agent — es un widget standalone con su propia
+    // verificación de token. Bakeamos data-nombre y data-tel desde Supabase
+    // para que el widget los pinte sin tener que consultar nada en runtime.
+    var nombre = (c.cliente_nombre||'').trim();
+    var tel = (c.cliente_telefono||'').trim();
+    return '<script src="'+CDN_BASE+'/itp.js"\n  data-token="'+esc(token)+'"'
+      + (nombre ? '\n  data-nombre="'+esc(nombre)+'"' : '')
+      + (tel ? '\n  data-tel="'+esc(tel)+'"' : '')
+      + '\n  defer><\/script>';
   }
   var agentId = (c.agente_retell_agent_id||'').trim();
   if(!agentId){
@@ -532,14 +544,27 @@ function snippetForPack(c){
 }
 function agenteScript(c){ return snippetForPack(c); }
 
-// Etiqueta + icono del badge según pack. Spark = Laura (texto); resto = Orion (voz).
+// Tipo + etiqueta + icono del badge según pack:
+//   - spark             → Laura IA (chat texto)
+//   - calculadora-itp   → Calculadora ITP (widget independiente, no hay agente IA)
+//   - resto             → Orion IA (voz Retell)
+function agenteTipoFromPack(pack){
+  var p = String(pack||'').toLowerCase();
+  if(p === 'spark') return 'laura';
+  if(p === 'calculadora-itp') return 'itp';
+  return 'orion';
+}
 function agenteLabel(pack){
-  return String(pack||'').toLowerCase() === 'spark'
-    ? 'Laura IA (chat texto · Claude API)'
-    : 'Orion IA (Retell + ElevenLabs)';
+  var tipo = agenteTipoFromPack(pack);
+  if(tipo === 'laura') return 'Laura IA (chat texto · Claude API)';
+  if(tipo === 'itp')   return 'CALCULADORA ITP';
+  return 'Orion IA (Retell + ElevenLabs)';
 }
 function agenteIcon(pack){
-  return String(pack||'').toLowerCase() === 'spark' ? '💬' : '🎙️';
+  var tipo = agenteTipoFromPack(pack);
+  if(tipo === 'laura') return '💬';
+  if(tipo === 'itp')   return '🧮';
+  return '🎙️';
 }
 function openAgente(id){
   var c = clientes.filter(function(x){ return x.id===id; })[0]; if(!c) return;
@@ -552,19 +577,26 @@ function openAgente(id){
   $('agenteBg').classList.add('show');
 }
 // Live preview en el modal de agente — refleja cambios en el input del agent ID
-// sin tener que pulsar Guardar.
+// sin tener que pulsar Guardar. Para calculadora-itp también pasamos
+// cliente_nombre y cliente_telefono porque el snippet los baka como data-*.
 function refreshAgenteSnippet(){
   if(!currentAgenteCli) return;
   var c = clientes.filter(function(x){ return x.id===currentAgenteCli; })[0]; if(!c) return;
-  var preview = { token_cdn: c.token_cdn, pack: c.pack, agente_retell_agent_id: ($('aAgentId').value||'').trim() };
+  var preview = {
+    token_cdn: c.token_cdn,
+    pack: c.pack,
+    agente_retell_agent_id: ($('aAgentId').value||'').trim(),
+    cliente_nombre: c.cliente_nombre,
+    cliente_telefono: c.cliente_telefono
+  };
   $('aScript').textContent = snippetForPack(preview);
 }
 function closeAgente(){ $('agenteBg').classList.remove('show'); currentAgenteCli=null; }
 function saveAgente(){
   if(!currentAgenteCli) return;
   var cli = clientes.filter(function(x){return x.id===currentAgenteCli;})[0];
-  // El tipo de agente sigue al pack: Spark = Laura (chat), resto = Orion (voz).
-  var tipo = String((cli&&cli.pack)||'').toLowerCase() === 'spark' ? 'laura' : 'orion';
+  // El tipo de agente sigue al pack — ver agenteTipoFromPack().
+  var tipo = agenteTipoFromPack(cli && cli.pack);
   var body = {
     agente_tipo: tipo,
     agente_retell_agent_id: ($('aAgentId').value||'').trim() || null,
@@ -637,12 +669,16 @@ function genToken(){ $('nToken').value=genTokenValue(); refreshNewSnippet(); }
 function openNew(){ $('nToken').value=genTokenValue(); $('nNombre').value=''; $('nUrl').value=''; $('nSector').value=''; $('nPack').value='spark'; $('nEstado').value='completado'; $('nPago').value=''; $('nAgentId').value=''; $('nPrompt').value=''; refreshNewSnippet(); $('newBg').classList.add('show'); }
 function closeNew(){ $('newBg').classList.remove('show'); }
 // Live preview del snippet en el modal de nuevo cliente — se recalcula al
-// cambiar token, pack o agent ID. El badge "Agente: …" también se adapta.
+// cambiar token, nombre, pack o agent ID. El badge "Agente: …" también se adapta.
+// Para calculadora-itp pasamos cliente_nombre porque el snippet baka data-nombre
+// (cliente_telefono no se captura en este modal — el snippet lo emitirá vacío
+// y el usuario puede editarlo en Supabase o vía panel después).
 function refreshNewSnippet(){
   var c = {
     token_cdn: ($('nToken').value||'').trim(),
     pack: $('nPack').value,
-    agente_retell_agent_id: ($('nAgentId').value||'').trim()
+    agente_retell_agent_id: ($('nAgentId').value||'').trim(),
+    cliente_nombre: ($('nNombre').value||'').trim()
   };
   $('nScript').textContent = snippetForPack(c);
   $('nAgenteBadge').textContent = agenteIcon(c.pack)+' Agente: '+agenteLabel(c.pack);
@@ -667,8 +703,8 @@ function saveNew(){
     pack: pack,
     estado: $('nEstado').value || 'completado',
     fecha_proximo_pago: $('nPago').value || null,
-    // El tipo de agente sigue al pack: Spark = Laura (chat), resto = Orion (voz).
-    agente_tipo: String(pack||'').toLowerCase() === 'spark' ? 'laura' : 'orion',
+    // El tipo de agente sigue al pack — ver agenteTipoFromPack().
+    agente_tipo: agenteTipoFromPack(pack),
     agente_retell_agent_id: ($('nAgentId').value||'').trim() || null,
     agente_system_prompt: ($('nPrompt').value||'').trim() || null
   };

@@ -172,10 +172,10 @@ tr:hover td{background:#0d0d16}
   </div>
 </div>
 
-<!-- NUEVO CLIENTE -->
+<!-- NUEVO / EDITAR CLIENTE -->
 <div class="modal-bg" id="newBg">
   <div class="modal">
-    <h3>➕ Nuevo cliente</h3>
+    <h3 id="newTitle">➕ Nuevo cliente</h3>
     <div class="mb">
       <label>Token CDN <span style="color:var(--warn)">*</span></label>
       <div class="tokgen">
@@ -189,7 +189,7 @@ tr:hover td{background:#0d0d16}
     </div>
     <div class="g2">
       <div><label>Sector</label><select id="nSector"></select></div>
-      <div><label>Pack</label><select id="nPack" onchange="refreshNewSnippet()"></select></div>
+      <div><label>Pack</label><select id="nPack" onchange="refreshNewSnippet();refreshFormRag()"></select></div>
     </div>
     <div class="g2">
       <div><label>Estado</label><select id="nEstado">
@@ -204,6 +204,25 @@ tr:hover td{background:#0d0d16}
       <div class="mb"><label>Retell agent ID <span class="muted" style="text-transform:none;font-size:.66rem">(solo Core / Scale / Elite)</span></label><input type="text" id="nAgentId" placeholder="agent_xxxxxxxxxxxxxxxx" oninput="refreshNewSnippet()"></div>
       <div class="mb"><label>System prompt</label><textarea id="nPrompt" rows="6" placeholder="Eres Orion, el agente de voz de [NEGOCIO]..."></textarea>
         <button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="loadPromptTpl('nPrompt','nNombre','nSector')">📋 Cargar plantilla base</button></div>
+
+      <!-- Documentos RAG · solo visible si el pack es core-rag / scale / elite (ver refreshFormRag) -->
+      <div class="mb" id="nRagSection" style="display:none">
+        <label>📚 Documentos RAG <span class="muted" style="text-transform:none;font-size:.66rem">(base de conocimiento · solo Core-RAG / Scale / Elite)</span></label>
+        <!-- Cliente nuevo, sin guardar todavía -->
+        <div id="nRagNew" class="warn-box" style="display:none;margin:0">💾 Guarda el cliente primero para poder subir documentos.</div>
+        <!-- Cliente ya existente -->
+        <div id="nRagExisting" style="display:none">
+          <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+            <button type="button" class="btn btn-a btn-sm" id="nRagUploadBtn" onclick="$('nRagFile').click()">⬆ Subir documento</button>
+            <input type="file" id="nRagFile" accept=".pdf,.txt,.doc,.docx,.md,application/pdf,text/plain" style="display:none" onchange="uploadRagDoc(this.files[0]); this.value='';">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="loadRagArchivos()">🔄 Actualizar</button>
+            <span class="muted" style="font-size:.7rem">PDF · TXT · Word</span>
+          </div>
+          <div id="nRagProgress" style="display:none"></div>
+          <div id="nRagList"><div class="empty">—</div></div>
+        </div>
+      </div>
+
       <div class="mb">
         <label>Script de instalación</label>
         <div class="code-box" id="nScript">—</div>
@@ -212,7 +231,7 @@ tr:hover td{background:#0d0d16}
     </div>
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
       <button class="btn btn-ghost" onclick="closeNew()">Cancelar</button>
-      <button class="btn btn-p" id="nSave" onclick="saveNew()">Crear cliente</button>
+      <button class="btn btn-p" id="nSave" onclick="saveCliente()">Crear cliente</button>
     </div>
   </div>
 </div>
@@ -255,25 +274,6 @@ tr:hover td{background:#0d0d16}
   </div>
 </div>
 
-<!-- DOCUMENTOS RAG DEL CLIENTE (solo core-rag / scale / elite) -->
-<div class="modal-bg" id="ragBg">
-  <div class="modal">
-    <h3 id="ragTitle">📚 Documentos RAG</h3>
-    <p class="muted" style="font-size:.74rem;margin:-8px 0 14px">Base de conocimiento del cliente. Sube PDF, TXT o Word y se indexa (chunks + embeddings) para que el agente responda con su documentación.</p>
-    <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
-      <button class="btn btn-p" id="ragUploadBtn" onclick="$('ragFile').click()">⬆ Subir documento</button>
-      <input type="file" id="ragFile" accept=".pdf,.txt,.doc,.docx,.md,application/pdf,text/plain" style="display:none" onchange="uploadRagDoc(this.files[0]); this.value='';">
-      <button class="btn btn-ghost btn-sm" onclick="loadRagArchivos()">🔄 Actualizar</button>
-      <span class="muted" style="font-size:.7rem">PDF · TXT · Word</span>
-    </div>
-    <div id="ragProgress" style="display:none"></div>
-    <div id="ragList"><div class="empty">—</div></div>
-    <div style="display:flex;justify-content:flex-end;margin-top:16px">
-      <button class="btn btn-ghost" onclick="closeRag()">Cerrar</button>
-    </div>
-  </div>
-</div>
-
 <script>
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
 var SUPABASE_URL  = 'https://mlaqtniujnvfxcvcourm.supabase.co';
@@ -292,8 +292,8 @@ var clientes = [];
 var pagosByCliente = {};   // cliente_id -> [pagos]
 var currentPagoCli = null; // id del cliente abierto en el modal de pagos
 var currentAgenteCli = null; // id del cliente abierto en el modal de agente
-var currentRagCli = null;  // id del cliente abierto en el modal de documentos RAG
-var ragArchivos = [];      // rag_archivos del cliente abierto
+var currentFormCli = null; // id del cliente en edición en el formulario (null = nuevo, sin guardar)
+var ragArchivos = [];      // rag_archivos del cliente del formulario
 var ragPollTimer = null;   // poll de progreso mientras se ingesta un documento
 var ghToken = '';
 
@@ -409,8 +409,8 @@ function render(){
       ? '<button class="btn btn-d btn-sm" onclick="setEstado(\''+esc(c.id)+'\',false)">Desactivar</button>'
       : '<button class="btn btn-a btn-sm" onclick="setEstado(\''+esc(c.id)+'\',true)">Activar</button>';
     h+=' <button class="btn btn-ghost btn-sm" onclick="openPagos(\''+esc(c.id)+'\')">💸 Pagos'+pagosPill(c.id)+'</button>';
+    h+=' <button class="btn btn-ghost btn-sm" onclick="openEditCliente(\''+esc(c.id)+'\')">✏️ Editar</button>';
     h+=' <button class="btn btn-ghost btn-sm" onclick="openAgente(\''+esc(c.id)+'\')">🧠 Agente</button>';
-    if(clienteTieneRag(c)) h+=' <button class="btn btn-ghost btn-sm" onclick="openRag(\''+esc(c.id)+'\')">📚 RAG</button>';
     h+=' <button class="btn btn-ghost btn-sm" onclick="copyCode(\''+esc(c.id)+'\')">📋 Código</button>';
     h+='</td></tr>';
   });
@@ -702,8 +702,70 @@ function fillSelects(){
 }
 function genTokenValue(){ var a=new Uint8Array(12); crypto.getRandomValues(a); return 'WM-'+Array.from(a,function(b){return b.toString(16).padStart(2,'0');}).join(''); }
 function genToken(){ $('nToken').value=genTokenValue(); refreshNewSnippet(); }
-function openNew(){ $('nToken').value=genTokenValue(); $('nNombre').value=''; $('nUrl').value=''; $('nSector').value=''; $('nPack').value='spark'; $('nEstado').value='completado'; $('nPago').value=''; $('nAgentId').value=''; $('nPrompt').value=''; refreshNewSnippet(); $('newBg').classList.add('show'); }
-function closeNew(){ $('newBg').classList.remove('show'); }
+function openNew(){
+  currentFormCli = null;
+  $('newTitle').textContent = '➕ Nuevo cliente';
+  $('nSave').textContent = 'Crear cliente';
+  resetEstadoOptions();
+  $('nToken').value=genTokenValue(); $('nNombre').value=''; $('nUrl').value=''; $('nSector').value=''; $('nPack').value='spark'; $('nEstado').value='completado'; $('nPago').value=''; $('nAgentId').value=''; $('nPrompt').value='';
+  refreshNewSnippet(); refreshFormRag();
+  $('newBg').classList.add('show');
+}
+// Abre el mismo formulario en modo edición, precargando el cliente. Aquí sí
+// hay cliente_id, así que la sección RAG (si el pack lo permite) muestra el
+// botón de subir + la lista de documentos ya indexados.
+function openEditCliente(id){
+  var c = clientes.filter(function(x){ return x.id===id; })[0]; if(!c) return;
+  currentFormCli = id;
+  ragArchivos = [];
+  $('newTitle').textContent = '✏️ Editar cliente';
+  $('nSave').textContent = 'Guardar cambios';
+  resetEstadoOptions(); ensureEstadoOption(c.estado);
+  $('nToken').value = c.token_cdn || '';
+  $('nNombre').value = c.cliente_nombre || '';
+  $('nUrl').value = c.url_web_cliente || '';
+  $('nSector').value = c.sector || '';
+  $('nPack').value = c.pack || 'spark';
+  $('nEstado').value = c.estado || 'completado';
+  $('nPago').value = c.fecha_proximo_pago || '';
+  $('nAgentId').value = c.agente_retell_agent_id || '';
+  $('nPrompt').value = c.agente_system_prompt || '';
+  refreshNewSnippet(); refreshFormRag();
+  $('newBg').classList.add('show');
+}
+function closeNew(){ stopRagPoll(); $('newBg').classList.remove('show'); currentFormCli=null; }
+// El <select> de estado solo trae 3 opciones; un cliente en onboarding puede
+// estar en dia1..dia6. Inyectamos su estado actual para no pisarlo al guardar.
+function resetEstadoOptions(){
+  var sel=$('nEstado'), keep={completado:1,pendiente:1,pausado:1};
+  for(var i=sel.options.length-1;i>=0;i--){ if(!keep[sel.options[i].value]) sel.remove(i); }
+}
+function ensureEstadoOption(estado){
+  if(!estado) return;
+  var sel=$('nEstado');
+  for(var i=0;i<sel.options.length;i++){ if(sel.options[i].value===estado) return; }
+  var o=document.createElement('option'); o.value=estado; o.textContent=estado; sel.appendChild(o);
+}
+// Muestra/oculta la sección de documentos RAG según el pack seleccionado y si
+// el cliente ya está guardado (currentFormCli). Solo recarga la lista al
+// (re)entrar en el estado "existente" — no en cada tecla del formulario.
+function refreshFormRag(){
+  var hasRag = !!PACKS_WITH_RAG[String($('nPack').value||'').toLowerCase()];
+  $('nRagSection').style.display = hasRag ? 'block' : 'none';
+  if(!hasRag){ stopRagPoll(); return; }
+  if(currentFormCli){
+    $('nRagNew').style.display='none';
+    $('nRagExisting').style.display='block';
+    $('nRagUploadBtn').disabled=false;
+    $('nRagProgress').style.display='none';
+    $('nRagList').innerHTML='<div class="empty">Cargando…</div>';
+    loadRagArchivos();
+  } else {
+    stopRagPoll();
+    $('nRagExisting').style.display='none';
+    $('nRagNew').style.display='block';
+  }
+}
 // Live preview del snippet en el modal de nuevo cliente — se recalcula al
 // cambiar token, nombre, pack o agent ID. El badge "Agente: …" también se adapta.
 // Para calculadora-itp pasamos cliente_nombre porque el snippet baka data-nombre
@@ -725,7 +787,7 @@ function copyNewSnippet(){
   navigator.clipboard.writeText(txt).then(function(){ toast('Script copiado 📋'); })
   .catch(function(){ toast('No se pudo copiar','err'); });
 }
-function saveNew(){
+function saveCliente(){
   var token=($('nToken').value||'').trim().replace(/[^A-Za-z0-9\-_]/g,'');
   var nombre=($('nNombre').value||'').trim();
   if(!token){ toast('Token obligatorio','err'); return; }
@@ -745,9 +807,29 @@ function saveNew(){
     agente_system_prompt: ($('nPrompt').value||'').trim() || null
   };
   $('nSave').disabled=true;
-  sbInsert('onboarding_clientes', body)
-  .then(function(){ $('nSave').disabled=false; closeNew(); toast('Cliente creado ✅'); loadData(); })
-  .catch(function(e){ $('nSave').disabled=false; toast('Error: '+String(e.message).slice(0,120),'err'); });
+  if(currentFormCli){
+    sbPatch('onboarding_clientes','id=eq.'+encodeURIComponent(currentFormCli), body)
+    .then(function(){ $('nSave').disabled=false; closeNew(); toast('Cliente actualizado ✅'); loadData(); })
+    .catch(function(e){ $('nSave').disabled=false; toast('Error: '+String(e.message).slice(0,120),'err'); });
+  } else {
+    sbInsert('onboarding_clientes', body)
+    .then(function(rows){
+      $('nSave').disabled=false;
+      var nuevo = rows && rows[0];
+      toast('Cliente creado ✅'); loadData();
+      // Si el pack tiene RAG, pasamos a modo edición sin cerrar el modal para
+      // que se pueda subir documentación inmediatamente. Si no, cerramos.
+      if(nuevo && PACKS_WITH_RAG[String(pack||'').toLowerCase()]){
+        currentFormCli = nuevo.id;
+        $('newTitle').textContent = '✏️ Editar cliente';
+        $('nSave').textContent = 'Guardar cambios';
+        refreshFormRag();
+      } else {
+        closeNew();
+      }
+    })
+    .catch(function(e){ $('nSave').disabled=false; toast('Error: '+String(e.message).slice(0,120),'err'); });
+  }
 }
 
 // ─── DOCUMENTOS RAG (Supabase · rag_archivos + Edge Function rag-ingest) ──────
@@ -756,8 +838,6 @@ function saveNew(){
 // TXT/MD como texto plano), trocea en chunks, genera embeddings y registra el
 // archivo en rag_archivos con su estado (procesando → listo / error). El panel
 // solo dispara la ingesta y refleja el estado + nº de chunks generados.
-function clienteTieneRag(c){ return !!PACKS_WITH_RAG[String(c && c.pack || '').toLowerCase()]; }
-
 function fmtBytes(n){
   if(n==null) return '—';
   if(n < 1024) return n+' B';
@@ -765,28 +845,15 @@ function fmtBytes(n){
   return (n/1048576).toFixed(1)+' MB';
 }
 
-function openRag(id){
-  var c = clientes.filter(function(x){ return x.id===id; })[0]; if(!c) return;
-  currentRagCli = id;
-  ragArchivos = [];
-  $('ragTitle').innerHTML = '📚 Documentos RAG · '+esc(c.cliente_nombre||'cliente');
-  $('ragProgress').style.display='none';
-  $('ragUploadBtn').disabled=false;
-  $('ragList').innerHTML='<div class="empty">Cargando…</div>';
-  $('ragBg').classList.add('show');
-  loadRagArchivos();
-}
-function closeRag(){ stopRagPoll(); $('ragBg').classList.remove('show'); currentRagCli=null; }
-
 function loadRagArchivos(){
-  if(!currentRagCli) return;
-  sbGet('rag_archivos?cliente_id=eq.'+encodeURIComponent(currentRagCli)+'&select=id,nombre_archivo,tipo_archivo,tamano_bytes,chunks_generados,estado,error_mensaje,created_at&order=created_at.desc')
+  if(!currentFormCli) return;
+  sbGet('rag_archivos?cliente_id=eq.'+encodeURIComponent(currentFormCli)+'&select=id,nombre_archivo,tipo_archivo,tamano_bytes,chunks_generados,estado,error_mensaje,created_at&order=created_at.desc')
   .then(function(rows){ ragArchivos = rows||[]; renderRagList(); })
-  .catch(function(e){ $('ragList').innerHTML='<div class="empty" style="color:var(--danger)">❌ '+esc(e.message)+'</div>'; });
+  .catch(function(e){ $('nRagList').innerHTML='<div class="empty" style="color:var(--danger)">❌ '+esc(e.message)+'</div>'; });
 }
 
 function renderRagList(){
-  if(!ragArchivos.length){ $('ragList').innerHTML='<div class="empty">Sin documentos indexados todavía. Sube el primero ⬆</div>'; return; }
+  if(!ragArchivos.length){ $('nRagList').innerHTML='<div class="empty">Sin documentos indexados todavía. Sube el primero ⬆</div>'; return; }
   var h='';
   ragArchivos.forEach(function(a){
     var st = a.estado||'procesando', badge, lbl;
@@ -805,24 +872,24 @@ function renderRagList(){
       +'<button class="btn btn-d btn-sm" onclick="deleteRagArchivo(\''+esc(a.id)+'\')">🗑</button>'
       +'</div></div>';
   });
-  $('ragList').innerHTML=h;
+  $('nRagList').innerHTML=h;
 }
 
-function showRagProgress(msg){ var p=$('ragProgress'); p.innerHTML='<div class="rag-prog"><span class="spin">⏳</span> '+esc(msg)+'</div>'; p.style.display='block'; }
-function hideRagProgress(){ $('ragProgress').style.display='none'; $('ragProgress').innerHTML=''; }
+function showRagProgress(msg){ var p=$('nRagProgress'); p.innerHTML='<div class="rag-prog"><span class="spin">⏳</span> '+esc(msg)+'</div>'; p.style.display='block'; }
+function hideRagProgress(){ $('nRagProgress').style.display='none'; $('nRagProgress').innerHTML=''; }
 // Mientras la ingesta está en vuelo refrescamos la lista periódicamente para
 // que el archivo aparezca en estado "procesando" en cuanto rag-ingest lo crea.
 function startRagPoll(){ stopRagPoll(); ragPollTimer=setInterval(loadRagArchivos, 3000); }
 function stopRagPoll(){ if(ragPollTimer){ clearInterval(ragPollTimer); ragPollTimer=null; } }
 
 function uploadRagDoc(file){
-  if(!file || !currentRagCli) return;
+  if(!file || !currentFormCli) return;
   if(!/\.(pdf|txt|doc|docx|md)$/i.test(file.name)){ toast('Formato no admitido. Usa PDF, TXT o Word.','err'); return; }
-  $('ragUploadBtn').disabled=true;
+  $('nRagUploadBtn').disabled=true;
   showRagProgress('Subiendo «'+file.name+'» ('+fmtBytes(file.size)+')… extrayendo texto y generando embeddings. Puede tardar según el tamaño.');
   startRagPoll();
   var fd = new FormData();
-  fd.append('cliente_id', currentRagCli);
+  fd.append('cliente_id', currentFormCli);
   fd.append('file', file);
   // No fijamos Content-Type: el navegador añade el boundary de multipart.
   fetch(FUNCTIONS_BASE+'/rag-ingest', {
@@ -832,20 +899,20 @@ function uploadRagDoc(file){
   })
   .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return { ok:r.ok, d:d }; }); })
   .then(function(res){
-    stopRagPoll(); $('ragUploadBtn').disabled=false; hideRagProgress();
+    stopRagPoll(); $('nRagUploadBtn').disabled=false; hideRagProgress();
     if(!res.ok || res.d.error){ toast('Error de ingesta: '+String(res.d.error||'desconocido').slice(0,140),'err'); loadRagArchivos(); return; }
     toast('✅ «'+file.name+'» indexado · '+(res.d.chunks||0)+' chunks');
     loadRagArchivos();
   })
-  .catch(function(e){ stopRagPoll(); $('ragUploadBtn').disabled=false; hideRagProgress(); toast('Error de red: '+e.message,'err'); loadRagArchivos(); });
+  .catch(function(e){ stopRagPoll(); $('nRagUploadBtn').disabled=false; hideRagProgress(); toast('Error de red: '+e.message,'err'); loadRagArchivos(); });
 }
 
 function deleteRagArchivo(id){
-  var a = ragArchivos.filter(function(x){ return x.id===id; })[0]; if(!a || !currentRagCli) return;
+  var a = ragArchivos.filter(function(x){ return x.id===id; })[0]; if(!a || !currentFormCli) return;
   if(!confirm('¿Eliminar «'+a.nombre_archivo+'» y sus '+(a.chunks_generados||0)+' chunks del RAG?\n\nEsta acción no se puede deshacer.')) return;
   // Borramos primero los chunks indexados (rag_documentos) y luego el registro
   // del archivo (rag_archivos), ambos casados por cliente_id + nombre_archivo.
-  sbDelete('rag_documentos','cliente_id=eq.'+encodeURIComponent(currentRagCli)+'&nombre_archivo=eq.'+encodeURIComponent(a.nombre_archivo))
+  sbDelete('rag_documentos','cliente_id=eq.'+encodeURIComponent(currentFormCli)+'&nombre_archivo=eq.'+encodeURIComponent(a.nombre_archivo))
   .then(function(){ return sbDelete('rag_archivos','id=eq.'+encodeURIComponent(id)); })
   .then(function(){ toast('Documento eliminado'); loadRagArchivos(); })
   .catch(function(e){ toast('Error: '+e.message,'err'); });

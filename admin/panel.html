@@ -91,6 +91,18 @@ tr:hover td{background:#0d0d16}
 .badge-paid{background:rgba(0,212,170,.15);color:var(--accent)}
 .pago-pill{font-size:.62rem;padding:1px 7px;border-radius:10px;background:rgba(245,165,36,.16);color:var(--warn);font-weight:700;margin-left:5px}
 .pago-pill.over{background:rgba(255,84,112,.16);color:var(--danger)}
+.rag-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;background:var(--bg)}
+.rag-item.error{border-color:rgba(255,84,112,.4)}
+.rag-item.procesando{border-color:rgba(245,165,36,.4)}
+.rag-name{font-weight:600;word-break:break-all}
+.rag-meta{font-size:.7rem;color:var(--muted);margin-top:3px;word-break:break-word}
+.badge-proc{background:rgba(245,165,36,.15);color:var(--warn)}
+.badge-listo{background:rgba(0,212,170,.15);color:var(--accent)}
+.badge-err{background:rgba(255,84,112,.15);color:var(--danger)}
+.rag-pill{font-size:.62rem;padding:2px 8px;border-radius:10px;background:rgba(124,77,255,.16);color:#b39dff;font-weight:700;white-space:nowrap}
+.rag-prog{background:rgba(124,77,255,.08);border:1px solid rgba(124,77,255,.25);border-radius:10px;padding:11px 13px;font-size:.76rem;color:#b39dff;margin-bottom:14px;line-height:1.5}
+.spin{display:inline-block;animation:spin 1.1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 @media(max-width:760px){.g2{grid-template-columns:1fr}table{font-size:.74rem}.token{font-size:.66rem}}
 @media(max-width:600px){.pago-add{grid-template-columns:1fr}}
 </style>
@@ -243,11 +255,31 @@ tr:hover td{background:#0d0d16}
   </div>
 </div>
 
+<!-- DOCUMENTOS RAG DEL CLIENTE (solo core-rag / scale / elite) -->
+<div class="modal-bg" id="ragBg">
+  <div class="modal">
+    <h3 id="ragTitle">📚 Documentos RAG</h3>
+    <p class="muted" style="font-size:.74rem;margin:-8px 0 14px">Base de conocimiento del cliente. Sube PDF, TXT o Word y se indexa (chunks + embeddings) para que el agente responda con su documentación.</p>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+      <button class="btn btn-p" id="ragUploadBtn" onclick="$('ragFile').click()">⬆ Subir documento</button>
+      <input type="file" id="ragFile" accept=".pdf,.txt,.doc,.docx,.md,application/pdf,text/plain" style="display:none" onchange="uploadRagDoc(this.files[0]); this.value='';">
+      <button class="btn btn-ghost btn-sm" onclick="loadRagArchivos()">🔄 Actualizar</button>
+      <span class="muted" style="font-size:.7rem">PDF · TXT · Word</span>
+    </div>
+    <div id="ragProgress" style="display:none"></div>
+    <div id="ragList"><div class="empty">—</div></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:16px">
+      <button class="btn btn-ghost" onclick="closeRag()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
 var SUPABASE_URL  = 'https://mlaqtniujnvfxcvcourm.supabase.co';
 var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sYXF0bml1am52ZnhjdmNvdXJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4MzUyMzIsImV4cCI6MjA5MzQxMTIzMn0.Neh7VUS8ADsxf0DPab0JoJyGXOAXnLIaXzXbKzj2BGs';
 var CDN_BASE = 'https://nexusforgeia.github.io/whitemoon-cdn';
+var FUNCTIONS_BASE = SUPABASE_URL + '/functions/v1';
 var REPO = 'NexusForgeIA/whitemoon-cdn';
 // MRR mensual por pack (alineado con el panel de precios).
 var PACK_MRR = { spark:199, core:199, 'core-rag':349, scale:449, elite:599, 'orion-ia-agent':199, 'orion-ia-calls':199, 'calculadora-itp':99 };
@@ -260,6 +292,9 @@ var clientes = [];
 var pagosByCliente = {};   // cliente_id -> [pagos]
 var currentPagoCli = null; // id del cliente abierto en el modal de pagos
 var currentAgenteCli = null; // id del cliente abierto en el modal de agente
+var currentRagCli = null;  // id del cliente abierto en el modal de documentos RAG
+var ragArchivos = [];      // rag_archivos del cliente abierto
+var ragPollTimer = null;   // poll de progreso mientras se ingesta un documento
 var ghToken = '';
 
 function $(id){ return document.getElementById(id); }
@@ -375,6 +410,7 @@ function render(){
       : '<button class="btn btn-a btn-sm" onclick="setEstado(\''+esc(c.id)+'\',true)">Activar</button>';
     h+=' <button class="btn btn-ghost btn-sm" onclick="openPagos(\''+esc(c.id)+'\')">💸 Pagos'+pagosPill(c.id)+'</button>';
     h+=' <button class="btn btn-ghost btn-sm" onclick="openAgente(\''+esc(c.id)+'\')">🧠 Agente</button>';
+    if(clienteTieneRag(c)) h+=' <button class="btn btn-ghost btn-sm" onclick="openRag(\''+esc(c.id)+'\')">📚 RAG</button>';
     h+=' <button class="btn btn-ghost btn-sm" onclick="copyCode(\''+esc(c.id)+'\')">📋 Código</button>';
     h+='</td></tr>';
   });
@@ -712,6 +748,107 @@ function saveNew(){
   sbInsert('onboarding_clientes', body)
   .then(function(){ $('nSave').disabled=false; closeNew(); toast('Cliente creado ✅'); loadData(); })
   .catch(function(e){ $('nSave').disabled=false; toast('Error: '+String(e.message).slice(0,120),'err'); });
+}
+
+// ─── DOCUMENTOS RAG (Supabase · rag_archivos + Edge Function rag-ingest) ──────
+// Solo aplica a packs con RAG (core-rag / scale / elite — ver PACKS_WITH_RAG).
+// La ingesta la hace la Edge Function rag-ingest: extrae texto (PDF con unpdf,
+// TXT/MD como texto plano), trocea en chunks, genera embeddings y registra el
+// archivo en rag_archivos con su estado (procesando → listo / error). El panel
+// solo dispara la ingesta y refleja el estado + nº de chunks generados.
+function clienteTieneRag(c){ return !!PACKS_WITH_RAG[String(c && c.pack || '').toLowerCase()]; }
+
+function fmtBytes(n){
+  if(n==null) return '—';
+  if(n < 1024) return n+' B';
+  if(n < 1048576) return (n/1024).toFixed(1)+' KB';
+  return (n/1048576).toFixed(1)+' MB';
+}
+
+function openRag(id){
+  var c = clientes.filter(function(x){ return x.id===id; })[0]; if(!c) return;
+  currentRagCli = id;
+  ragArchivos = [];
+  $('ragTitle').innerHTML = '📚 Documentos RAG · '+esc(c.cliente_nombre||'cliente');
+  $('ragProgress').style.display='none';
+  $('ragUploadBtn').disabled=false;
+  $('ragList').innerHTML='<div class="empty">Cargando…</div>';
+  $('ragBg').classList.add('show');
+  loadRagArchivos();
+}
+function closeRag(){ stopRagPoll(); $('ragBg').classList.remove('show'); currentRagCli=null; }
+
+function loadRagArchivos(){
+  if(!currentRagCli) return;
+  sbGet('rag_archivos?cliente_id=eq.'+encodeURIComponent(currentRagCli)+'&select=id,nombre_archivo,tipo_archivo,tamano_bytes,chunks_generados,estado,error_mensaje,created_at&order=created_at.desc')
+  .then(function(rows){ ragArchivos = rows||[]; renderRagList(); })
+  .catch(function(e){ $('ragList').innerHTML='<div class="empty" style="color:var(--danger)">❌ '+esc(e.message)+'</div>'; });
+}
+
+function renderRagList(){
+  if(!ragArchivos.length){ $('ragList').innerHTML='<div class="empty">Sin documentos indexados todavía. Sube el primero ⬆</div>'; return; }
+  var h='';
+  ragArchivos.forEach(function(a){
+    var st = a.estado||'procesando', badge, lbl;
+    if(st==='listo'){ badge='badge-listo'; lbl='LISTO'; }
+    else if(st==='error'){ badge='badge-err'; lbl='ERROR'; }
+    else { badge='badge-proc'; lbl='PROCESANDO'; }
+    var meta = (a.tipo_archivo?('.'+esc(a.tipo_archivo)+' · '):'') + fmtBytes(a.tamano_bytes) + ' · ' + fmtDate(a.created_at);
+    if(st==='error' && a.error_mensaje) meta += ' · '+esc(a.error_mensaje);
+    h+='<div class="rag-item '+esc(st)+'">'
+      +'<div style="min-width:0">'
+      +'<div class="rag-name">'+esc(a.nombre_archivo)+' <span class="badge '+badge+'">'+lbl+'</span>'
+      +(st==='procesando'?' <span class="spin">⏳</span>':'')+'</div>'
+      +'<div class="rag-meta">'+meta+'</div></div>'
+      +'<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">'
+      +'<span class="rag-pill">'+(a.chunks_generados||0)+' chunks</span>'
+      +'<button class="btn btn-d btn-sm" onclick="deleteRagArchivo(\''+esc(a.id)+'\')">🗑</button>'
+      +'</div></div>';
+  });
+  $('ragList').innerHTML=h;
+}
+
+function showRagProgress(msg){ var p=$('ragProgress'); p.innerHTML='<div class="rag-prog"><span class="spin">⏳</span> '+esc(msg)+'</div>'; p.style.display='block'; }
+function hideRagProgress(){ $('ragProgress').style.display='none'; $('ragProgress').innerHTML=''; }
+// Mientras la ingesta está en vuelo refrescamos la lista periódicamente para
+// que el archivo aparezca en estado "procesando" en cuanto rag-ingest lo crea.
+function startRagPoll(){ stopRagPoll(); ragPollTimer=setInterval(loadRagArchivos, 3000); }
+function stopRagPoll(){ if(ragPollTimer){ clearInterval(ragPollTimer); ragPollTimer=null; } }
+
+function uploadRagDoc(file){
+  if(!file || !currentRagCli) return;
+  if(!/\.(pdf|txt|doc|docx|md)$/i.test(file.name)){ toast('Formato no admitido. Usa PDF, TXT o Word.','err'); return; }
+  $('ragUploadBtn').disabled=true;
+  showRagProgress('Subiendo «'+file.name+'» ('+fmtBytes(file.size)+')… extrayendo texto y generando embeddings. Puede tardar según el tamaño.');
+  startRagPoll();
+  var fd = new FormData();
+  fd.append('cliente_id', currentRagCli);
+  fd.append('file', file);
+  // No fijamos Content-Type: el navegador añade el boundary de multipart.
+  fetch(FUNCTIONS_BASE+'/rag-ingest', {
+    method:'POST',
+    headers:{ apikey:SUPABASE_ANON, Authorization:'Bearer '+SUPABASE_ANON },
+    body: fd
+  })
+  .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return { ok:r.ok, d:d }; }); })
+  .then(function(res){
+    stopRagPoll(); $('ragUploadBtn').disabled=false; hideRagProgress();
+    if(!res.ok || res.d.error){ toast('Error de ingesta: '+String(res.d.error||'desconocido').slice(0,140),'err'); loadRagArchivos(); return; }
+    toast('✅ «'+file.name+'» indexado · '+(res.d.chunks||0)+' chunks');
+    loadRagArchivos();
+  })
+  .catch(function(e){ stopRagPoll(); $('ragUploadBtn').disabled=false; hideRagProgress(); toast('Error de red: '+e.message,'err'); loadRagArchivos(); });
+}
+
+function deleteRagArchivo(id){
+  var a = ragArchivos.filter(function(x){ return x.id===id; })[0]; if(!a || !currentRagCli) return;
+  if(!confirm('¿Eliminar «'+a.nombre_archivo+'» y sus '+(a.chunks_generados||0)+' chunks del RAG?\n\nEsta acción no se puede deshacer.')) return;
+  // Borramos primero los chunks indexados (rag_documentos) y luego el registro
+  // del archivo (rag_archivos), ambos casados por cliente_id + nombre_archivo.
+  sbDelete('rag_documentos','cliente_id=eq.'+encodeURIComponent(currentRagCli)+'&nombre_archivo=eq.'+encodeURIComponent(a.nombre_archivo))
+  .then(function(){ return sbDelete('rag_archivos','id=eq.'+encodeURIComponent(id)); })
+  .then(function(){ toast('Documento eliminado'); loadRagArchivos(); })
+  .catch(function(e){ toast('Error: '+e.message,'err'); });
 }
 
 // ─── EXPORT CSV ──────────────────────────────────────────────────────────────

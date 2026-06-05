@@ -101,6 +101,10 @@ tr:hover td{background:#0d0d16}
 .badge-err{background:rgba(255,84,112,.15);color:var(--danger)}
 .rag-pill{font-size:.62rem;padding:2px 8px;border-radius:10px;background:rgba(124,77,255,.16);color:#b39dff;font-weight:700;white-space:nowrap}
 .rag-prog{background:rgba(124,77,255,.08);border:1px solid rgba(124,77,255,.25);border-radius:10px;padding:11px 13px;font-size:.76rem;color:#b39dff;margin-bottom:14px;line-height:1.5}
+.rag-counter{font-size:.7rem;font-weight:700;color:var(--muted);white-space:nowrap}
+.rag-counter.soon{color:var(--warn)}
+.rag-counter.over{color:var(--danger)}
+.rag-limit-msg{background:rgba(255,84,112,.08);border:1px solid rgba(255,84,112,.3);border-radius:10px;padding:11px 13px;font-size:.74rem;color:var(--danger);line-height:1.5;margin-bottom:10px}
 .spin{display:inline-block;animation:spin 1.1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media(max-width:760px){.g2{grid-template-columns:1fr}table{font-size:.74rem}.token{font-size:.66rem}}
@@ -217,7 +221,9 @@ tr:hover td{background:#0d0d16}
             <input type="file" id="nRagFile" accept=".pdf,.txt,.doc,.docx,.md,application/pdf,text/plain" style="display:none" onchange="uploadRagDoc(this.files[0]); this.value='';">
             <button type="button" class="btn btn-ghost btn-sm" onclick="loadRagArchivos()">🔄 Actualizar</button>
             <span class="muted" style="font-size:.7rem">PDF · TXT · Word</span>
+            <span id="nRagCounter" class="rag-counter" style="margin-left:auto">— documentos</span>
           </div>
+          <div id="nRagLimitMsg" class="rag-limit-msg" style="display:none"></div>
           <div id="nRagProgress" style="display:none"></div>
           <div id="nRagList"><div class="empty">—</div></div>
         </div>
@@ -295,6 +301,7 @@ var currentAgenteCli = null; // id del cliente abierto en el modal de agente
 var currentFormCli = null; // id del cliente en edición en el formulario (null = nuevo, sin guardar)
 var ragArchivos = [];      // rag_archivos del cliente del formulario
 var ragPollTimer = null;   // poll de progreso mientras se ingesta un documento
+var ragUploading = false;  // hay una ingesta en vuelo (mantiene el botón deshabilitado)
 var ghToken = '';
 
 function $(id){ return document.getElementById(id); }
@@ -551,6 +558,10 @@ function deletePago(pagoId){
 // El atributo data-rag lo leerá orion-widget.js cuando se cablée RAG; hoy se
 // genera ya en el HTML para que la migración del lado widget no toque el panel.
 var PACKS_WITH_RAG = { 'core-rag':1, 'scale':1, 'elite':1 };
+// Límite de documentos RAG por pack (cuenta archivos con estado != 'error').
+// Infinity = sin límite. Solo se cuentan packs presentes en PACKS_WITH_RAG.
+var RAG_LIMITES = { 'core-rag':100, 'scale':500, 'elite':Infinity };
+function ragLimite(pack){ return RAG_LIMITES[String(pack||'').toLowerCase()]; }
 function snippetForPack(c){
   var token = (c.token_cdn||'').trim();
   if(!token) return '— Falta token CDN para generar el script.';
@@ -754,10 +765,13 @@ function refreshFormRag(){
   $('nRagSection').style.display = hasRag ? 'block' : 'none';
   if(!hasRag){ stopRagPoll(); return; }
   if(currentFormCli){
+    ragUploading=false;
     $('nRagNew').style.display='none';
     $('nRagExisting').style.display='block';
     $('nRagUploadBtn').disabled=false;
     $('nRagProgress').style.display='none';
+    $('nRagLimitMsg').style.display='none';
+    $('nRagCounter').textContent='— documentos';
     $('nRagList').innerHTML='<div class="empty">Cargando…</div>';
     loadRagArchivos();
   } else {
@@ -852,7 +866,32 @@ function loadRagArchivos(){
   .catch(function(e){ $('nRagList').innerHTML='<div class="empty" style="color:var(--danger)">❌ '+esc(e.message)+'</div>'; });
 }
 
+// Nº de documentos que cuentan para el límite: todos menos los que fallaron.
+function ragCountActivos(){ return ragArchivos.filter(function(a){ return a.estado!=='error'; }).length; }
+
+// Pinta el contador "X / N documentos" (o "X documentos · Sin límite" en elite)
+// y bloquea el botón de subir + muestra el aviso cuando se alcanza el límite.
+function renderRagLimit(){
+  var pack = String($('nPack').value||'').toLowerCase();
+  var limite = ragLimite(pack);
+  var count = ragCountActivos();
+  var ilimitado = !isFinite(limite);
+  var alcanzado = !ilimitado && count >= limite;
+  var counter = $('nRagCounter');
+  counter.textContent = ilimitado ? (count+' documentos · Sin límite') : (count+' / '+limite+' documentos');
+  counter.className = 'rag-counter' + (alcanzado ? ' over' : ((!ilimitado && count >= limite*0.9) ? ' soon' : ''));
+  $('nRagUploadBtn').disabled = ragUploading || alcanzado;
+  var msg = $('nRagLimitMsg');
+  if(alcanzado){
+    msg.textContent = 'Has alcanzado el límite de '+limite+' documentos del pack '+pack+'. Contacta con WhiteMoon para actualizar tu plan.';
+    msg.style.display='block';
+  } else {
+    msg.style.display='none';
+  }
+}
+
 function renderRagList(){
+  renderRagLimit();
   if(!ragArchivos.length){ $('nRagList').innerHTML='<div class="empty">Sin documentos indexados todavía. Sube el primero ⬆</div>'; return; }
   var h='';
   ragArchivos.forEach(function(a){
@@ -885,6 +924,15 @@ function stopRagPoll(){ if(ragPollTimer){ clearInterval(ragPollTimer); ragPollTi
 function uploadRagDoc(file){
   if(!file || !currentFormCli) return;
   if(!/\.(pdf|txt|doc|docx|md)$/i.test(file.name)){ toast('Formato no admitido. Usa PDF, TXT o Word.','err'); return; }
+  // Control de límite del pack antes de subir (cuenta archivos != 'error').
+  var pack = String($('nPack').value||'').toLowerCase();
+  var limite = ragLimite(pack);
+  if(isFinite(limite) && ragCountActivos() >= limite){
+    toast('Has alcanzado el límite de '+limite+' documentos del pack '+pack+'.','err');
+    renderRagLimit();
+    return;
+  }
+  ragUploading = true;
   $('nRagUploadBtn').disabled=true;
   showRagProgress('Subiendo «'+file.name+'» ('+fmtBytes(file.size)+')… extrayendo texto y generando embeddings. Puede tardar según el tamaño.');
   startRagPoll();
@@ -899,12 +947,12 @@ function uploadRagDoc(file){
   })
   .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return { ok:r.ok, d:d }; }); })
   .then(function(res){
-    stopRagPoll(); $('nRagUploadBtn').disabled=false; hideRagProgress();
+    ragUploading=false; stopRagPoll(); hideRagProgress();
     if(!res.ok || res.d.error){ toast('Error de ingesta: '+String(res.d.error||'desconocido').slice(0,140),'err'); loadRagArchivos(); return; }
     toast('✅ «'+file.name+'» indexado · '+(res.d.chunks||0)+' chunks');
     loadRagArchivos();
   })
-  .catch(function(e){ stopRagPoll(); $('nRagUploadBtn').disabled=false; hideRagProgress(); toast('Error de red: '+e.message,'err'); loadRagArchivos(); });
+  .catch(function(e){ ragUploading=false; stopRagPoll(); hideRagProgress(); toast('Error de red: '+e.message,'err'); loadRagArchivos(); });
 }
 
 function deleteRagArchivo(id){

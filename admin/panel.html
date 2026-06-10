@@ -79,6 +79,11 @@ tr:hover td{background:#0d0d16}
 .tokgen{display:flex;gap:6px}.tokgen input{flex:1}
 .pill{font-size:.64rem;padding:2px 8px;border-radius:10px;background:rgba(0,212,170,.12);color:var(--accent);font-weight:700}
 .src-note{font-size:.68rem;color:var(--muted);margin-top:4px}
+#tbl tr:hover td{cursor:pointer}
+.cli-info{background:#111118;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;font-size:.78rem}
+.cli-info .ci-l{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:3px}
+.cli-info .ci-full{grid-column:1/-1}
+@media(max-width:600px){.cli-info{grid-template-columns:1fr}}
 .pago-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;background:var(--bg)}
 .pago-item.over{border-color:rgba(255,84,112,.4)}
 .pago-item.soon{border-color:rgba(245,165,36,.4)}
@@ -243,11 +248,12 @@ tr:hover td{background:#0d0d16}
   </div>
 </div>
 
-<!-- PAGOS DEL CLIENTE -->
+<!-- DETALLE DEL CLIENTE: DATOS + PAGOS -->
 <div class="modal-bg" id="pagosBg">
   <div class="modal">
-    <h3 id="pagosTitle">💸 Pagos</h3>
-    <p class="muted" style="font-size:.74rem;margin:-8px 0 14px">Historial multi-pago del cliente · setup, renovaciones, cuotas puntuales.</p>
+    <h3 id="pagosTitle">👤 Cliente</h3>
+    <p class="muted" style="font-size:.74rem;margin:-8px 0 14px">Ficha del cliente · historial multi-pago: setup, renovaciones, cuotas puntuales.</p>
+    <div class="cli-info" id="pagosCliInfo"></div>
     <div id="pagosList"><div class="empty">—</div></div>
     <div class="pago-add">
       <div><label>Concepto</label><input type="text" id="pConcepto" placeholder="Setup inicial Spark"></div>
@@ -408,7 +414,7 @@ function render(){
     var d=daysUntil(c.fecha_proximo_pago), payCls='';
     if(d!==null){ if(d<0) payCls='pay-over'; else if(d<=7) payCls='pay-soon'; }
     var mrr=PACK_MRR[c.pack]||0;
-    h+='<tr>';
+    h+='<tr onclick="rowClick(event,\''+esc(c.id)+'\')">';
     h+='<td><div class="biz">'+esc(c.cliente_nombre||'—')+'</div>'
       +(c.url_web_cliente?'<div class="dom">'+esc(c.url_web_cliente)+'</div>':'')
       +(c.sector?'<div class="dom">'+esc(c.sector)+'</div>':'')
@@ -482,10 +488,28 @@ function pagosPill(id){
   return '<span class="pago-pill'+(over?' over':'')+'">'+pend.length+'</span>';
 }
 
+// Clic en la fila del cliente → abre la ficha (ignora clics en botones/inputs
+// de la propia fila para no pisar las acciones existentes).
+function rowClick(e, id){
+  if(e.target.closest('button,input,a,select,textarea')) return;
+  openPagos(id);
+}
+function clienteInfoHTML(c){
+  var mrr = PACK_MRR[c.pack]||0;
+  function item(lbl, val, full){
+    return '<div'+(full?' class="ci-full"':'')+'><div class="ci-l">'+lbl+'</div><div>'+(val||'—')+'</div></div>';
+  }
+  return item('Pack','<span class="badge badge-pack">'+esc(c.pack||'—')+'</span>'+(mrr?' <span class="muted">'+mrr+'€/mes</span>':''))
+    + item('Token', c.token_cdn?('<span class="token">'+esc(c.token_cdn)+'</span>'):'—')
+    + item('Web', c.url_web_cliente?esc(c.url_web_cliente):'—')
+    + item('Teléfono', c.cliente_telefono?esc(c.cliente_telefono):'—')
+    + item('Notas', c.notas?esc(c.notas):'—', true);
+}
 function openPagos(id){
   currentPagoCli = id;
-  var c = clientes.filter(function(x){ return x.id===id; })[0];
-  $('pagosTitle').innerHTML = '💸 Pagos · '+esc((c&&c.cliente_nombre)||'cliente');
+  var c = clientes.filter(function(x){ return x.id===id; })[0] || {};
+  $('pagosTitle').innerHTML = '👤 '+esc(c.cliente_nombre||'cliente');
+  $('pagosCliInfo').innerHTML = clienteInfoHTML(c);
   $('pConcepto').value=''; $('pImporte').value=''; $('pVenc').value='';
   renderPagos();
   $('pagosBg').classList.add('show');
@@ -494,7 +518,6 @@ function closePagos(){ $('pagosBg').classList.remove('show'); currentPagoCli=nul
 
 function renderPagos(){
   var list = pagosDe(currentPagoCli).slice().sort(function(a,b){
-    if(a.pagado!==b.pagado) return a.pagado?1:-1;
     return (a.fecha_vencimiento||'').localeCompare(b.fecha_vencimiento||'');
   });
   if(!list.length){ $('pagosList').innerHTML='<div class="empty">Sin pagos registrados para este cliente.</div>'; return; }
@@ -508,10 +531,10 @@ function renderPagos(){
       else { lbl='📅 en '+d+'d'; }
     }
     var meta = p.pagado
-      ? 'Cobrado'+(p.fecha_pago?(' · '+fmtDate(p.fecha_pago)):'')
+      ? 'Pagado'+(p.fecha_pago?(' · '+fmtDate(p.fecha_pago)):'')+(p.fecha_vencimiento?(' · vencía '+fmtDate(p.fecha_vencimiento)):'')
       : (fmtDate(p.fecha_vencimiento)+(lbl?(' · '+lbl):''));
     h+='<div class="pago-item '+cls+'">'
-      +'<div><div class="pago-c">'+esc(p.concepto)+' <span class="badge '+(p.pagado?'badge-paid':'badge-pend')+'">'+(p.pagado?'COBRADO':'PENDIENTE')+'</span></div>'
+      +'<div><div class="pago-c">'+esc(p.concepto)+' <span class="badge '+(p.pagado?'badge-paid':'badge-pend')+'">'+(p.pagado?'✅ PAGADO':'⏳ PENDIENTE')+'</span></div>'
       +'<div class="pago-meta">'+esc(meta)+'</div></div>'
       +'<div style="display:flex;align-items:center;gap:8px">'
       +'<span class="pago-amt'+(p.pagado?' paid':'')+'">'+(parseFloat(p.importe)||0).toFixed(2)+'€</span>'

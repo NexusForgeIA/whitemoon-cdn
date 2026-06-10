@@ -47,6 +47,11 @@ th{text-align:left;padding:11px 12px;color:var(--muted);font-size:.66rem;text-tr
 td{padding:11px 12px;border-bottom:1px solid #14141f;font-size:.82rem;vertical-align:middle}
 tr:hover td{background:#0d0d16}
 .biz{font-weight:600}.dom{color:var(--muted);font-size:.74rem}
+/* Celda CLIENTE compacta: cada línea (nombre, dominio, sector, teléfono) a
+   1 línea máximo con ellipsis. Las notas no se pintan inline — solo el icono
+   📝 junto al nombre, con el texto completo en el tooltip (title). */
+#tbl .biz,#tbl .dom{max-width:230px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.note-ico{cursor:help}
 .token{font-family:ui-monospace,Menlo,monospace;color:var(--primary);font-size:.72rem;word-break:break-all}
 .badge{padding:3px 10px;border-radius:20px;font-size:.66rem;font-weight:700;display:inline-block;white-space:nowrap}
 .badge-on{background:rgba(0,212,170,.15);color:var(--accent)}
@@ -415,11 +420,10 @@ function render(){
     if(d!==null){ if(d<0) payCls='pay-over'; else if(d<=7) payCls='pay-soon'; }
     var mrr=PACK_MRR[c.pack]||0;
     h+='<tr onclick="rowClick(event,\''+esc(c.id)+'\')">';
-    h+='<td><div class="biz">'+esc(c.cliente_nombre||'—')+'</div>'
+    h+='<td><div class="biz">'+esc(c.cliente_nombre||'—')+(c.notas?' <span class="note-ico" title="'+esc(c.notas)+'">📝</span>':'')+'</div>'
       +(c.url_web_cliente?'<div class="dom">'+esc(c.url_web_cliente)+'</div>':'')
       +(c.sector?'<div class="dom">'+esc(c.sector)+'</div>':'')
       +(c.cliente_telefono?'<div class="dom">📞 '+esc(c.cliente_telefono)+'</div>':'')
-      +(c.notas?'<div class="dom" title="'+esc(c.notas)+'">📝 '+esc(c.notas.length>60?c.notas.slice(0,60)+'…':c.notas)+'</div>':'')
       +'</td>';
     h+='<td><span class="badge badge-pack">'+esc(c.pack||'—')+'</span><div class="src-note">'+(mrr?mrr+'€/mes':'—')+'</div></td>';
     h+='<td class="token">'+esc(c.token_cdn||'—')+'</td>';

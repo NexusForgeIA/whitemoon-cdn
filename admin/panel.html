@@ -162,7 +162,7 @@ tr:hover td{background:#0d0d16}
     </h2>
     <div class="card">
       <div class="toolbar">
-        <input type="text" id="search" placeholder="🔍 Buscar nombre, dominio, token, sector..." oninput="render()">
+        <input type="text" id="search" placeholder="🔍 Buscar nombre, dominio, token, sector, teléfono, notas..." oninput="render()">
         <select id="fEstado" style="max-width:180px" onchange="render()">
           <option value="">Todos los estados</option>
           <option value="activos">Solo activos</option>
@@ -203,6 +203,7 @@ tr:hover td{background:#0d0d16}
       </select></div>
       <div><label>Próximo pago</label><input type="date" id="nPago"></div>
     </div>
+    <div class="mb"><label>Notas</label><textarea id="nNotas" rows="3" placeholder="Notas internas del cliente…"></textarea></div>
     <div class="agente-box">
       <span class="agente-tag" id="nAgenteBadge">🎙️ Agente: Orion IA (Retell + ElevenLabs)</span>
       <div class="mb"><label>Retell agent ID <span class="muted" style="text-transform:none;font-size:.66rem">(solo Core / Scale / Elite)</span></label><input type="text" id="nAgentId" placeholder="agent_xxxxxxxxxxxxxxxx" oninput="refreshNewSnippet()"></div>
@@ -288,9 +289,12 @@ var CDN_BASE = 'https://nexusforgeia.github.io/whitemoon-cdn';
 var FUNCTIONS_BASE = SUPABASE_URL + '/functions/v1';
 var REPO = 'NexusForgeIA/whitemoon-cdn';
 // MRR mensual por pack (alineado con el panel de precios).
-var PACK_MRR = { spark:199, core:199, 'core-rag':349, scale:449, elite:599, 'orion-ia-agent':199, 'orion-ia-calls':199, 'calculadora-itp':99 };
-// Setup (pago único) por pack.
-var PACK_SETUP = { spark:499, core:1800, 'core-rag':3200, scale:4500, elite:8500, 'orion-ia-agent':999, 'orion-ia-calls':1499, 'calculadora-itp':599 };
+// Incluye alias snake_case (core_rag, orion_agent, orion_calls) porque las
+// altas hechas desde el CRM pueden llegar con ese formato — sin el alias el
+// MRR de esas filas saldría 0.
+var PACK_MRR = { spark:199, core:199, 'core-rag':349, core_rag:349, scale:449, elite:599, 'orion-ia-agent':199, orion_agent:199, 'orion-ia-calls':199, orion_calls:199, 'calculadora-itp':99 };
+// Setup (pago único) por pack — mismos alias snake_case que PACK_MRR.
+var PACK_SETUP = { spark:499, core:1800, 'core-rag':3200, core_rag:3200, scale:4500, elite:8500, 'orion-ia-agent':999, orion_agent:999, 'orion-ia-calls':1499, orion_calls:1499, 'calculadora-itp':599 };
 var SECTORES = ['dental','legal','restaurante','gestoria','clinica','inmobiliaria','gimnasio','peluqueria','veterinaria','formacion','taller','podologia','automovil','abogados'];
 var PACKS = ['spark','core','core-rag','scale','elite','orion-ia-agent','orion-ia-calls','calculadora-itp'];
 
@@ -349,7 +353,7 @@ function enterPanel(){ $('loginView').style.display='none'; $('panelView').style
 function loadData(){
   $('tbl').innerHTML='<div class="empty">Cargando…</div>';
   Promise.all([
-    sbGet('onboarding_clientes?select=id,token_cdn,estado,cliente_nombre,cliente_email,cliente_telefono,sector,pack,url_web_cliente,fecha_proximo_pago,fecha_inicio,created_at,agente_tipo,agente_retell_agent_id,agente_system_prompt&order=created_at.desc'),
+    sbGet('onboarding_clientes?select=id,token_cdn,estado,cliente_nombre,cliente_email,cliente_telefono,sector,pack,url_web_cliente,notas,fecha_proximo_pago,fecha_inicio,created_at,agente_tipo,agente_retell_agent_id,agente_system_prompt&order=created_at.desc'),
     sbGet('cdn_config?id=eq.true&select=modo_automatico_pagos'),
     sbGet('historial_pagos?select=id,cliente_id,concepto,importe,fecha_vencimiento,pagado,fecha_pago,created_at&order=fecha_vencimiento.asc')
   ]).then(function(res){
@@ -393,7 +397,7 @@ function render(){
   var rows = clientes.filter(function(c){
     if(fe==='activos' && !isActive(c)) return false;
     if(fe==='pausado' && c.estado!=='pausado') return false;
-    if(q){ var h=((c.cliente_nombre||'')+' '+(c.url_web_cliente||'')+' '+(c.token_cdn||'')+' '+(c.sector||'')+' '+(c.pack||'')).toLowerCase(); if(h.indexOf(q)===-1) return false; }
+    if(q){ var h=((c.cliente_nombre||'')+' '+(c.url_web_cliente||'')+' '+(c.token_cdn||'')+' '+(c.sector||'')+' '+(c.pack||'')+' '+(c.cliente_telefono||'')+' '+(c.notas||'')).toLowerCase(); if(h.indexOf(q)===-1) return false; }
     return true;
   });
   if(!clientes.length){ $('tbl').innerHTML='<div class="empty">Sin clientes en Supabase todavía.</div>'; return; }
@@ -405,7 +409,12 @@ function render(){
     if(d!==null){ if(d<0) payCls='pay-over'; else if(d<=7) payCls='pay-soon'; }
     var mrr=PACK_MRR[c.pack]||0;
     h+='<tr>';
-    h+='<td><div class="biz">'+esc(c.cliente_nombre||'—')+'</div>'+(c.url_web_cliente?'<div class="dom">'+esc(c.url_web_cliente)+'</div>':'')+(c.sector?'<div class="dom">'+esc(c.sector)+'</div>':'')+'</td>';
+    h+='<td><div class="biz">'+esc(c.cliente_nombre||'—')+'</div>'
+      +(c.url_web_cliente?'<div class="dom">'+esc(c.url_web_cliente)+'</div>':'')
+      +(c.sector?'<div class="dom">'+esc(c.sector)+'</div>':'')
+      +(c.cliente_telefono?'<div class="dom">📞 '+esc(c.cliente_telefono)+'</div>':'')
+      +(c.notas?'<div class="dom" title="'+esc(c.notas)+'">📝 '+esc(c.notas.length>60?c.notas.slice(0,60)+'…':c.notas)+'</div>':'')
+      +'</td>';
     h+='<td><span class="badge badge-pack">'+esc(c.pack||'—')+'</span><div class="src-note">'+(mrr?mrr+'€/mes':'—')+'</div></td>';
     h+='<td class="token">'+esc(c.token_cdn||'—')+'</td>';
     h+='<td><span class="badge '+(isActive(c)?'badge-on':'badge-off')+'">'+(isActive(c)?'ACTIVA':'PAUSADA')+'</span><div class="src-note">'+esc(c.estado)+'</div></td>';
@@ -718,7 +727,7 @@ function openNew(){
   $('newTitle').textContent = '➕ Nuevo cliente';
   $('nSave').textContent = 'Crear cliente';
   resetEstadoOptions();
-  $('nToken').value=genTokenValue(); $('nNombre').value=''; $('nUrl').value=''; $('nSector').value=''; $('nPack').value='spark'; $('nEstado').value='completado'; $('nPago').value=''; $('nAgentId').value=''; $('nPrompt').value='';
+  $('nToken').value=genTokenValue(); $('nNombre').value=''; $('nUrl').value=''; $('nSector').value=''; $('nPack').value='spark'; $('nEstado').value='completado'; $('nPago').value=''; $('nNotas').value=''; $('nAgentId').value=''; $('nPrompt').value='';
   refreshNewSnippet(); refreshFormRag();
   $('newBg').classList.add('show');
 }
@@ -739,6 +748,7 @@ function openEditCliente(id){
   $('nPack').value = c.pack || 'spark';
   $('nEstado').value = c.estado || 'completado';
   $('nPago').value = c.fecha_proximo_pago || '';
+  $('nNotas').value = c.notas || '';
   $('nAgentId').value = c.agente_retell_agent_id || '';
   $('nPrompt').value = c.agente_system_prompt || '';
   refreshNewSnippet(); refreshFormRag();
@@ -815,6 +825,7 @@ function saveCliente(){
     pack: pack,
     estado: $('nEstado').value || 'completado',
     fecha_proximo_pago: $('nPago').value || null,
+    notas: ($('nNotas').value||'').trim() || null,
     // El tipo de agente sigue al pack — ver agenteTipoFromPack().
     agente_tipo: agenteTipoFromPack(pack),
     agente_retell_agent_id: ($('nAgentId').value||'').trim() || null,

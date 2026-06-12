@@ -27,7 +27,16 @@
         // construye config mínima con los datos de la Edge Function.
         fetchLicensesJson().then(function(licenses){
           var rich = licenses && licenses[token];
-          proceed(rich || licFromEdge(res));
+          var lic = rich || licFromEdge(res);
+          // El WhatsApp del cliente (número + apikey de CallMeBot) vive en Supabase
+          // y llega por la Edge Function. Lo fusionamos también en la config "rica"
+          // de licenses.json para que el chatbot entregue los leads al número del
+          // cliente aunque su token ya estuviera en licenses.json.
+          if(rich){
+            if(!rich.callmebotApikey && res.callmebot_apikey) rich.callmebotApikey = res.callmebot_apikey;
+            if(!rich.phone && (res.telefono || res.cliente_telefono)) rich.phone = res.telefono || res.cliente_telefono;
+          }
+          proceed(lic);
         });
         return;
       }
@@ -61,6 +70,11 @@
     return {
       biz: res.nombre || '', domain: res.url || '', pack: res.pack || '', template: res.sector || '',
       active: true, _source: 'edge',
+      // WhatsApp del cliente: número (cliente_telefono) + apikey de CallMeBot.
+      // Permiten que el chatbot entregue los leads al WhatsApp del propio cliente
+      // usando SU número y SU apikey, en lugar de los de WhiteMoon.
+      phone: res.telefono || res.cliente_telefono || '',
+      callmebotApikey: res.callmebot_apikey || '',
       agentEndpoint: agentEndpoint,        // '' → ai-claude usa la Edge Function por defecto
       aiPrompt: aiPrompt,
       aiEnabled: !!(aiPrompt || agentEndpoint)  // cliente Laura si tiene prompt o endpoint propio
@@ -117,6 +131,19 @@
     return String(text||'').replace(/\{(\w+)\}/g, function(_, k){ return vars[k] !== undefined ? vars[k] : ''; });
   }
   function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  // Entrega el lead por WhatsApp al número del cliente vía CallMeBot. El número
+  // se normaliza a dígitos y se le antepone el prefijo 34 si viene sin él (igual
+  // que el enlace wa.me). Se usa mode:'no-cors' porque CallMeBot no envía cabeceras
+  // CORS: solo nos interesa disparar el envío, no leer la respuesta.
+  function sendCallMeBot(phone, apikey, text){
+    var p = String(phone||'').replace(/[^0-9]/g, '');
+    if(!p || !apikey) return;
+    if(p.length <= 9) p = '34' + p;
+    var url = 'https://api.callmebot.com/whatsapp.php?phone=' + encodeURIComponent(p)
+      + '&text=' + encodeURIComponent(text)
+      + '&apikey=' + encodeURIComponent(apikey);
+    fetch(url, { mode:'no-cors' }).catch(function(){});
+  }
   function escAttr(s){ return escapeHtml(s).replace(/"/g,'&quot;'); }
   function hexToRgb(hex){
     var c = (hex||'#7c3aed').replace('#','');
@@ -141,6 +168,9 @@
       summary:    (licResp && licResp._summary)   || (tplResp && tplResp._summary)   || 'Perfecto {nombre}. Te contactamos en breve.',
       template:   lic.template || '',
       token:      token,
+      // Apikey de CallMeBot del cliente — si está presente, los leads se entregan
+      // automáticamente por WhatsApp al número del cliente (cfg.tel) vía CallMeBot.
+      callmebotApikey: lic.callmebotApikey || '',
       aiEnabled:  !!lic.aiEnabled,
       agentEndpoint: lic.agentEndpoint || '',  // Edge Function propia del cliente ('' = por defecto)
       aiPrompt:   lic.aiPrompt || ''
@@ -463,6 +493,12 @@
       var waLink = cfg.tel
         ? 'https://wa.me/34'+cfg.tel+'?text='+encodeURIComponent(msg)
         : 'https://wa.me/?text='+encodeURIComponent(msg);
+
+      // Entrega automática del lead por WhatsApp vía CallMeBot, usando el número
+      // y la apikey del propio cliente (configurados en el panel CDN). El botón
+      // wa.me de abajo se mantiene como confirmación manual. Si el cliente no
+      // tiene CallMeBot configurado, este envío simplemente no se dispara.
+      if(cfg.callmebotApikey && cfg.tel) sendCallMeBot(cfg.tel, cfg.callmebotApikey, msg);
 
       var fin = opts.finish || {};
       var agente = opts.agent || fin.agent || 'gestor/a';

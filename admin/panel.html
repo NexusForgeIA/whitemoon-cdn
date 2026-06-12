@@ -214,6 +214,7 @@ tr:hover td{background:#0d0d16}
       <div><label>Próximo pago</label><input type="date" id="nPago"></div>
     </div>
     <div class="mb"><label>Notas</label><textarea id="nNotas" rows="3" placeholder="Notas internas del cliente…"></textarea></div>
+    <div class="mb"><label>CallMeBot API Key <span class="muted" style="text-transform:none;font-size:.66rem">(WhatsApp del cliente · oculto por seguridad)</span></label><input type="password" id="nCallmebot" placeholder="Apikey de CallMeBot del cliente" autocomplete="off"></div>
     <div class="agente-box">
       <span class="agente-tag" id="nAgenteBadge">🎙️ Agente: Orion IA (Retell + ElevenLabs)</span>
       <div class="mb"><label>Retell agent ID <span class="muted" style="text-transform:none;font-size:.66rem">(solo Core / Scale / Elite)</span></label><input type="text" id="nAgentId" placeholder="agent_xxxxxxxxxxxxxxxx" oninput="refreshNewSnippet()"></div>
@@ -370,7 +371,7 @@ function enterPanel(){ $('loginView').style.display='none'; $('panelView').style
 function loadData(){
   $('tbl').innerHTML='<div class="empty">Cargando…</div>';
   Promise.all([
-    sbGet('onboarding_clientes?select=id,token_cdn,estado,cliente_nombre,cliente_email,cliente_telefono,sector,pack,url_web_cliente,notas,fecha_proximo_pago,fecha_inicio,created_at,agente_tipo,agente_retell_agent_id,agente_system_prompt&order=created_at.desc'),
+    sbGet('onboarding_clientes?select=id,token_cdn,estado,cliente_nombre,cliente_email,cliente_telefono,sector,pack,url_web_cliente,notas,fecha_proximo_pago,fecha_inicio,created_at,agente_tipo,agente_retell_agent_id,agente_system_prompt,callmebot_apikey&order=created_at.desc'),
     sbGet('cdn_config?id=eq.true&select=modo_automatico_pagos'),
     sbGet('historial_pagos?select=id,cliente_id,concepto,importe,fecha_vencimiento,pagado,fecha_pago,created_at&order=fecha_vencimiento.asc')
   ]).then(function(res){
@@ -760,7 +761,7 @@ function openNew(){
   $('newTitle').textContent = '➕ Nuevo cliente';
   $('nSave').textContent = 'Crear cliente';
   resetEstadoOptions(); resetPackOptions();
-  $('nToken').value=genTokenValue(); $('nNombre').value=''; $('nUrl').value=''; $('nSector').value=''; $('nPack').value='spark'; $('nEstado').value='completado'; $('nPago').value=''; $('nNotas').value=''; $('nAgentId').value=''; $('nPrompt').value='';
+  $('nToken').value=genTokenValue(); $('nNombre').value=''; $('nUrl').value=''; $('nSector').value=''; $('nPack').value='spark'; $('nEstado').value='completado'; $('nPago').value=''; $('nNotas').value=''; $('nCallmebot').value=''; $('nAgentId').value=''; $('nPrompt').value='';
   refreshNewSnippet(); refreshFormRag();
   $('newBg').classList.add('show');
 }
@@ -783,6 +784,7 @@ function openEditCliente(id){
   $('nEstado').value = c.estado || 'completado';
   $('nPago').value = c.fecha_proximo_pago || '';
   $('nNotas').value = c.notas || '';
+  $('nCallmebot').value = c.callmebot_apikey || '';
   $('nAgentId').value = c.agente_retell_agent_id || '';
   $('nPrompt').value = c.agente_system_prompt || '';
   refreshNewSnippet(); refreshFormRag();
@@ -876,6 +878,9 @@ function saveCliente(){
     estado: $('nEstado').value || 'completado',
     fecha_proximo_pago: $('nPago').value || null,
     notas: ($('nNotas').value||'').trim() || null,
+    // Apikey de CallMeBot del cliente — la usa el chatbot (chat.js) para entregar
+    // los leads por WhatsApp al número del propio cliente, no al de WhiteMoon.
+    callmebot_apikey: ($('nCallmebot').value||'').trim() || null,
     // El tipo de agente sigue al pack — ver agenteTipoFromPack().
     agente_tipo: agenteTipoFromPack(pack),
     agente_retell_agent_id: ($('nAgentId').value||'').trim() || null,

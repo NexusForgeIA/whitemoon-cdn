@@ -490,7 +490,7 @@ function copyCode(id){
   if(!c){ toast('Cliente no encontrado','err'); return; }
   var code = agenteScript(c);
   // Los mensajes informativos/de error empiezan por '—'; los snippets copiables
-  // empiezan por '<' (widgets) o '/' (license-check.js de JusticIA).
+  // empiezan por '<' (widgets y el <script> inline de JusticIA).
   if(!code || code.charAt(0) === '—'){ toast(code||'Snippet no disponible','err'); return; }
   navigator.clipboard.writeText(code).then(function(){ toast('Script copiado 📋'); })
   .catch(function(){ toast('No se pudo copiar','err'); });
@@ -614,18 +614,21 @@ function ragLimite(pack){ return RAG_LIMITES[String(pack||'').toLowerCase()]; }
 // al que el cliente accede por login (Edge Function justicia-auth), no un widget
 // embebido en su web. Por eso no genera <script> de instalación.
 function isJusticia(pack){ return /^justicia-/.test(String(pack||'').toLowerCase()); }
-// Contenido COMPLETO de assets/js/license-check.js del CRM JusticIA, con el token
+// Bloque <script> inline COMPLETO de license-check del CRM JusticIA, con el token
 // y el nombre del despacho ya interpolados. El usuario copia todo el bloque y lo
-// pega en assets/js/license-check.js del repo del despacho.
+// pega dentro del <head> del HTML del CRM del despacho.
 // Nota: el href del botón usa concatenación (' + WA_URL + ') a propósito —
 // se resuelve en runtime dentro del fichero generado, no aquí al generarlo.
 function snippetJusticia(token, nombre){
   var despacho = (nombre && nombre.trim()) || '[Despacho]';
-  return `/**
+  return `<script>
+/**
  * JusticIA — License Check
  * Despacho: ${despacho}
  * Token CDN: ${token}
  * WhiteMoon Agencia IA · whitemoon.es
+ * INSTRUCCIONES: Pega este bloque dentro del <head>
+ * del HTML del CRM del despacho.
  */
 (function() {
   var LICENSE_TOKEN = '${token}';
@@ -657,7 +660,8 @@ function snippetJusticia(token, nombre){
   } else {
     verificarLicencia();
   }
-})();`;
+})();
+<\/script>`;
 }
 function snippetForPack(c){
   var token = (c.token_cdn||'').trim();
@@ -925,7 +929,7 @@ function refreshNewSnippet(){
 }
 function copyNewSnippet(){
   var txt = ($('nScript').textContent||'').trim();
-  // '—' = mensaje informativo/de error (no copiable). '<' widgets · '/' JusticIA.
+  // '—' = mensaje informativo/de error (no copiable). '<' widgets y JusticIA.
   if(!txt || txt.charAt(0) === '—'){ toast(txt||'Snippet no disponible','err'); return; }
   navigator.clipboard.writeText(txt).then(function(){ toast('Script copiado 📋'); })
   .catch(function(){ toast('No se pudo copiar','err'); });

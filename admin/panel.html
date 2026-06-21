@@ -217,7 +217,7 @@ tr:hover td{background:#0d0d16}
     <div class="mb"><label>CallMeBot API Key <span class="muted" style="text-transform:none;font-size:.66rem">(WhatsApp del cliente · oculto por seguridad)</span></label><input type="password" id="nCallmebot" placeholder="Apikey de CallMeBot del cliente" autocomplete="off"></div>
     <div class="agente-box">
       <span class="agente-tag" id="nAgenteBadge">🎙️ Agente: Orion IA (Retell + ElevenLabs)</span>
-      <div class="mb"><label>Retell agent ID <span class="muted" style="text-transform:none;font-size:.66rem">(solo Core / Scale / Elite)</span></label><input type="text" id="nAgentId" placeholder="agent_xxxxxxxxxxxxxxxx" oninput="refreshNewSnippet()"></div>
+      <div class="mb" id="nRetellSection"><label>Retell agent ID <span class="muted" style="text-transform:none;font-size:.66rem">(solo Core / Scale / Elite)</span></label><input type="text" id="nAgentId" placeholder="agent_xxxxxxxxxxxxxxxx" oninput="refreshNewSnippet()"></div>
       <div class="mb" id="nPromptSection"><label>System prompt</label><textarea id="nPrompt" rows="6" placeholder="Eres Orion, el agente de voz de [NEGOCIO]..."></textarea>
         <button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="loadPromptTpl('nPrompt','nNombre','nSector')">📋 Cargar plantilla base</button></div>
 
@@ -836,9 +836,11 @@ function ensureEstadoOption(estado){
 // el cliente ya está guardado (currentFormCli). Solo recarga la lista al
 // (re)entrar en el estado "existente" — no en cada tecla del formulario.
 function refreshFormRag(){
-  // JusticIA es un CRM por login: no usa system prompt de agente. Ocultamos esa
-  // sección para packs justicia-* (y la restauramos al volver a otro pack).
-  $('nPromptSection').style.display = isJusticia($('nPack').value) ? 'none' : '';
+  // JusticIA es un CRM por login: no usa agente Retell ni system prompt. Ocultamos
+  // ambas secciones para packs justicia-* (y las restauramos al volver a otro pack).
+  var esJusticia = isJusticia($('nPack').value);
+  $('nRetellSection').style.display = esJusticia ? 'none' : '';
+  $('nPromptSection').style.display = esJusticia ? 'none' : '';
   var hasRag = !!PACKS_WITH_RAG[String($('nPack').value||'').toLowerCase()];
   $('nRagSection').style.display = hasRag ? 'block' : 'none';
   if(!hasRag){ stopRagPoll(); return; }

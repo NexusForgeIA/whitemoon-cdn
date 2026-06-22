@@ -307,17 +307,14 @@ var REPO = 'NexusForgeIA/whitemoon-cdn';
 // calculadora-itp) se conservan para que los clientes antiguos sigan
 // computando MRR y facturación.
 var PACK_MRR = { spark:199, 'orion-ia-agent':199, orion_agent:199, core:199, 'core-rag':349, core_rag:349,
-  // JusticIA — CRM legal CENDOJ (producto independiente, acceso por login).
-  'justicia-basic':149, 'justicia-pro':249, 'justicia-elite':399,
   /* legacy */ scale:449, elite:599, 'orion-ia-calls':199, orion_calls:199, 'calculadora-itp':99 };
 // Setup (pago único) por pack — mismos alias y legacy que PACK_MRR.
 var PACK_SETUP = { spark:499, 'orion-ia-agent':999, orion_agent:999, core:1800, 'core-rag':3200, core_rag:3200,
-  'justicia-basic':999, 'justicia-pro':999, 'justicia-elite':999,
   /* legacy */ scale:4500, elite:8500, 'orion-ia-calls':1499, orion_calls:1499, 'calculadora-itp':599 };
 var SECTORES = ['dental','legal','restaurante','gestoria','clinica','inmobiliaria','gimnasio','peluqueria','veterinaria','formacion','taller','podologia','automovil','abogados'];
 // Packs en venta (dropdown de alta/edición). Los retirados no se ofrecen,
 // pero ensurePackOption() los inyecta al editar un cliente antiguo.
-var PACKS = ['spark','orion-ia-agent','core','core-rag','justicia-basic','justicia-pro','justicia-elite'];
+var PACKS = ['spark','orion-ia-agent','core','core-rag'];
 
 var clientes = [];
 var pagosByCliente = {};   // cliente_id -> [pagos]
@@ -490,7 +487,7 @@ function copyCode(id){
   if(!c){ toast('Cliente no encontrado','err'); return; }
   var code = agenteScript(c);
   // Los mensajes informativos/de error empiezan por '—'; los snippets copiables
-  // empiezan por '<' (widgets y el <script> inline de JusticIA).
+  // empiezan por '<' (widgets embebidos).
   if(!code || code.charAt(0) === '—'){ toast(code||'Snippet no disponible','err'); return; }
   navigator.clipboard.writeText(code).then(function(){ toast('Script copiado 📋'); })
   .catch(function(){ toast('No se pudo copiar','err'); });
@@ -610,67 +607,10 @@ var PACKS_WITH_RAG = { 'core-rag':1, 'scale':1, 'elite':1 };
 // Infinity = sin límite. Solo se cuentan packs presentes en PACKS_WITH_RAG.
 var RAG_LIMITES = { 'core-rag':100, 'scale':500, 'elite':Infinity };
 function ragLimite(pack){ return RAG_LIMITES[String(pack||'').toLowerCase()]; }
-// JusticIA (basic/pro/elite) es el CRM legal CENDOJ: un producto independiente
-// al que el cliente accede por login (Edge Function justicia-auth), no un widget
-// embebido en su web. Por eso no genera <script> de instalación.
-function isJusticia(pack){ return /^justicia-/.test(String(pack||'').toLowerCase()); }
-// Bloque <script> inline COMPLETO de license-check del CRM JusticIA, con el token
-// y el nombre del despacho ya interpolados. El usuario copia todo el bloque y lo
-// pega dentro del <head> del HTML del CRM del despacho.
-// Nota: el href del botón usa concatenación (' + WA_URL + ') a propósito —
-// se resuelve en runtime dentro del fichero generado, no aquí al generarlo.
-function snippetJusticia(token, nombre){
-  var despacho = (nombre && nombre.trim()) || '[Despacho]';
-  return `<script>
-/**
- * JusticIA — License Check
- * Despacho: ${despacho}
- * Token CDN: ${token}
- * WhiteMoon Agencia IA · whitemoon.es
- * INSTRUCCIONES: Pega este bloque dentro del <head>
- * del HTML del CRM del despacho.
- */
-(function() {
-  var LICENSE_TOKEN = '${token}';
-  var VERIFY_URL = 'https://mlaqtniujnvfxcvcourm.supabase.co/functions/v1/verify-token';
-  var WA_URL = 'https://wa.me/34643199580';
-
-  function bloquearAcceso(mensaje) {
-    document.documentElement.style.overflow = 'hidden';
-    var overlay = document.createElement('div');
-    overlay.id = 'wm-license-block';
-    overlay.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#08080d;display:flex;align-items:center;justify-content:center;flex-direction:column;font-family:Sora,system-ui,sans-serif;padding:32px;text-align:center';
-    overlay.innerHTML = '<div style="max-width:420px"><div style="font-size:48px;margin-bottom:24px">⚖️</div><h1 style="color:#f0f0f5;font-size:1.5rem;font-weight:700;margin-bottom:12px">Licencia suspendida</h1><p style="color:#8888a0;font-size:0.95rem;line-height:1.6;margin-bottom:32px">' + mensaje + '</p><a href="' + WA_URL + '" style="display:inline-block;background:#7c4dff;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:0.95rem">💬 Contactar con WhiteMoon</a><p style="color:#555;font-size:0.75rem;margin-top:20px">JusticIA CRM · whitemoon.es · +34 643 199 580</p></div>';
-    document.body.appendChild(overlay);
-  }
-
-  function verificarLicencia() {
-    fetch(VERIFY_URL + '?token=' + encodeURIComponent(LICENSE_TOKEN))
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        if (!data.active) {
-          bloquearAcceso('La licencia de JusticIA de este despacho está suspendida. Contacta con WhiteMoon para renovar tu suscripción.');
-        }
-      })
-      .catch(function() {});
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', verificarLicencia);
-  } else {
-    verificarLicencia();
-  }
-})();
-<\/script>`;
-}
 function snippetForPack(c){
   var token = (c.token_cdn||'').trim();
   if(!token) return '— Falta token CDN para generar el script.';
   var pack = String(c.pack||'').toLowerCase();
-  if(isJusticia(pack)){
-    // Devuelve el license-check.js completo (token + despacho interpolados).
-    return snippetJusticia(token, c.cliente_nombre||'');
-  }
   if(pack === 'spark'){
     return '<script src="'+CDN_BASE+'/chat.js"\n  data-token="'+esc(token)+'"><\/script>';
   }
@@ -704,21 +644,18 @@ function agenteTipoFromPack(pack){
   var p = String(pack||'').toLowerCase();
   if(p === 'spark') return 'laura';
   if(p === 'calculadora-itp') return 'itp';
-  if(isJusticia(p)) return 'justicia';
   return 'orion';
 }
 function agenteLabel(pack){
   var tipo = agenteTipoFromPack(pack);
   if(tipo === 'laura') return 'Laura IA (chat texto · Claude API)';
   if(tipo === 'itp')   return 'CALCULADORA ITP';
-  if(tipo === 'justicia') return 'JusticIA · CRM legal CENDOJ (acceso por login)';
   return 'Orion IA (Retell + ElevenLabs)';
 }
 function agenteIcon(pack){
   var tipo = agenteTipoFromPack(pack);
   if(tipo === 'laura') return '💬';
   if(tipo === 'itp')   return '🧮';
-  if(tipo === 'justicia') return '⚖️';
   return '🎙️';
 }
 function openAgente(id){
@@ -888,11 +825,6 @@ function ensureEstadoOption(estado){
 // el cliente ya está guardado (currentFormCli). Solo recarga la lista al
 // (re)entrar en el estado "existente" — no en cada tecla del formulario.
 function refreshFormRag(){
-  // JusticIA es un CRM por login: no usa agente Retell ni system prompt. Ocultamos
-  // ambas secciones para packs justicia-* (y las restauramos al volver a otro pack).
-  var esJusticia = isJusticia($('nPack').value);
-  $('nRetellSection').style.display = esJusticia ? 'none' : '';
-  $('nPromptSection').style.display = esJusticia ? 'none' : '';
   var hasRag = !!PACKS_WITH_RAG[String($('nPack').value||'').toLowerCase()];
   $('nRagSection').style.display = hasRag ? 'block' : 'none';
   if(!hasRag){ stopRagPoll(); return; }
@@ -929,7 +861,7 @@ function refreshNewSnippet(){
 }
 function copyNewSnippet(){
   var txt = ($('nScript').textContent||'').trim();
-  // '—' = mensaje informativo/de error (no copiable). '<' widgets y JusticIA.
+  // '—' = mensaje informativo/de error (no copiable). '<' widgets embebidos.
   if(!txt || txt.charAt(0) === '—'){ toast(txt||'Snippet no disponible','err'); return; }
   navigator.clipboard.writeText(txt).then(function(){ toast('Script copiado 📋'); })
   .catch(function(){ toast('No se pudo copiar','err'); });

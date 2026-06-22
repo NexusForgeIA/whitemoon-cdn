@@ -397,7 +397,8 @@ function pendientesDe(id){ return pagosDe(id).filter(function(p){ return !p.paga
 function render(){
   var activos = clientes.filter(isActive);
   var mrr = activos.reduce(function(s,c){ return s + (PACK_MRR[c.pack]||0); }, 0);
-  var due = clientes.filter(function(c){ var d=daysUntil(c.fecha_proximo_pago); return d!==null && d<=7; });
+  // "Vencen ≤7 días" cuenta pagos (no clientes), misma fuente que renderDue.
+  var due = pagosProximos().filter(function(it){ var d=daysUntil(it.fecha); return d!==null && d<=7; });
   var pend = 0;
   Object.keys(pagosByCliente).forEach(function(cid){ pendientesDe(cid).forEach(function(p){ pend += parseFloat(p.importe)||0; }); });
   // Total facturado histórico: Σ setup + Σ (cuota mensual × meses desde el alta), todos los clientes.
@@ -451,11 +452,13 @@ function render(){
   $('tbl').innerHTML=h;
 }
 
-function renderDue(){
-  // Un ítem por pago próximo. Si el cliente tiene pagos pendientes en
-  // historial_pagos (con fecha de vencimiento) usamos ESOS — el detalle real
-  // (incluye su cuota mensual "CORE MES"). Si no tiene historial, caemos al
-  // pago mensual del pack derivado de fecha_proximo_pago.
+// Pagos próximos unificados: una entrada por pago. Si el cliente tiene pagos
+// pendientes en historial_pagos (con fecha de vencimiento) usa ESOS — el
+// detalle real, que ya incluye su cuota mensual "CORE MES". Si no tiene
+// historial, cae al pago mensual del pack derivado de fecha_proximo_pago.
+// Sin filtrar por ventana: cada consumidor aplica su propio umbral de días
+// (renderDue ≤30, el stat "Vencen ≤7 días" ≤7).
+function pagosProximos(){
   var items = [];
   clientes.forEach(function(c){
     var pend = pendientesDe(c.id).filter(function(p){ return p.fecha_vencimiento; });
@@ -467,7 +470,10 @@ function renderDue(){
       items.push({ nombre:c.cliente_nombre, concepto:String(c.pack||'').toUpperCase()+' MES', importe:PACK_MRR[c.pack]||0, fecha:c.fecha_proximo_pago });
     }
   });
-  items = items.filter(function(it){ var d=daysUntil(it.fecha); return d!==null && d<=30; })
+  return items;
+}
+function renderDue(){
+  var items = pagosProximos().filter(function(it){ var d=daysUntil(it.fecha); return d!==null && d<=30; })
     .sort(function(a,b){
       return (a.fecha||'').localeCompare(b.fecha||'')
         || (a.nombre||'').localeCompare(b.nombre||'')

@@ -217,7 +217,7 @@ tr:hover td{background:#0d0d16}
     <div class="mb"><label>CallMeBot API Key <span class="muted" style="text-transform:none;font-size:.66rem">(WhatsApp del cliente · oculto por seguridad)</span></label><input type="password" id="nCallmebot" placeholder="Apikey de CallMeBot del cliente" autocomplete="off"></div>
     <div class="agente-box">
       <span class="agente-tag" id="nAgenteBadge">🎙️ Agente: Orion IA (Retell + ElevenLabs)</span>
-      <div class="mb" id="nRetellSection"><label>Retell agent ID <span class="muted" style="text-transform:none;font-size:.66rem">(solo Orion IA Agent / Core Orion)</span></label><input type="text" id="nAgentId" placeholder="agent_xxxxxxxxxxxxxxxx" oninput="refreshNewSnippet()"></div>
+      <div class="mb" id="nRetellSection"><label>Retell agent ID <span class="muted" style="text-transform:none;font-size:.66rem">(solo Orion IA Agent / Core Orion / Core RAG)</span></label><input type="text" id="nAgentId" placeholder="agent_xxxxxxxxxxxxxxxx" oninput="refreshNewSnippet()"></div>
       <div class="mb" id="nPromptSection"><label>System prompt</label><textarea id="nPrompt" rows="6" placeholder="Eres Orion, el agente de voz de [NEGOCIO]..."></textarea>
         <button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="loadPromptTpl('nPrompt','nNombre','nSector')">📋 Cargar plantilla base</button></div>
 
@@ -278,8 +278,8 @@ tr:hover td{background:#0d0d16}
   <div class="modal">
     <h3 id="agenteTitle">🎙️ Agente</h3>
     <span class="agente-tag" id="aAgenteBadge">Orion IA (Retell + ElevenLabs)</span>
-    <div class="mb" id="aRetellSection"><label>Retell agent ID <span class="muted" style="text-transform:none;font-size:.66rem">(solo Orion IA Agent / Core Orion)</span></label><input type="text" id="aAgentId" placeholder="agent_xxxxxxxxxxxxxxxx" oninput="refreshAgenteSnippet()"></div>
-    <div class="mb"><label>System prompt de Orion</label><textarea id="aPrompt" rows="8" placeholder="Eres Orion, el agente de voz de [NEGOCIO]..."></textarea>
+    <div class="mb" id="aRetellSection"><label>Retell agent ID <span class="muted" style="text-transform:none;font-size:.66rem">(solo Orion IA Agent / Core Orion / Core RAG)</span></label><input type="text" id="aAgentId" placeholder="agent_xxxxxxxxxxxxxxxx" oninput="refreshAgenteSnippet()"></div>
+    <div class="mb" id="aPromptSection"><label>System prompt de Orion</label><textarea id="aPrompt" rows="8" placeholder="Eres Orion, el agente de voz de [NEGOCIO]..."></textarea>
       <button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="loadPromptTpl('aPrompt')">📋 Cargar plantilla base</button></div>
     <div class="mb">
       <label>Script de instalación</label>
@@ -616,12 +616,12 @@ function deletePago(pagoId){
 
 // ─── AGENTE IA (snippet por pack · onboarding_clientes) ──────────────────────
 // El snippet que se instala en la web del cliente depende del pack:
-//   - spark / core-spark-web   → chat.js (chatbot texto · Laura IA · Claude API)
-//   - core-rag                 → chat.js con data-rag="true" (texto + base RAG)
-//   - orion-ia-agent / core-orion → orion-widget.js (voz · Retell, data-agent)
-//   - calculadora-itp          → itp.js (widget de calculadora ITP)
+//   - spark / core-spark-web       → chat.js (chatbot texto · Laura IA · Claude API)
+//   - orion-ia-agent / core-orion  → orion-widget.js (voz · Retell, data-agent)
+//   - core-rag                     → orion-widget.js con data-agent + data-rag="true" (voz + RAG)
+//   - calculadora-itp              → itp.js (widget de calculadora ITP)
 // El atributo data-agent solo aparece en los snippets de orion-widget.js (voz).
-// El atributo data-rag lo emite chat.js para activar la base de conocimiento RAG.
+// El atributo data-rag lo emite orion-widget.js para activar la base de conocimiento RAG.
 var PACKS_WITH_RAG = { 'core-rag':1 };
 // Límite de documentos RAG por pack (cuenta archivos con estado != 'error').
 // Solo se cuentan packs presentes en PACKS_WITH_RAG.
@@ -635,10 +635,6 @@ function snippetForPack(c){
   if(pack === 'spark' || pack === 'core-spark-web'){
     return '<script src="'+CDN_BASE+'/chat.js"\n  data-token="'+esc(token)+'"><\/script>';
   }
-  // core-rag: mismo chatbot de texto + base de conocimiento RAG (data-rag).
-  if(pack === 'core-rag'){
-    return '<script src="'+CDN_BASE+'/chat.js"\n  data-token="'+esc(token)+'"\n  data-rag="true"><\/script>';
-  }
   if(pack === 'calculadora-itp'){
     // itp.js no necesita Retell agent — es un widget standalone con su propia
     // verificación de token. Bakeamos data-nombre y data-tel desde Supabase
@@ -650,31 +646,41 @@ function snippetForPack(c){
       + (tel ? '\n  data-tel="'+esc(tel)+'"' : '')
       + '\n  defer><\/script>';
   }
-  // Packs de voz (Orion IA · Retell): orion-ia-agent, core-orion.
+  // Packs de voz (Orion IA · Retell): orion-ia-agent, core-orion y core-rag.
+  // core-rag añade data-rag="true" para activar la base de conocimiento RAG.
   var agentId = (c.agente_retell_agent_id||'').trim();
   if(!agentId){
     return '— Falta Retell agent ID para generar el script de Orion.';
   }
-  return '<script src="'+CDN_BASE+'/orion-widget.js"\n  data-token="'+esc(token)+'"\n  data-agent="'+esc(agentId)+'"\n  defer><\/script>';
+  var rag = !!PACKS_WITH_RAG[pack];
+  return '<script src="'+CDN_BASE+'/orion-widget.js"\n  data-token="'+esc(token)+'"\n  data-agent="'+esc(agentId)+'"'
+    + (rag ? '\n  data-rag="true"' : '')
+    + '\n  defer><\/script>';
 }
 function agenteScript(c){ return snippetForPack(c); }
 
 // Tipo + etiqueta + icono del badge según pack:
-//   - spark / core-spark-web / core-rag  → Laura IA (chat texto · Claude API)
-//   - orion-ia-agent / core-orion        → Orion IA (voz Retell)
-//   - calculadora-itp                    → Calculadora ITP (widget, sin agente IA)
+//   - spark / core-spark-web         → Laura IA (chat texto · Claude API)
+//   - orion-ia-agent / core-orion    → Orion IA (voz Retell)
+//   - core-rag                       → Orion IA + RAG (voz Retell + base de conocimiento)
+//   - calculadora-itp                → Calculadora ITP (widget, sin agente IA)
 function agenteTipoFromPack(pack){
   var p = String(pack||'').toLowerCase();
   if(p === 'calculadora-itp') return 'itp';
-  if(p === 'orion-ia-agent' || p === 'core-orion') return 'orion';
+  if(p === 'orion-ia-agent' || p === 'core-orion' || p === 'core-rag') return 'orion';
   return 'laura';
 }
 // Solo los packs de voz (Orion · Retell) usan el campo Retell agent ID.
 function packUsesRetell(pack){ return agenteTipoFromPack(pack) === 'orion'; }
+// El system prompt de texto se oculta en core-rag: su conocimiento sale de los
+// documentos RAG, no de un prompt escrito a mano.
+function packShowsPrompt(pack){ return String(pack||'').toLowerCase() !== 'core-rag'; }
 function agenteLabel(pack){
+  var p = String(pack||'').toLowerCase();
   var tipo = agenteTipoFromPack(pack);
   if(tipo === 'laura') return 'Laura IA (chat texto · Claude API)';
   if(tipo === 'itp')   return 'CALCULADORA ITP';
+  if(p === 'core-rag') return 'Orion IA + RAG (Retell + ElevenLabs)';
   return 'Orion IA (Retell + ElevenLabs)';
 }
 function agenteIcon(pack){
@@ -688,8 +694,10 @@ function openAgente(id){
   currentAgenteCli = id;
   $('agenteTitle').innerHTML = agenteIcon(c.pack)+' Agente · '+esc(c.cliente_nombre||'cliente');
   $('aAgenteBadge').textContent = agenteLabel(c.pack);
-  // El campo Retell agent ID solo aplica a packs de voz (orion-ia-agent, core-orion).
+  // El campo Retell agent ID solo aplica a packs de voz (orion-ia-agent, core-orion, core-rag).
   $('aRetellSection').style.display = packUsesRetell(c.pack) ? 'block' : 'none';
+  // core-rag oculta el system prompt de texto (su conocimiento viene del RAG).
+  $('aPromptSection').style.display = packShowsPrompt(c.pack) ? 'block' : 'none';
   $('aAgentId').value = c.agente_retell_agent_id || '';
   $('aPrompt').value = c.agente_system_prompt || '';
   $('aScript').textContent = agenteScript(c);
@@ -885,8 +893,10 @@ function refreshNewSnippet(){
   };
   $('nScript').textContent = snippetForPack(c);
   $('nAgenteBadge').textContent = agenteIcon(c.pack)+' Agente: '+agenteLabel(c.pack);
-  // El campo Retell agent ID solo aplica a packs de voz (orion-ia-agent, core-orion).
+  // El campo Retell agent ID solo aplica a packs de voz (orion-ia-agent, core-orion, core-rag).
   $('nRetellSection').style.display = packUsesRetell(c.pack) ? 'block' : 'none';
+  // core-rag oculta el system prompt de texto (su conocimiento viene del RAG).
+  $('nPromptSection').style.display = packShowsPrompt(c.pack) ? 'block' : 'none';
 }
 function copyNewSnippet(){
   var txt = ($('nScript').textContent||'').trim();

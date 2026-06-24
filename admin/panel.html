@@ -217,13 +217,13 @@ tr:hover td{background:#0d0d16}
     <div class="mb"><label>CallMeBot API Key <span class="muted" style="text-transform:none;font-size:.66rem">(WhatsApp del cliente · oculto por seguridad)</span></label><input type="password" id="nCallmebot" placeholder="Apikey de CallMeBot del cliente" autocomplete="off"></div>
     <div class="agente-box">
       <span class="agente-tag" id="nAgenteBadge">🎙️ Agente: Orion IA (Retell + ElevenLabs)</span>
-      <div class="mb" id="nRetellSection"><label>Retell agent ID <span class="muted" style="text-transform:none;font-size:.66rem">(solo Core / Scale / Elite)</span></label><input type="text" id="nAgentId" placeholder="agent_xxxxxxxxxxxxxxxx" oninput="refreshNewSnippet()"></div>
+      <div class="mb" id="nRetellSection"><label>Retell agent ID <span class="muted" style="text-transform:none;font-size:.66rem">(solo Orion IA Agent / Core Orion)</span></label><input type="text" id="nAgentId" placeholder="agent_xxxxxxxxxxxxxxxx" oninput="refreshNewSnippet()"></div>
       <div class="mb" id="nPromptSection"><label>System prompt</label><textarea id="nPrompt" rows="6" placeholder="Eres Orion, el agente de voz de [NEGOCIO]..."></textarea>
         <button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="loadPromptTpl('nPrompt','nNombre','nSector')">📋 Cargar plantilla base</button></div>
 
-      <!-- Documentos RAG · solo visible si el pack es core-rag / scale / elite (ver refreshFormRag) -->
+      <!-- Documentos RAG · solo visible si el pack es core-rag (ver refreshFormRag) -->
       <div class="mb" id="nRagSection" style="display:none">
-        <label>📚 Documentos RAG <span class="muted" style="text-transform:none;font-size:.66rem">(base de conocimiento · solo Core-RAG / Scale / Elite)</span></label>
+        <label>📚 Documentos RAG <span class="muted" style="text-transform:none;font-size:.66rem">(base de conocimiento · solo Core RAG)</span></label>
         <!-- Cliente nuevo, sin guardar todavía -->
         <div id="nRagNew" class="warn-box" style="display:none;margin:0">💾 Guarda el cliente primero para poder subir documentos.</div>
         <!-- Cliente ya existente -->
@@ -278,7 +278,7 @@ tr:hover td{background:#0d0d16}
   <div class="modal">
     <h3 id="agenteTitle">🎙️ Agente</h3>
     <span class="agente-tag" id="aAgenteBadge">Orion IA (Retell + ElevenLabs)</span>
-    <div class="mb"><label>Retell agent ID <span class="muted" style="text-transform:none;font-size:.66rem">(solo Core / Scale / Elite)</span></label><input type="text" id="aAgentId" placeholder="agent_xxxxxxxxxxxxxxxx" oninput="refreshAgenteSnippet()"></div>
+    <div class="mb" id="aRetellSection"><label>Retell agent ID <span class="muted" style="text-transform:none;font-size:.66rem">(solo Orion IA Agent / Core Orion)</span></label><input type="text" id="aAgentId" placeholder="agent_xxxxxxxxxxxxxxxx" oninput="refreshAgenteSnippet()"></div>
     <div class="mb"><label>System prompt de Orion</label><textarea id="aPrompt" rows="8" placeholder="Eres Orion, el agente de voz de [NEGOCIO]..."></textarea>
       <button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="loadPromptTpl('aPrompt')">📋 Cargar plantilla base</button></div>
     <div class="mb">
@@ -303,18 +303,14 @@ var REPO = 'NexusForgeIA/whitemoon-cdn';
 // MRR mensual por pack (alineado con el panel de precios).
 // Incluye alias snake_case (core_rag, orion_agent) porque las altas hechas
 // desde el CRM pueden llegar con ese formato — sin el alias el MRR de esas
-// filas saldría 0. Los packs retirados de venta (scale, elite, orion-ia-calls,
-// calculadora-itp) se conservan para que los clientes antiguos sigan
-// computando MRR y facturación.
-var PACK_MRR = { spark:199, 'orion-ia-agent':199, orion_agent:199, core:199, 'core-rag':349, core_rag:349,
-  /* legacy */ scale:449, elite:599, 'orion-ia-calls':199, orion_calls:199, 'calculadora-itp':99 };
-// Setup (pago único) por pack — mismos alias y legacy que PACK_MRR.
-var PACK_SETUP = { spark:499, 'orion-ia-agent':999, orion_agent:999, core:1800, 'core-rag':3200, core_rag:3200,
-  /* legacy */ scale:4500, elite:8500, 'orion-ia-calls':1499, orion_calls:1499, 'calculadora-itp':599 };
+// filas saldría 0.
+var PACK_MRR = { spark:199, 'orion-ia-agent':199, orion_agent:199, 'core-spark-web':199, 'core-orion':199, 'core-rag':349, core_rag:349, 'calculadora-itp':99 };
+// Setup (pago único) por pack — mismos alias que PACK_MRR.
+var PACK_SETUP = { spark:499, 'orion-ia-agent':999, orion_agent:999, 'core-spark-web':1800, 'core-orion':2899, 'core-rag':3200, core_rag:3200, 'calculadora-itp':599 };
 var SECTORES = ['dental','legal','restaurante','gestoria','clinica','inmobiliaria','gimnasio','peluqueria','veterinaria','formacion','taller','podologia','automovil','abogados'];
 // Packs en venta (dropdown de alta/edición). Los retirados no se ofrecen,
 // pero ensurePackOption() los inyecta al editar un cliente antiguo.
-var PACKS = ['spark','orion-ia-agent','core','core-rag'];
+var PACKS = ['spark','orion-ia-agent','core-spark-web','core-orion','core-rag'];
 
 var clientes = [];
 var pagosByCliente = {};   // cliente_id -> [pagos]
@@ -620,24 +616,28 @@ function deletePago(pagoId){
 
 // ─── AGENTE IA (snippet por pack · onboarding_clientes) ──────────────────────
 // El snippet que se instala en la web del cliente depende del pack:
-//   - spark                                              → chat.js (chatbot texto · Laura IA)
-//   - core / orion-ia-agent / orion-ia-calls             → orion-widget.js (voz · sin RAG)
-//   - core-rag / scale / elite                           → orion-widget.js con data-rag="true"
-//   - calculadora-itp                                    → itp.js (widget de calculadora ITP)
-// El atributo data-agent solo aparece en los snippets de orion-widget.js.
-// El atributo data-rag lo leerá orion-widget.js cuando se cablée RAG; hoy se
-// genera ya en el HTML para que la migración del lado widget no toque el panel.
-var PACKS_WITH_RAG = { 'core-rag':1, 'scale':1, 'elite':1 };
+//   - spark / core-spark-web   → chat.js (chatbot texto · Laura IA · Claude API)
+//   - core-rag                 → chat.js con data-rag="true" (texto + base RAG)
+//   - orion-ia-agent / core-orion → orion-widget.js (voz · Retell, data-agent)
+//   - calculadora-itp          → itp.js (widget de calculadora ITP)
+// El atributo data-agent solo aparece en los snippets de orion-widget.js (voz).
+// El atributo data-rag lo emite chat.js para activar la base de conocimiento RAG.
+var PACKS_WITH_RAG = { 'core-rag':1 };
 // Límite de documentos RAG por pack (cuenta archivos con estado != 'error').
-// Infinity = sin límite. Solo se cuentan packs presentes en PACKS_WITH_RAG.
-var RAG_LIMITES = { 'core-rag':100, 'scale':500, 'elite':Infinity };
+// Solo se cuentan packs presentes en PACKS_WITH_RAG.
+var RAG_LIMITES = { 'core-rag':100 };
 function ragLimite(pack){ return RAG_LIMITES[String(pack||'').toLowerCase()]; }
 function snippetForPack(c){
   var token = (c.token_cdn||'').trim();
   if(!token) return '— Falta token CDN para generar el script.';
   var pack = String(c.pack||'').toLowerCase();
-  if(pack === 'spark'){
+  // Packs de texto (Laura IA · Claude API): chat.js, sin widget de voz Retell.
+  if(pack === 'spark' || pack === 'core-spark-web'){
     return '<script src="'+CDN_BASE+'/chat.js"\n  data-token="'+esc(token)+'"><\/script>';
+  }
+  // core-rag: mismo chatbot de texto + base de conocimiento RAG (data-rag).
+  if(pack === 'core-rag'){
+    return '<script src="'+CDN_BASE+'/chat.js"\n  data-token="'+esc(token)+'"\n  data-rag="true"><\/script>';
   }
   if(pack === 'calculadora-itp'){
     // itp.js no necesita Retell agent — es un widget standalone con su propia
@@ -650,27 +650,27 @@ function snippetForPack(c){
       + (tel ? '\n  data-tel="'+esc(tel)+'"' : '')
       + '\n  defer><\/script>';
   }
+  // Packs de voz (Orion IA · Retell): orion-ia-agent, core-orion.
   var agentId = (c.agente_retell_agent_id||'').trim();
   if(!agentId){
     return '— Falta Retell agent ID para generar el script de Orion.';
   }
-  var rag = !!PACKS_WITH_RAG[pack];
-  return '<script src="'+CDN_BASE+'/orion-widget.js"\n  data-token="'+esc(token)+'"\n  data-agent="'+esc(agentId)+'"'
-    + (rag ? '\n  data-rag="true"' : '')
-    + '\n  defer><\/script>';
+  return '<script src="'+CDN_BASE+'/orion-widget.js"\n  data-token="'+esc(token)+'"\n  data-agent="'+esc(agentId)+'"\n  defer><\/script>';
 }
 function agenteScript(c){ return snippetForPack(c); }
 
 // Tipo + etiqueta + icono del badge según pack:
-//   - spark             → Laura IA (chat texto)
-//   - calculadora-itp   → Calculadora ITP (widget independiente, no hay agente IA)
-//   - resto             → Orion IA (voz Retell)
+//   - spark / core-spark-web / core-rag  → Laura IA (chat texto · Claude API)
+//   - orion-ia-agent / core-orion        → Orion IA (voz Retell)
+//   - calculadora-itp                    → Calculadora ITP (widget, sin agente IA)
 function agenteTipoFromPack(pack){
   var p = String(pack||'').toLowerCase();
-  if(p === 'spark') return 'laura';
   if(p === 'calculadora-itp') return 'itp';
-  return 'orion';
+  if(p === 'orion-ia-agent' || p === 'core-orion') return 'orion';
+  return 'laura';
 }
+// Solo los packs de voz (Orion · Retell) usan el campo Retell agent ID.
+function packUsesRetell(pack){ return agenteTipoFromPack(pack) === 'orion'; }
 function agenteLabel(pack){
   var tipo = agenteTipoFromPack(pack);
   if(tipo === 'laura') return 'Laura IA (chat texto · Claude API)';
@@ -688,6 +688,8 @@ function openAgente(id){
   currentAgenteCli = id;
   $('agenteTitle').innerHTML = agenteIcon(c.pack)+' Agente · '+esc(c.cliente_nombre||'cliente');
   $('aAgenteBadge').textContent = agenteLabel(c.pack);
+  // El campo Retell agent ID solo aplica a packs de voz (orion-ia-agent, core-orion).
+  $('aRetellSection').style.display = packUsesRetell(c.pack) ? 'block' : 'none';
   $('aAgentId').value = c.agente_retell_agent_id || '';
   $('aPrompt').value = c.agente_system_prompt || '';
   $('aScript').textContent = agenteScript(c);
@@ -825,7 +827,7 @@ function resetEstadoOptions(){
   for(var i=sel.options.length-1;i>=0;i--){ if(!keep[sel.options[i].value]) sel.remove(i); }
 }
 // Mismo patrón para el pack: el dropdown solo ofrece los packs en venta
-// (PACKS), pero un cliente antiguo puede tener uno retirado (scale, elite…).
+// (PACKS), pero un cliente antiguo puede tener uno retirado o renombrado.
 // Sin inyectarlo, el <select> caería a la primera opción y al guardar se
 // pisaría el pack real del cliente.
 function resetPackOptions(){
@@ -883,6 +885,8 @@ function refreshNewSnippet(){
   };
   $('nScript').textContent = snippetForPack(c);
   $('nAgenteBadge').textContent = agenteIcon(c.pack)+' Agente: '+agenteLabel(c.pack);
+  // El campo Retell agent ID solo aplica a packs de voz (orion-ia-agent, core-orion).
+  $('nRetellSection').style.display = packUsesRetell(c.pack) ? 'block' : 'none';
 }
 function copyNewSnippet(){
   var txt = ($('nScript').textContent||'').trim();
@@ -941,7 +945,7 @@ function saveCliente(){
 }
 
 // ─── DOCUMENTOS RAG (Supabase · rag_archivos + Edge Function rag-ingest) ──────
-// Solo aplica a packs con RAG (core-rag / scale / elite — ver PACKS_WITH_RAG).
+// Solo aplica a packs con RAG (core-rag — ver PACKS_WITH_RAG).
 // La ingesta la hace la Edge Function rag-ingest: extrae texto (PDF con unpdf,
 // TXT/MD como texto plano), trocea en chunks, genera embeddings y registra el
 // archivo en rag_archivos con su estado (procesando → listo / error). El panel
@@ -963,8 +967,8 @@ function loadRagArchivos(){
 // Nº de documentos que cuentan para el límite: todos menos los que fallaron.
 function ragCountActivos(){ return ragArchivos.filter(function(a){ return a.estado!=='error'; }).length; }
 
-// Pinta el contador "X / N documentos" (o "X documentos · Sin límite" en elite)
-// y bloquea el botón de subir + muestra el aviso cuando se alcanza el límite.
+// Pinta el contador "X / N documentos" y bloquea el botón de subir + muestra
+// el aviso cuando se alcanza el límite.
 function renderRagLimit(){
   var pack = String($('nPack').value||'').toLowerCase();
   var limite = ragLimite(pack);

@@ -86,13 +86,13 @@
         var card;
         if(pack === 'Spark'){
           card =
-            '<b>🚀 Pack Spark — 499€ setup + 199€/mes</b><br>'+
+            '<b>🚀 Pack Spark — 499€ setup + 99€/mes</b><br>'+
             '🤖 Chatbot IA con flujo específico para <b>'+sec+'</b><br>'+
             '📱 Captura leads 24/7 → WhatsApp inmediato<br>'+
             '⚡ Operativo en 5-7 días · Sin permanencia';
         } else {
           card =
-            '<b>🌐 Pack Core — 1.800€ setup + 199€/mes</b><br>'+
+            '<b>🌐 Pack Core — 899€ setup + 99€/mes</b><br>'+
             '🌐 Web profesional + Chatbot IA para <b>'+sec+'</b><br>'+
             '📱 Captura leads 24/7 → WhatsApp inmediato<br>'+
             '🔍 SEO básico incluido · Sin permanencia';
@@ -124,7 +124,7 @@
           { key:'dominio', msg:'¿Tienes dominio y hosting?',  opts:['Tengo todo','Necesito todo','No sé'] }
         ], function(data){
           w.bot(
-            '<b>🌐 Pack Core — 1.800€ setup + 199€/mes</b><br>'+
+            '<b>🌐 Pack Core — 899€ setup + 99€/mes</b><br>'+
             'Web profesional + Chatbot IA para <b>'+u.escapeHtml(data.sector)+'</b><br>'+
             '🔍 SEO básico · 📱 Captura 24/7 → WhatsApp · Sin permanencia',
             function(){ capture('Pack Core', data.sector); }
@@ -182,9 +182,9 @@
       function mostrarPrecios(){
         w.bot(
           '💰 <b>Precios WhiteMoon</b> — Sin permanencia:<br>'+
-          '🤖 Spark: 499€ setup + 199€/mes<br>'+
-          '🌐 Core (web+chatbot): 1.800€ setup + 199€/mes<br>'+
-          '📈 Scale (RAG+CRM): 3.500€ setup + 349€/mes<br>'+
+          '🤖 Spark: 499€ setup + 99€/mes<br>'+
+          '🌐 Core (web+chatbot): 899€ setup + 99€/mes<br>'+
+          '📈 Scale (RAG+CRM): 3.500€ setup + 99€/mes<br>'+
           '🚀 Elite (RAG premium): 6.500€ setup + 599€/mes<br>'+
           '📋 Auditoría IA: 899€ pago único<br>'+
           '🔭 Scout Starter: 299€ setup + 299€/mes',

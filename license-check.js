@@ -28,14 +28,29 @@
     .catch(function(){ fallback(cb); }); // Edge Function no disponible → fallback
   }
 
+  // Normalización idéntica a verify-token v16 (strip protocolo, www, puerto).
+  function normalizeDomain(raw){
+    if(!raw) return '';
+    var d = String(raw).trim().toLowerCase();
+    if(d.indexOf('http://') === 0 || d.indexOf('https://') === 0){
+      try { d = new URL(d).hostname; } catch(e){ return ''; }
+    }
+    return d.replace(/^www\./, '').replace(/:\d+$/, '');
+  }
+
   function fallback(cb){
     fetch('https://nexusforgeia.github.io/whitemoon-cdn/licenses.json?_=' + Date.now())
     .then(function(r){ return r.json(); })
     .then(function(data){
       var lic = data.licenses && data.licenses[token];
-      cb(!!(lic && lic.active));
+      if(!lic || !lic.active){ cb(false); return; }
+      // Capa 1: además de token activo, el dominio actual debe coincidir con
+      // el guardado en la licencia (mismo criterio que verify-token v16).
+      var reqDomain = normalizeDomain(location.hostname);
+      var licDomain = normalizeDomain(lic.domain);
+      cb(!!(reqDomain && licDomain && reqDomain === licDomain));
     })
-    .catch(function(){ cb(true); }); // si TODO falla, no desactivar
+    .catch(function(){ cb(true); }); // si TODO falla (red/JSON), no desactivar
   }
 
   function disableChat(){

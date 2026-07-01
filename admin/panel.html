@@ -199,7 +199,7 @@ tr:hover td{background:#0d0d16}
     </div>
     <div class="g2">
       <div><label>Nombre cliente *</label><input type="text" id="nNombre" placeholder="Clínica Dental Sonríe" oninput="refreshNewSnippet()"></div>
-      <div><label>Dominio web</label><input type="text" id="nUrl" placeholder="clinicasonrie.es"></div>
+      <div><label>Dominio web <span style="color:var(--warn)">*</span></label><input type="text" id="nUrl" placeholder="clinicasonrie.es"></div>
     </div>
     <div class="g2">
       <div><label>Sector</label><select id="nSector"></select></div>
@@ -908,13 +908,15 @@ function copyNewSnippet(){
 function saveCliente(){
   var token=($('nToken').value||'').trim().replace(/[^A-Za-z0-9\-_]/g,'');
   var nombre=($('nNombre').value||'').trim();
+  var url=($('nUrl').value||'').trim();
   if(!token){ toast('Token obligatorio','err'); return; }
   if(!nombre){ toast('Nombre obligatorio','err'); return; }
+  if(!url){ toast('Dominio web obligatorio','err'); return; }
   var pack = $('nPack').value || null;
   var body = {
     token_cdn: token,
     cliente_nombre: nombre,
-    url_web_cliente: ($('nUrl').value||'').trim() || null,
+    url_web_cliente: url,
     sector: $('nSector').value || null,
     pack: pack,
     estado: $('nEstado').value || 'completado',

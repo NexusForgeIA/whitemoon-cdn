@@ -7,41 +7,12 @@
       "active": true,
       "created": "2026-05-11",
       "expires": "2099-05-11",
-      "contact": "",
       "phone": "",
-      "notes": "Pack Core · 3 pagos 600€ · 199€/mes · Web completa con chatbot",
       "botName": "Asistente",
       "color": "#7c3aed",
       "calendar": true,
       "greeting": "",
       "serviceButtons": [],
-      "pendingPayments": [
-        {
-          "concept": "Pago 2: \"Setup Core - Pago 2/3\" · 600€ · fecha: +2 meses",
-          "amount": 600,
-          "dueDate": "2026-07-12",
-          "paid": false
-        },
-        {
-          "concept": "Pago 3: \"Setup Core - Pago 3/3\" · 600€ · fecha: +4 meses",
-          "amount": 600,
-          "dueDate": "2026-11-12",
-          "paid": false
-        },
-        {
-          "concept": "Cuota mensual: \"Cuota mensual Core\" · 199€ · fecha: +1 mes",
-          "amount": 199,
-          "dueDate": "2026-06-12",
-          "paid": false
-        },
-        {
-          "concept": "Setup Core - Pago 1/3",
-          "amount": 600,
-          "dueDate": "2026-05-12",
-          "paid": true,
-          "paidDate": "2026-05-14"
-        }
-      ],
       "updated": "2026-05-11T17:41:09.993Z"
     }
   }

@@ -81,10 +81,22 @@
     };
   }
 
+  // Normalización idéntica a verify-token v16 (strip protocolo, www, puerto).
+  function normalizeDomain(raw){
+    if(!raw) return '';
+    var d = String(raw).trim().toLowerCase();
+    if(d.indexOf('http://') === 0 || d.indexOf('https://') === 0){
+      try { d = new URL(d).hostname; } catch(e){ return ''; }
+    }
+    return d.replace(/^www\./, '').replace(/:\d+$/, '');
+  }
+
   function proceed(lic){
-    var host = window.location.hostname;
-    var local = host === 'localhost' || host === '127.0.0.1' || host === '' || host.includes('github.io');
-    if(!local && lic.domain && !host.includes(lic.domain)){ console.warn('[WM-CHAT] Dominio no autorizado'); return; }
+    var host = normalizeDomain(window.location.hostname);
+    var local = host === 'localhost' || host === '127.0.0.1' || host === '' || host.indexOf('github.io') !== -1;
+    var licDomain = normalizeDomain(lic.domain);
+    // Igualdad exacta normalizada (antes host.includes(lic.domain), subcadena débil).
+    if(!local && licDomain && host !== licDomain){ console.warn('[WM-CHAT] Dominio no autorizado'); return; }
     if(lic.expires && new Date(lic.expires) < new Date()){ console.warn('[WM-CHAT] Licencia expirada'); return; }
 
     if(lic.template){

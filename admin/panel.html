@@ -211,7 +211,7 @@ tr:hover td{background:#0d0d16}
     </div>
     <div class="g2">
       <div><label>Sector</label><select id="nSector"></select></div>
-      <div><label>Pack</label><select id="nPack" onchange="refreshNewSnippet();refreshFormRag()"></select></div>
+      <div><label>Pack</label><select id="nPack" onchange="refreshNewSnippet();refreshFormRag();switchPackDefaults(this.value)"></select></div>
     </div>
     <div class="g2">
       <div><label>Estado</label><select id="nEstado">
@@ -226,7 +226,7 @@ tr:hover td{background:#0d0d16}
     <div class="agente-box">
       <span class="agente-tag" id="nAgenteBadge">🎙️ Agente: Orion IA (Retell + ElevenLabs)</span>
       <div class="mb" id="nRetellSection"><label>Retell agent ID <span class="muted" style="text-transform:none;font-size:.66rem">(solo Orion IA Agent / Core Orion / Core RAG)</span></label><input type="text" id="nAgentId" placeholder="agent_xxxxxxxxxxxxxxxx" oninput="refreshNewSnippet()"></div>
-      <div class="mb" id="nPromptSection"><label>System prompt</label><textarea id="nPrompt" rows="6" placeholder="Eres Orion, el agente de voz de [NEGOCIO]..."></textarea>
+      <div class="mb" id="nPromptSection"><label>System prompt</label><textarea id="nPrompt" rows="6" placeholder="Se autocompleta según el pack. Edítalo si quieres personalizarlo." oninput="markPromptDirty()"></textarea>
         <button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="loadPromptTpl('nPrompt','nNombre','nSector')">📋 Cargar plantilla base</button></div>
 
       <!-- Documentos RAG · solo visible si el pack es core-rag (ver refreshFormRag) -->
@@ -726,6 +726,46 @@ function agenteIcon(pack){
   if(tipo === 'itp')   return '🧮';
   return '🎙️';
 }
+
+// ─── AUTO-DEFAULTS POR PACK (solo formulario de alta) ────────────────────────
+// System prompt por defecto según el pack. Texto (chat.js) para spark/core-spark-web,
+// voz (orion-widget.js) para orion-ia-agent/core-orion, y voz+RAG para core-rag.
+// [NEGOCIO] se sustituye por el nombre del cliente si ya está escrito.
+function packPromptDefault(pack, negocio){
+  var neg = (negocio && negocio.trim()) ? negocio.trim() : '[NEGOCIO]';
+  var p = String(pack||'').toLowerCase();
+  if(agenteTipoFromPack(pack) !== 'orion'){
+    // TEXTO — spark / core-spark-web (chat.js)
+    return 'Eres Laura, el asistente virtual de '+neg+'.\n'
+      + 'Atiendes consultas 24/7 por chat. Eres amable, conciso y profesional. '
+      + 'Máximo 3 frases por respuesta. Una pregunta a la vez. '
+      + 'Cuando tengas nombre y teléfono del cliente, cierra la conversación y registra el lead.';
+  }
+  if(p === 'core-rag'){
+    // VOZ + RAG — core-rag (orion-widget.js + base de conocimiento)
+    return 'Eres Orion, el agente de voz de '+neg+'.\n'
+      + 'Tienes acceso a la base de conocimiento de la empresa. '
+      + 'Atiendes llamadas 24/7 con información precisa y actualizada. '
+      + 'Máximo 2-3 frases por turno. Consulta siempre los documentos antes de responder. '
+      + 'Cuando tengas nombre y teléfono, registra el lead.';
+  }
+  // VOZ — orion-ia-agent / core-orion (orion-widget.js)
+  return 'Eres Orion, el agente de voz de '+neg+'.\n'
+    + 'Atiendes llamadas 24/7. Eres natural, empático y directo. '
+    + 'Máximo 2-3 frases por turno. Gestiona citas vía Cal.com. '
+    + 'Cuando tengas nombre y teléfono, confirma la cita o registra el lead.';
+}
+// Flag: el usuario ha editado el prompt a mano → no lo autocompletamos al cambiar pack.
+var promptDirty = false;
+function markPromptDirty(){ promptDirty = true; }
+// Al cambiar el pack en el alta: el tipo de agente y el snippet ya se adaptan
+// vía refreshNewSnippet(); aquí solo autocargamos el prompt correcto por pack,
+// salvo que el usuario ya lo haya tocado manualmente.
+function switchPackDefaults(pack){
+  if(!promptDirty){
+    $('nPrompt').value = packPromptDefault(pack, $('nNombre').value);
+  }
+}
 function openAgente(id){
   var c = clientes.filter(function(x){ return x.id===id; })[0]; if(!c) return;
   currentAgenteCli = id;
@@ -812,6 +852,8 @@ function loadPromptTpl(targetId, nameId, sectorId){
 '- NUNCA menciones competidores\n'+
 '- Si preguntan si eres IA, responde\n'+
 '  con transparencia';
+  // Carga manual explícita → marca el prompt como tocado para no autocompletarlo al cambiar pack.
+  if(targetId === 'nPrompt') promptDirty = true;
 }
 
 // ─── MODO AUTOMÁTICO PAGOS (global) ──────────────────────────────────────────
@@ -836,6 +878,8 @@ function openNew(){
   $('nSave').textContent = 'Crear cliente';
   resetEstadoOptions(); resetPackOptions();
   $('nToken').value=genTokenValue(); $('nNombre').value=''; $('nUrl').value=''; $('nSector').value=''; $('nPack').value='spark'; $('nEstado').value='completado'; $('nPago').value=''; $('nNotas').value=''; $('nCallmebot').value=''; $('nAgentId').value=''; $('nPrompt').value='';
+  promptDirty = false;                 // cliente nuevo: prompt aún no tocado
+  switchPackDefaults($('nPack').value); // autocarga el prompt del pack inicial (spark → texto)
   refreshNewSnippet(); refreshFormRag();
   $('newBg').classList.add('show');
 }
@@ -861,6 +905,8 @@ function openEditCliente(id){
   $('nCallmebot').value = c.callmebot_apikey || '';
   $('nAgentId').value = c.agente_retell_agent_id || '';
   $('nPrompt').value = c.agente_system_prompt || '';
+  // Editando un cliente: respetamos su prompt guardado (no autocompletar al tocar pack).
+  promptDirty = true;
   refreshNewSnippet(); refreshFormRag();
   $('newBg').classList.add('show');
 }

@@ -97,6 +97,14 @@ tr:hover td{background:#0d0d16}
 .pago-amt{font-weight:800;color:var(--warn);white-space:nowrap}
 .pago-amt.paid{color:var(--accent)}
 .pago-add{display:grid;grid-template-columns:1fr 92px 1fr auto;gap:8px;align-items:end;margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
+.pagos-resumen{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.pagos-resumen>div{background:#111118;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.pagos-resumen .pr-l{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:4px}
+.pagos-resumen .pr-v{font-size:.9rem;font-weight:800}
+.pagos-resumen .pr-v.warn{color:var(--warn)}
+.pagos-resumen .pr-v.accent{color:var(--accent)}
+.pago-notas{font-size:.7rem;color:var(--muted);margin-top:4px;font-style:italic}
+@media(max-width:600px){.pagos-resumen{grid-template-columns:1fr}}
 .badge-pend{background:rgba(245,165,36,.15);color:var(--warn)}
 .badge-paid{background:rgba(0,212,170,.15);color:var(--accent)}
 .pago-pill{font-size:.62rem;padding:1px 7px;border-radius:10px;background:rgba(245,165,36,.16);color:var(--warn);font-weight:700;margin-left:5px}
@@ -260,12 +268,14 @@ tr:hover td{background:#0d0d16}
     <h3 id="pagosTitle">👤 Cliente</h3>
     <p class="muted" style="font-size:.74rem;margin:-8px 0 14px">Ficha del cliente · historial multi-pago: setup, renovaciones, cuotas puntuales.</p>
     <div class="cli-info" id="pagosCliInfo"></div>
+    <div id="pagosResumen"></div>
     <div id="pagosList"><div class="empty">—</div></div>
     <div class="pago-add">
       <div><label>Concepto</label><input type="text" id="pConcepto" placeholder="Setup inicial Spark"></div>
       <div><label>Importe €</label><input type="number" id="pImporte" placeholder="0" min="0" step="0.01"></div>
       <div><label>Vencimiento</label><input type="date" id="pVenc"></div>
-      <div><button class="btn btn-p" id="pAdd" onclick="addPago()">+ Añadir</button></div>
+      <div><button class="btn btn-p" id="pAdd" onclick="addPago()">+ Añadir pago</button></div>
+      <div style="grid-column:1/-1"><label>Notas (opcional)</label><input type="text" id="pNotas" placeholder="Notas internas del pago…"></div>
     </div>
     <div style="display:flex;justify-content:flex-end;margin-top:16px">
       <button class="btn btn-ghost" onclick="closePagos()">Cerrar</button>
@@ -369,7 +379,7 @@ function loadData(){
   Promise.all([
     sbGet('onboarding_clientes?select=id,token_cdn,estado,cliente_nombre,cliente_email,cliente_telefono,sector,pack,url_web_cliente,notas,fecha_proximo_pago,fecha_inicio,created_at,agente_tipo,agente_retell_agent_id,agente_system_prompt,callmebot_apikey&order=created_at.desc'),
     sbGet('cdn_config?id=eq.true&select=modo_automatico_pagos'),
-    sbGet('historial_pagos?select=id,cliente_id,concepto,importe,fecha_vencimiento,pagado,fecha_pago,created_at&order=fecha_vencimiento.asc')
+    sbGet('historial_pagos?select=id,cliente_id,concepto,importe,fecha_vencimiento,pagado,fecha_pago,notas,created_at&order=fecha_vencimiento.asc')
   ]).then(function(res){
     clientes = res[0] || [];
     var cfg = (res[1] && res[1][0]) || { modo_automatico_pagos:false };
@@ -544,13 +554,32 @@ function openPagos(id){
   var c = clientes.filter(function(x){ return x.id===id; })[0] || {};
   $('pagosTitle').innerHTML = '👤 '+esc(c.cliente_nombre||'cliente');
   $('pagosCliInfo').innerHTML = clienteInfoHTML(c);
-  $('pConcepto').value=''; $('pImporte').value=''; $('pVenc').value='';
+  $('pConcepto').value=''; $('pImporte').value=''; $('pVenc').value=''; $('pNotas').value='';
   renderPagos();
   $('pagosBg').classList.add('show');
 }
 function closePagos(){ $('pagosBg').classList.remove('show'); currentPagoCli=null; }
 
+// Resumen por cliente sobre la tabla: pendiente de cobro, próximo pago, cobrado.
+// Nota: "pendiente" = suma de todos los no pagados. No se separa setup vs cuota
+// porque historial_pagos no tiene columna `tipo` (el concepto es texto libre).
+function pagosResumenHTML(id){
+  var arr = pagosDe(id);
+  if(!arr.length) return '';
+  var pendientes = arr.filter(function(p){ return !p.pagado; });
+  var pend = pendientes.reduce(function(s,p){ return s+(parseFloat(p.importe)||0); },0);
+  var cobrado = arr.filter(function(p){ return p.pagado; }).reduce(function(s,p){ return s+(parseFloat(p.importe)||0); },0);
+  var prox = pendientes.slice().sort(function(a,b){ return (a.fecha_vencimiento||'').localeCompare(b.fecha_vencimiento||''); })[0];
+  var proxTxt = prox ? (fmtDate(prox.fecha_vencimiento)+' — '+(parseFloat(prox.importe)||0).toFixed(2)+'€') : '—';
+  return '<div class="pagos-resumen">'
+    +'<div><div class="pr-l">Pendiente de cobro</div><div class="pr-v warn">'+pend.toFixed(2)+'€</div></div>'
+    +'<div><div class="pr-l">Próximo pago</div><div class="pr-v">'+esc(proxTxt)+'</div></div>'
+    +'<div><div class="pr-l">Total cobrado</div><div class="pr-v accent">'+cobrado.toFixed(2)+'€</div></div>'
+    +'</div>';
+}
+
 function renderPagos(){
+  $('pagosResumen').innerHTML = pagosResumenHTML(currentPagoCli);
   var list = pagosDe(currentPagoCli).slice().sort(function(a,b){
     return (a.fecha_vencimiento||'').localeCompare(b.fecha_vencimiento||'');
   });
@@ -569,11 +598,13 @@ function renderPagos(){
       : (fmtDate(p.fecha_vencimiento)+(lbl?(' · '+lbl):''));
     h+='<div class="pago-item '+cls+'">'
       +'<div><div class="pago-c">'+esc(p.concepto)+' <span class="badge '+(p.pagado?'badge-paid':'badge-pend')+'">'+(p.pagado?'✅ PAGADO':'⏳ PENDIENTE')+'</span></div>'
-      +'<div class="pago-meta">'+esc(meta)+'</div></div>'
+      +'<div class="pago-meta">'+esc(meta)+'</div>'
+      +(p.notas?('<div class="pago-notas">📝 '+esc(p.notas)+'</div>'):'')+'</div>'
       +'<div style="display:flex;align-items:center;gap:8px">'
       +'<span class="pago-amt'+(p.pagado?' paid':'')+'">'+(parseFloat(p.importe)||0).toFixed(2)+'€</span>'
-      +(p.pagado?'':'<button class="btn btn-a btn-sm" onclick="markPagado(\''+esc(p.id)+'\')">✓ Cobrado</button>')
-      +'<button class="btn btn-d btn-sm" onclick="deletePago(\''+esc(p.id)+'\')">🗑</button>'
+      // Los cobrados NO se pueden marcar ni eliminar (histórico intacto).
+      +(p.pagado?'':'<button class="btn btn-a btn-sm" onclick="markPagado(\''+esc(p.id)+'\')">✓ Cobrado</button>'
+        +'<button class="btn btn-d btn-sm" onclick="deletePago(\''+esc(p.id)+'\')" title="Eliminar pago">✕</button>')
       +'</div></div>';
   });
   $('pagosList').innerHTML=h;
@@ -584,13 +615,14 @@ function addPago(){
   var concepto=($('pConcepto').value||'').trim();
   var importe=parseFloat($('pImporte').value);
   var venc=$('pVenc').value||null;
+  var notas=($('pNotas').value||'').trim()||null;
   if(!concepto){ toast('Concepto obligatorio','err'); return; }
   if(isNaN(importe)||importe<0){ toast('Importe inválido','err'); return; }
   $('pAdd').disabled=true;
-  sbInsert('historial_pagos', { cliente_id:currentPagoCli, concepto:concepto, importe:importe, fecha_vencimiento:venc, pagado:false })
+  sbInsert('historial_pagos', { cliente_id:currentPagoCli, concepto:concepto, importe:importe, fecha_vencimiento:venc, pagado:false, notas:notas })
   .then(function(rows){
     (pagosByCliente[currentPagoCli]=pagosByCliente[currentPagoCli]||[]).push(rows[0]);
-    $('pAdd').disabled=false; $('pConcepto').value=''; $('pImporte').value=''; $('pVenc').value='';
+    $('pAdd').disabled=false; $('pConcepto').value=''; $('pImporte').value=''; $('pVenc').value=''; $('pNotas').value='';
     renderPagos(); render(); toast('Pago añadido ✅');
   })
   .catch(function(e){ $('pAdd').disabled=false; toast('Error: '+String(e.message).slice(0,120),'err'); });
@@ -598,16 +630,21 @@ function addPago(){
 
 function markPagado(pagoId){
   var p = pagosDe(currentPagoCli).filter(function(x){ return x.id===pagoId; })[0]; if(!p) return;
-  if(!confirm('¿Marcar "'+p.concepto+'" ('+(parseFloat(p.importe)||0).toFixed(2)+'€) como cobrado?')) return;
   var hoy = new Date().toISOString().split('T')[0];
-  sbPatch('historial_pagos','id=eq.'+encodeURIComponent(pagoId), { pagado:true, fecha_pago:hoy })
-  .then(function(){ p.pagado=true; p.fecha_pago=hoy; renderPagos(); render(); toast('Pago cobrado ✅'); })
+  // Confirmación + fecha de cobro editable (por defecto hoy).
+  var fecha = prompt('Marcar "'+p.concepto+'" ('+(parseFloat(p.importe)||0).toFixed(2)+'€) como cobrado.\nFecha de cobro (YYYY-MM-DD):', hoy);
+  if(fecha===null) return; // cancelado
+  fecha = (fecha||'').trim() || hoy;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(fecha)){ toast('Fecha inválida (usa YYYY-MM-DD)','err'); return; }
+  sbPatch('historial_pagos','id=eq.'+encodeURIComponent(pagoId), { pagado:true, fecha_pago:fecha })
+  .then(function(){ p.pagado=true; p.fecha_pago=fecha; renderPagos(); render(); toast('Pago cobrado ✅'); })
   .catch(function(e){ toast('Error: '+e.message,'err'); });
 }
 
 function deletePago(pagoId){
   var arr = pagosDe(currentPagoCli);
   var p = arr.filter(function(x){ return x.id===pagoId; })[0]; if(!p) return;
+  if(p.pagado){ toast('Un pago cobrado no se puede eliminar','err'); return; }
   if(!confirm('¿Eliminar el pago "'+p.concepto+'"? Esta acción no se puede deshacer.')) return;
   sbDelete('historial_pagos','id=eq.'+encodeURIComponent(pagoId))
   .then(function(){ pagosByCliente[currentPagoCli]=arr.filter(function(x){ return x.id!==pagoId; }); renderPagos(); render(); toast('Pago eliminado'); })

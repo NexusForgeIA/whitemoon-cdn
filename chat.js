@@ -16,6 +16,10 @@
   // Este archivo público NO incluye ninguna credencial de Supabase.
   // licenses.json se mantiene como fallback para no interrumpir clientes instalados.
   var VERIFY_ENDPOINT = 'https://mlaqtniujnvfxcvcourm.supabase.co/functions/v1/verify-token';
+  // Notificación de leads: server-side vía Telegram (un bot compartido; cada
+  // cliente recibe solo sus leads en su propio chat_id, configurado en el panel).
+  // El token del bot vive en Secrets de Supabase y NUNCA llega al navegador.
+  var NOTIFY_ENDPOINT = 'https://mlaqtniujnvfxcvcourm.supabase.co/functions/v1/cdn-lead-notify';
 
   verifyToken();
 
@@ -28,12 +32,10 @@
         fetchLicensesJson().then(function(licenses){
           var rich = licenses && licenses[token];
           var lic = rich || licFromEdge(res);
-          // El WhatsApp del cliente (número + apikey de CallMeBot) vive en Supabase
-          // y llega por la Edge Function. Lo fusionamos también en la config "rica"
-          // de licenses.json para que el chatbot entregue los leads al número del
-          // cliente aunque su token ya estuviera en licenses.json.
+          // El teléfono del cliente (para el botón wa.me manual) vive en Supabase y
+          // llega por la Edge Function. Lo fusionamos también en la config "rica" de
+          // licenses.json por si el token ya estuviera allí sin teléfono.
           if(rich){
-            if(!rich.callmebotApikey && res.callmebot_apikey) rich.callmebotApikey = res.callmebot_apikey;
             if(!rich.phone && (res.telefono || res.cliente_telefono)) rich.phone = res.telefono || res.cliente_telefono;
           }
           proceed(lic);
@@ -70,11 +72,10 @@
     return {
       biz: res.nombre || '', domain: res.url || '', pack: res.pack || '', template: res.sector || '',
       active: true, _source: 'edge',
-      // WhatsApp del cliente: número (cliente_telefono) + apikey de CallMeBot.
-      // Permiten que el chatbot entregue los leads al WhatsApp del propio cliente
-      // usando SU número y SU apikey, en lugar de los de WhiteMoon.
+      // Teléfono del cliente (cliente_telefono): alimenta el botón wa.me manual
+      // del cierre del chat. La entrega automática del lead ya no usa este número:
+      // va server-side por Telegram (cdn-lead-notify) al chat_id del cliente.
       phone: res.telefono || res.cliente_telefono || '',
-      callmebotApikey: res.callmebot_apikey || '',
       agentEndpoint: agentEndpoint,        // '' → ai-claude usa la Edge Function por defecto
       aiPrompt: aiPrompt,
       aiEnabled: !!(aiPrompt || agentEndpoint)  // cliente Laura si tiene prompt o endpoint propio
@@ -143,18 +144,18 @@
     return String(text||'').replace(/\{(\w+)\}/g, function(_, k){ return vars[k] !== undefined ? vars[k] : ''; });
   }
   function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-  // Entrega el lead por WhatsApp al número del cliente vía CallMeBot. El número
-  // se normaliza a dígitos y se le antepone el prefijo 34 si viene sin él (igual
-  // que el enlace wa.me). Se usa mode:'no-cors' porque CallMeBot no envía cabeceras
-  // CORS: solo nos interesa disparar el envío, no leer la respuesta.
-  function sendCallMeBot(phone, apikey, text){
-    var p = String(phone||'').replace(/[^0-9]/g, '');
-    if(!p || !apikey) return;
-    if(p.length <= 9) p = '34' + p;
-    var url = 'https://api.callmebot.com/whatsapp.php?phone=' + encodeURIComponent(p)
-      + '&text=' + encodeURIComponent(text)
-      + '&apikey=' + encodeURIComponent(apikey);
-    fetch(url, { mode:'no-cors' }).catch(function(){});
+  // Entrega el lead server-side: POST a cdn-lead-notify con el token del cliente
+  // + los datos del lead. La Edge Function busca el chat_id de Telegram del cliente
+  // por su token y envía el mensaje con el bot compartido (token del bot en Secrets,
+  // nunca en el navegador). Si el cliente no tiene chat_id, responde ok sin enviar.
+  function postLead(payload){
+    try {
+      fetch(NOTIFY_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).catch(function(){});
+    } catch(e){}
   }
   function escAttr(s){ return escapeHtml(s).replace(/"/g,'&quot;'); }
   function hexToRgb(hex){
@@ -180,9 +181,6 @@
       summary:    (licResp && licResp._summary)   || (tplResp && tplResp._summary)   || 'Perfecto {nombre}. Te contactamos en breve.',
       template:   lic.template || '',
       token:      token,
-      // Apikey de CallMeBot del cliente — si está presente, los leads se entregan
-      // automáticamente por WhatsApp al número del cliente (cfg.tel) vía CallMeBot.
-      callmebotApikey: lic.callmebotApikey || '',
       aiEnabled:  !!lic.aiEnabled,
       agentEndpoint: lic.agentEndpoint || '',  // Edge Function propia del cliente ('' = por defecto)
       aiPrompt:   lic.aiPrompt || ''
@@ -506,11 +504,18 @@
         ? 'https://wa.me/34'+cfg.tel+'?text='+encodeURIComponent(msg)
         : 'https://wa.me/?text='+encodeURIComponent(msg);
 
-      // Entrega automática del lead por WhatsApp vía CallMeBot, usando el número
-      // y la apikey del propio cliente (configurados en el panel CDN). El botón
-      // wa.me de abajo se mantiene como confirmación manual. Si el cliente no
-      // tiene CallMeBot configurado, este envío simplemente no se dispara.
-      if(cfg.callmebotApikey && cfg.tel) sendCallMeBot(cfg.tel, cfg.callmebotApikey, msg);
+      // Entrega automática del lead server-side por Telegram (cdn-lead-notify).
+      // La Edge Function resuelve el chat_id del cliente por su token y envía con
+      // el bot compartido. El botón wa.me de abajo se mantiene como confirmación
+      // manual. Si el cliente no tiene Telegram configurado, no se envía nada.
+      postLead({
+        token:    cfg.token,
+        nombre:   leadData.nombre || '',
+        telefono: leadData.telefono ? '+34' + leadData.telefono : '',
+        servicio: tramite || '',
+        zona:     leadData.zona || opts.zona || '',
+        mensaje:  prioridad ? (detalle + ' | Prioridad: ' + prioridad) : detalle
+      });
 
       var fin = opts.finish || {};
       var agente = opts.agent || fin.agent || 'gestor/a';

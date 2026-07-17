@@ -222,7 +222,8 @@ tr:hover td{background:#0d0d16}
       <div><label>Próximo pago</label><input type="date" id="nPago"></div>
     </div>
     <div class="mb"><label>Notas</label><textarea id="nNotas" rows="3" placeholder="Notas internas del cliente…"></textarea></div>
-    <div class="mb"><label>CallMeBot API Key <span class="muted" style="text-transform:none;font-size:.66rem">(WhatsApp del cliente · oculto por seguridad)</span></label><input type="password" id="nCallmebot" placeholder="Apikey de CallMeBot del cliente" autocomplete="off"></div>
+    <div class="mb"><label>Telegram chat_id <span class="muted" style="text-transform:none;font-size:.66rem">(a dónde llegan los leads de este cliente)</span></label><input type="text" id="nTelegram" placeholder="Ej: 861432965" autocomplete="off">
+      <span class="muted" style="display:block;margin-top:5px;text-transform:none;font-size:.66rem;line-height:1.4">El cliente abre <b>@Chatwhitemoonbot</b> en Telegram y le da a <b>/start</b>. Saca su chat_id en <b>getUpdates</b> y pégalo aquí. Sin chat_id, el cliente solo tiene el botón wa.me manual.</span></div>
     <div class="agente-box">
       <span class="agente-tag" id="nAgenteBadge">🎙️ Agente: Orion IA (Retell + ElevenLabs)</span>
       <div class="mb" id="nRetellSection"><label>Retell agent ID <span class="muted" style="text-transform:none;font-size:.66rem">(solo Orion IA Agent / Core Orion / Core RAG)</span></label><input type="text" id="nAgentId" placeholder="agent_xxxxxxxxxxxxxxxx" oninput="refreshNewSnippet()"></div>
@@ -377,7 +378,7 @@ function enterPanel(){ $('loginView').style.display='none'; $('panelView').style
 function loadData(){
   $('tbl').innerHTML='<div class="empty">Cargando…</div>';
   Promise.all([
-    sbGet('onboarding_clientes?select=id,token_cdn,estado,cliente_nombre,cliente_email,cliente_telefono,sector,pack,url_web_cliente,notas,fecha_proximo_pago,fecha_inicio,created_at,agente_tipo,agente_retell_agent_id,agente_system_prompt,callmebot_apikey&order=created_at.desc'),
+    sbGet('onboarding_clientes?select=id,token_cdn,estado,cliente_nombre,cliente_email,cliente_telefono,sector,pack,url_web_cliente,notas,fecha_proximo_pago,fecha_inicio,created_at,agente_tipo,agente_retell_agent_id,agente_system_prompt,telegram_chat_id&order=created_at.desc'),
     sbGet('cdn_config?id=eq.true&select=modo_automatico_pagos'),
     sbGet('historial_pagos?select=id,cliente_id,concepto,importe,fecha_vencimiento,pagado,fecha_pago,notas,created_at&order=fecha_vencimiento.asc')
   ]).then(function(res){
@@ -877,7 +878,7 @@ function openNew(){
   $('newTitle').textContent = '➕ Nuevo cliente';
   $('nSave').textContent = 'Crear cliente';
   resetEstadoOptions(); resetPackOptions();
-  $('nToken').value=genTokenValue(); $('nNombre').value=''; $('nUrl').value=''; $('nSector').value=''; $('nPack').value='spark'; $('nEstado').value='completado'; $('nPago').value=''; $('nNotas').value=''; $('nCallmebot').value=''; $('nAgentId').value=''; $('nPrompt').value='';
+  $('nToken').value=genTokenValue(); $('nNombre').value=''; $('nUrl').value=''; $('nSector').value=''; $('nPack').value='spark'; $('nEstado').value='completado'; $('nPago').value=''; $('nNotas').value=''; $('nTelegram').value=''; $('nAgentId').value=''; $('nPrompt').value='';
   promptDirty = false;                 // cliente nuevo: prompt aún no tocado
   switchPackDefaults($('nPack').value); // autocarga el prompt del pack inicial (spark → texto)
   refreshNewSnippet(); refreshFormRag();
@@ -902,7 +903,7 @@ function openEditCliente(id){
   $('nEstado').value = c.estado || 'completado';
   $('nPago').value = c.fecha_proximo_pago || '';
   $('nNotas').value = c.notas || '';
-  $('nCallmebot').value = c.callmebot_apikey || '';
+  $('nTelegram').value = c.telegram_chat_id || '';
   $('nAgentId').value = c.agente_retell_agent_id || '';
   $('nPrompt').value = c.agente_system_prompt || '';
   // Editando un cliente: respetamos su prompt guardado (no autocompletar al tocar pack).
@@ -1005,9 +1006,9 @@ function saveCliente(){
     estado: $('nEstado').value || 'completado',
     fecha_proximo_pago: $('nPago').value || null,
     notas: ($('nNotas').value||'').trim() || null,
-    // Apikey de CallMeBot del cliente — la usa el chatbot (chat.js) para entregar
-    // los leads por WhatsApp al número del propio cliente, no al de WhiteMoon.
-    callmebot_apikey: ($('nCallmebot').value||'').trim() || null,
+    // Telegram chat_id del cliente — cdn-lead-notify (server-side) lo resuelve por
+    // el token y envía ahí los leads con el bot compartido @Chatwhitemoonbot.
+    telegram_chat_id: ($('nTelegram').value||'').trim() || null,
     // El tipo de agente sigue al pack — ver agenteTipoFromPack().
     agente_tipo: agenteTipoFromPack(pack),
     agente_retell_agent_id: ($('nAgentId').value||'').trim() || null,

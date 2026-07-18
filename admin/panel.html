@@ -315,13 +315,17 @@ var REPO = 'NexusForgeIA/whitemoon-cdn';
 // Incluye alias snake_case (core_rag, orion_agent) porque las altas hechas
 // desde el CRM pueden llegar con ese formato — sin el alias el MRR de esas
 // filas saldría 0.
-var PACK_MRR = { spark:99, 'orion-ia-agent':99, orion_agent:99, 'core-spark-web':99, 'core-orion':99, 'core-rag':199, core_rag:199, 'calculadora-itp':99 };
+var PACK_MRR = { spark:99, 'mini-core':99, 'orion-ia-agent':99, orion_agent:99, 'core-spark-web':99, 'core-orion':99, 'core-rag':199, core_rag:199, 'calculadora-itp':99 };
 // Setup (pago único) por pack — mismos alias que PACK_MRR.
-var PACK_SETUP = { spark:499, 'orion-ia-agent':799, orion_agent:799, 'core-spark-web':899, 'core-orion':1499, 'core-rag':2499, core_rag:2499, 'calculadora-itp':599 };
+var PACK_SETUP = { spark:499, 'mini-core':599, 'orion-ia-agent':799, orion_agent:799, 'core-spark-web':899, 'core-orion':1499, 'core-rag':2499, core_rag:2499, 'calculadora-itp':599 };
 var SECTORES = ['dental','legal','restaurante','gestoria','clinica','inmobiliaria','gimnasio','peluqueria','veterinaria','formacion','taller','podologia','automovil','abogados'];
 // Packs en venta (dropdown de alta/edición). Los retirados no se ofrecen,
 // pero ensurePackOption() los inyecta al editar un cliente antiguo.
-var PACKS = ['spark','orion-ia-agent','core-spark-web','core-orion','core-rag'];
+var PACKS = ['spark','mini-core','orion-ia-agent','core-spark-web','core-orion','core-rag'];
+// Etiqueta legible por pack (dropdown/badge). Sin entrada → se muestra la clave
+// tal cual (comportamiento histórico de spark, core-orion, etc.).
+var PACK_LABEL = { 'mini-core':'Pack Mini Core' };
+function packLabel(p){ if(!p) return '—'; return PACK_LABEL[p] || p; }
 
 var clientes = [];
 var pagosByCliente = {};   // cliente_id -> [pagos]
@@ -440,7 +444,7 @@ function render(){
       +(c.sector?'<div class="dom">'+esc(c.sector)+'</div>':'')
       +(c.cliente_telefono?'<div class="dom">📞 '+esc(c.cliente_telefono)+'</div>':'')
       +'</td>';
-    h+='<td><span class="badge badge-pack">'+esc(c.pack||'—')+'</span><div class="src-note">'+(mrr?mrr+'€/mes':'—')+'</div></td>';
+    h+='<td><span class="badge badge-pack">'+esc(packLabel(c.pack))+'</span><div class="src-note">'+(mrr?mrr+'€/mes':'—')+'</div></td>';
     h+='<td class="token">'+esc(c.token_cdn||'—')+'</td>';
     h+='<td><span class="badge '+(isActive(c)?'badge-on':'badge-off')+'">'+(isActive(c)?'ACTIVA':'PAUSADA')+'</span><div class="src-note">'+esc(c.estado)+'</div></td>';
     h+='<td>'+fmtDate(c.created_at)+'</td>';
@@ -544,7 +548,7 @@ function clienteInfoHTML(c){
   function item(lbl, val, full){
     return '<div'+(full?' class="ci-full"':'')+'><div class="ci-l">'+lbl+'</div><div>'+(val||'—')+'</div></div>';
   }
-  return item('Pack','<span class="badge badge-pack">'+esc(c.pack||'—')+'</span>'+(mrr?' <span class="muted">'+mrr+'€/mes</span>':''))
+  return item('Pack','<span class="badge badge-pack">'+esc(packLabel(c.pack))+'</span>'+(mrr?' <span class="muted">'+mrr+'€/mes</span>':''))
     + item('Token', c.token_cdn?('<span class="token">'+esc(c.token_cdn)+'</span>'):'—')
     + item('Web', c.url_web_cliente?esc(c.url_web_cliente):'—')
     + item('Teléfono', c.cliente_telefono?esc(c.cliente_telefono):'—')
@@ -654,7 +658,7 @@ function deletePago(pagoId){
 
 // ─── AGENTE IA (snippet por pack · onboarding_clientes) ──────────────────────
 // El snippet que se instala en la web del cliente depende del pack:
-//   - spark / core-spark-web       → chat.js (chatbot texto · Laura IA · Claude API)
+//   - spark / mini-core / core-spark-web → chat.js (chatbot texto · Laura IA · Claude API)
 //   - orion-ia-agent / core-orion  → orion-widget.js (voz · Retell, data-agent)
 //   - core-rag                     → orion-widget.js con data-agent + data-rag="true" (voz + RAG)
 //   - calculadora-itp              → itp.js (widget de calculadora ITP)
@@ -670,7 +674,7 @@ function snippetForPack(c){
   if(!token) return '— Falta token CDN para generar el script.';
   var pack = String(c.pack||'').toLowerCase();
   // Packs de texto (Laura IA · Claude API): chat.js, sin widget de voz Retell.
-  if(pack === 'spark' || pack === 'core-spark-web'){
+  if(pack === 'spark' || pack === 'mini-core' || pack === 'core-spark-web'){
     return '<script src="'+CDN_BASE+'/chat.js"\n  data-token="'+esc(token)+'"><\/script>';
   }
   if(pack === 'calculadora-itp'){
@@ -869,7 +873,7 @@ function toggleAutoPay(){
 // ─── NUEVO CLIENTE ───────────────────────────────────────────────────────────
 function fillSelects(){
   $('nSector').innerHTML = '<option value="">—</option>' + SECTORES.map(function(s){ return '<option value="'+s+'">'+s+'</option>'; }).join('');
-  $('nPack').innerHTML = PACKS.map(function(p){ return '<option value="'+p+'">'+p+' — '+(PACK_SETUP[p]||0).toLocaleString('es-ES')+'€ setup + '+(PACK_MRR[p]||0)+'€/mes</option>'; }).join('');
+  $('nPack').innerHTML = PACKS.map(function(p){ return '<option value="'+p+'">'+esc(packLabel(p))+' — '+(PACK_SETUP[p]||0).toLocaleString('es-ES')+'€ setup + '+(PACK_MRR[p]||0)+'€/mes</option>'; }).join('');
 }
 function genTokenValue(){ var a=new Uint8Array(12); crypto.getRandomValues(a); return 'WM-'+Array.from(a,function(b){return b.toString(16).padStart(2,'0');}).join(''); }
 function genToken(){ $('nToken').value=genTokenValue(); refreshNewSnippet(); }
@@ -931,7 +935,7 @@ function ensurePackOption(pack){
   var sel=$('nPack');
   for(var i=0;i<sel.options.length;i++){ if(sel.options[i].value===pack) return; }
   var o=document.createElement('option'); o.value=pack;
-  o.textContent=pack+' (retirado) — '+(PACK_SETUP[pack]||0).toLocaleString('es-ES')+'€ setup + '+(PACK_MRR[pack]||0)+'€/mes';
+  o.textContent=packLabel(pack)+' (retirado) — '+(PACK_SETUP[pack]||0).toLocaleString('es-ES')+'€ setup + '+(PACK_MRR[pack]||0)+'€/mes';
   sel.appendChild(o);
 }
 function ensureEstadoOption(estado){

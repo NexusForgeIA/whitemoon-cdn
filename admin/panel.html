@@ -307,7 +307,10 @@ tr:hover td{background:#0d0d16}
 <script>
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
 var SUPABASE_URL  = 'https://mlaqtniujnvfxcvcourm.supabase.co';
-var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sYXF0bml1am52ZnhjdmNvdXJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4MzUyMzIsImV4cCI6MjA5MzQxMTIzMn0.Neh7VUS8ADsxf0DPab0JoJyGXOAXnLIaXzXbKzj2BGs';
+// Clave publishable (sb_publishable_…), la recomendada por Supabase para
+// clientes. Sustituye a la anon key JWT legacy: mismo rol `anon` y mismas
+// politicas RLS, pero es rotable de forma independiente y no caduca.
+var SUPABASE_ANON = 'sb_publishable_6no6BuOgiA_2nonTJntAuQ_DTqEgrcV';
 var CDN_BASE = 'https://nexusforgeia.github.io/whitemoon-cdn';
 var FUNCTIONS_BASE = SUPABASE_URL + '/functions/v1';
 var REPO = 'NexusForgeIA/whitemoon-cdn';

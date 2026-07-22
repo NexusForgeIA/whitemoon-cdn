@@ -29,6 +29,20 @@ function maskToken(raw: string | null | undefined): string {
   return t.length <= 4 ? "****" : "****" + t.slice(-4);
 }
 
+// Saneado de cualquier texto que vaya a los logs.
+//
+// El token del bot viaja DENTRO de la URL de la API de Telegram
+// (…/bot<TOKEN>/sendMessage), y los errores de fetch de Deno incluyen la URL
+// completa del request en su mensaje. Sin esto, un simple fallo de red (DNS,
+// timeout, conexion cortada) escribiria en los logs, en claro, la credencial
+// del bot — que es compartida por TODOS los clientes, no de uno solo.
+function redact(raw: unknown): string {
+  let s = String(raw);
+  const botToken = Deno.env.get("TELEGRAM_BOT_TOKEN");
+  if (botToken) s = s.split(botToken).join("****");
+  return s.replace(/\/bot[^/\s)]+/gi, "/bot****");
+}
+
 // Normalizacion identica a verify-token (strip protocolo, www, puerto).
 function normalizeDomain(raw: string | null): string {
   if (!raw) return "";
@@ -107,6 +121,16 @@ Deno.serve(async (req: Request) => {
 
     if (!domainOk) return json({ ok: false, error: "domain_blocked" }, 200);
 
+    // Guard de lead incompleto — estándar WhiteMoon.
+    // Un lead solo es válido con nombre Y teléfono: sin ambos no se inserta
+    // nada ni se avisa. Va DESPUES de validar token y dominio para no alterar
+    // la respuesta ante tokens/dominios invalidos.
+    const nombreLead = (body.nombre == null ? "" : String(body.nombre)).trim();
+    const telefonoLead = (body.telefono == null ? "" : String(body.telefono)).trim();
+    if (!nombreLead || !telefonoLead) {
+      return json({ ok: false, error: "lead incompleto" }, 400);
+    }
+
     // Cliente pausado → no enviamos.
     if (cliente.estado === "pausado") return json({ ok: true, sent: false });
 
@@ -137,11 +161,11 @@ Deno.serve(async (req: Request) => {
     const tgBody = await tgRes.json().catch(() => ({}));
     const sent = tgRes.ok && (tgBody as Record<string, unknown>).ok === true;
     if (!sent) {
-      console.error("cdn-lead-notify: Telegram fallo", tgRes.status, JSON.stringify(tgBody));
+      console.error("cdn-lead-notify: Telegram fallo", tgRes.status, redact(JSON.stringify(tgBody)));
     }
     return json({ ok: sent, sent });
   } catch (err) {
-    console.error("cdn-lead-notify: server_error", String(err));
+    console.error("cdn-lead-notify: server_error", redact(err));
     return json({ ok: false, error: "server_error" }, 200);
   }
 });

@@ -11,7 +11,7 @@
 :root{
   --bg:#08080d; --bg2:#101019; --line:#1c1c2b;
   --primary:#7c4dff; --accent:#00d4aa; --text:#f0f0f5; --muted:#8a8aa0;
-  --danger:#ff5470; --warn:#f5a524;
+  --danger:#ff5470; --warn:#f5a524; --gold:#f5c842;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Sora',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
@@ -57,6 +57,9 @@ tr:hover td{background:#0d0d16}
 .badge-on{background:rgba(0,212,170,.15);color:var(--accent)}
 .badge-off{background:rgba(255,84,112,.15);color:var(--danger)}
 .badge-pack{background:rgba(124,77,255,.15);color:#b39dff;text-transform:capitalize}
+/* Aviso de placeholders sin rellenar en el system prompt ([COMPLETAR: ...]) */
+.badge-falta{display:block;margin-top:8px;background:rgba(245,200,66,.1);border:1px solid rgba(245,200,66,.35);border-radius:8px;padding:9px 12px;font-size:.74rem;color:var(--gold);line-height:1.45}
+.prompt-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
 .pay-input{width:148px}
 .pay-soon{color:var(--warn)!important;font-weight:700}
 .pay-over{color:var(--danger)!important;font-weight:700}
@@ -230,7 +233,11 @@ tr:hover td{background:#0d0d16}
       <div><label>Dominio web <span style="color:var(--warn)">*</span></label><input type="text" id="nUrl" placeholder="clinicasonrie.es"></div>
     </div>
     <div class="g2">
-      <div><label>Sector</label><select id="nSector"></select></div>
+      <div><label>Dirección</label><input type="text" id="nDireccion" placeholder="C/ Mayor 12, Majadahonda"></div>
+      <div><label>Teléfono</label><input type="text" id="nTelefono" placeholder="912345678"></div>
+    </div>
+    <div class="g2">
+      <div><label>Sector</label><select id="nSector" onchange="onSectorChange()"></select></div>
       <div><label>Pack</label><select id="nPack" onchange="refreshNewSnippet();refreshFormRag();switchPackDefaults(this.value)"></select></div>
     </div>
     <div class="g2">
@@ -244,11 +251,20 @@ tr:hover td{background:#0d0d16}
     <div class="mb"><label>Notas</label><textarea id="nNotas" rows="3" placeholder="Notas internas del cliente…"></textarea></div>
     <div class="mb"><label>Telegram chat_id <span class="muted" style="text-transform:none;font-size:.66rem">(a dónde llegan los leads de este cliente)</span></label><input type="text" id="nTelegram" placeholder="Ej: 861432965" autocomplete="off">
       <span class="muted" style="display:block;margin-top:5px;text-transform:none;font-size:.66rem;line-height:1.4">El cliente abre <b>@Chatwhitemoonbot</b> en Telegram y le da a <b>/start</b>. Saca su chat_id en <b>getUpdates</b> y pégalo aquí. Sin chat_id, el cliente solo tiene el botón wa.me manual.</span></div>
+    <!-- Horario y servicios NO son columnas de onboarding_clientes: solo alimentan
+         la generación del prompt por sector. No se guardan. -->
+    <div class="g2">
+      <div><label>Horario <span class="muted" style="text-transform:none;font-size:.66rem">(solo para el prompt)</span></label><input type="text" id="nHorario" placeholder="L-V 9:00-20:00, S 10:00-14:00"></div>
+      <div><label>Servicios <span class="muted" style="text-transform:none;font-size:.66rem">(solo para el prompt)</span></label><input type="text" id="nServicios" placeholder="Implantes, ortodoncia invisible, estética dental"></div>
+    </div>
     <div class="agente-box">
       <span class="agente-tag" id="nAgenteBadge">🎙️ Agente: Orion IA (Retell + ElevenLabs)</span>
       <div class="mb" id="nRetellSection"><label>Retell agent ID <span class="muted" style="text-transform:none;font-size:.66rem">(solo Orion IA Agent / Core Orion / Core RAG)</span></label><input type="text" id="nAgentId" placeholder="agent_xxxxxxxxxxxxxxxx" oninput="refreshNewSnippet()"></div>
-      <div class="mb" id="nPromptSection"><label>System prompt</label><textarea id="nPrompt" rows="6" placeholder="Se autocompleta según el pack. Edítalo si quieres personalizarlo." oninput="markPromptDirty()"></textarea>
-        <button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="loadPromptTpl('nPrompt','nNombre','nSector')">📋 Cargar plantilla base</button></div>
+      <div class="mb" id="nPromptSection"><label>System prompt</label><textarea id="nPrompt" rows="6" placeholder="Se autocompleta según el pack. Edítalo si quieres personalizarlo." oninput="markPromptDirty();revisarPromptFaltantes(this,'nPromptFalta')"></textarea>
+        <div class="prompt-actions">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="generarPromptSector()">📋 Generar prompt del sector</button>
+        </div>
+        <div class="badge-falta" id="nPromptFalta" hidden></div></div>
 
       <!-- Documentos RAG · solo visible si el pack es core-rag (ver refreshFormRag) -->
       <div class="mb" id="nRagSection" style="display:none">
@@ -310,8 +326,11 @@ tr:hover td{background:#0d0d16}
     <h3 id="agenteTitle">🎙️ Agente</h3>
     <span class="agente-tag" id="aAgenteBadge">Orion IA (Retell + ElevenLabs)</span>
     <div class="mb" id="aRetellSection"><label>Retell agent ID <span class="muted" style="text-transform:none;font-size:.66rem">(solo Orion IA Agent / Core Orion / Core RAG)</span></label><input type="text" id="aAgentId" placeholder="agent_xxxxxxxxxxxxxxxx" oninput="refreshAgenteSnippet()"></div>
-    <div class="mb" id="aPromptSection"><label>System prompt de Orion</label><textarea id="aPrompt" rows="8" placeholder="Eres Orion, el agente de voz de [NEGOCIO]..."></textarea>
-      <button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="loadPromptTpl('aPrompt')">📋 Cargar plantilla base</button></div>
+    <div class="mb" id="aPromptSection"><label>System prompt de Orion</label><textarea id="aPrompt" rows="8" placeholder="Eres Orion, el agente de voz de [NEGOCIO]..." oninput="revisarPromptFaltantes(this,'aPromptFalta')"></textarea>
+      <div class="prompt-actions">
+        <button type="button" class="btn btn-ghost btn-sm" onclick="generarPromptAgente()">📋 Generar prompt del sector</button>
+      </div>
+      <div class="badge-falta" id="aPromptFalta" hidden></div></div>
     <div class="mb">
       <label>Script de instalación</label>
       <div class="code-box" id="aScript">—</div>
@@ -341,16 +360,20 @@ var FUNCTIONS_BASE = SUPABASE_URL + '/functions/v1';
 // Incluye alias snake_case (core_rag, orion_agent) porque las altas hechas
 // desde el CRM pueden llegar con ese formato — sin el alias el MRR de esas
 // filas saldría 0.
-var PACK_MRR = { spark:99, 'mini-core':99, 'orion-ia-agent':99, orion_agent:99, 'core-spark-web':99, 'core-orion':99, 'core-rag':199, core_rag:199, 'calculadora-itp':99 };
+var PACK_MRR = { spark:99, 'mini-core':99, 'orion-ia-agent':99, orion_agent:99, 'core-spark-web':99, 'core-orion':99, 'whitemoon-360':199, 'core-rag':199, core_rag:199, 'calculadora-itp':99, 'pack-ads':599 };
 // Setup (pago único) por pack — mismos alias que PACK_MRR.
-var PACK_SETUP = { spark:499, 'mini-core':599, 'orion-ia-agent':799, orion_agent:799, 'core-spark-web':899, 'core-orion':1499, 'core-rag':2499, core_rag:2499, 'calculadora-itp':599 };
+// Pack Ads va sin setup: la inversión publicitaria es aparte.
+var PACK_SETUP = { spark:499, 'mini-core':599, 'orion-ia-agent':799, orion_agent:799, 'core-spark-web':899, 'core-orion':1499, 'whitemoon-360':1899, 'core-rag':2499, core_rag:2499, 'calculadora-itp':599, 'pack-ads':0 };
 var SECTORES = ['dental','legal','restaurante','gestoria','clinica','inmobiliaria','gimnasio','peluqueria','veterinaria','formacion','taller','podologia','automovil','abogados'];
 // Packs en venta (dropdown de alta/edición). Los retirados no se ofrecen,
 // pero ensurePackOption() los inyecta al editar un cliente antiguo.
-var PACKS = ['spark','mini-core','orion-ia-agent','core-spark-web','core-orion','core-rag'];
+var PACKS = ['spark','mini-core','orion-ia-agent','core-spark-web','core-orion','whitemoon-360','core-rag','calculadora-itp','pack-ads'];
+// Sectores del CHECK que no tienen plantilla propia en plantillas_prompt_sector
+// (ni directa ni por alias): la RPC les devuelve la plantilla 'generico'.
+var SECTORES_GENERICOS = { legal:1, abogados:1, clinica:1, gimnasio:1, veterinaria:1, formacion:1, podologia:1 };
 // Etiqueta legible por pack (dropdown/badge). Sin entrada → se muestra la clave
 // tal cual (comportamiento histórico de spark, core-orion, etc.).
-var PACK_LABEL = { 'mini-core':'Pack Mini Core' };
+var PACK_LABEL = { 'mini-core':'Pack Mini Core', 'whitemoon-360':'WhiteMoon 360', 'pack-ads':'Pack Ads', 'calculadora-itp':'Calculadora ITP Pro' };
 function packLabel(p){ if(!p) return '—'; return PACK_LABEL[p] || p; }
 
 var clientes = [];
@@ -466,7 +489,7 @@ function doLogout(){
 function loadData(){
   $('tbl').innerHTML='<div class="empty">Cargando…</div>';
   Promise.all([
-    sbGet('onboarding_clientes?select=id,token_cdn,estado,cliente_nombre,cliente_email,cliente_telefono,sector,pack,url_web_cliente,notas,fecha_proximo_pago,fecha_inicio,created_at,agente_tipo,agente_retell_agent_id,agente_system_prompt,telegram_chat_id&order=created_at.desc'),
+    sbGet('onboarding_clientes?select=id,token_cdn,estado,cliente_nombre,cliente_email,cliente_telefono,direccion,sector,pack,url_web_cliente,notas,fecha_proximo_pago,fecha_inicio,created_at,agente_tipo,agente_retell_agent_id,agente_system_prompt,telegram_chat_id&order=created_at.desc'),
     sbGet('cdn_config?id=eq.true&select=modo_automatico_pagos'),
     sbGet('historial_pagos?select=id,cliente_id,concepto,importe,fecha_vencimiento,pagado,fecha_pago,notas,created_at&order=fecha_vencimiento.asc')
   ]).then(function(res){
@@ -754,9 +777,11 @@ var PACKS_WITH_RAG = { 'core-rag':1 };
 var RAG_LIMITES = { 'core-rag':100 };
 function ragLimite(pack){ return RAG_LIMITES[String(pack||'').toLowerCase()]; }
 function snippetForPack(c){
+  var pack = String(c.pack||'').toLowerCase();
+  // Pack Ads no instala nada en la web del cliente: ni script ni token CDN.
+  if(pack === 'pack-ads') return '— Pack Ads no lleva script embebido: es gestión de campañas.';
   var token = (c.token_cdn||'').trim();
   if(!token) return '— Falta token CDN para generar el script.';
-  var pack = String(c.pack||'').toLowerCase();
   // Packs de texto (Laura IA · Claude API): chat.js, sin widget de voz Retell.
   if(pack === 'spark' || pack === 'mini-core' || pack === 'core-spark-web'){
     return '<script src="'+CDN_BASE+'/chat.js"\n  data-token="'+esc(token)+'"><\/script>';
@@ -792,18 +817,25 @@ function agenteScript(c){ return snippetForPack(c); }
 //   - calculadora-itp                → Calculadora ITP (widget, sin agente IA)
 function agenteTipoFromPack(pack){
   var p = String(pack||'').toLowerCase();
+  // Pack Ads es gestión de campañas: no lleva agente ni script embebido. Sin este
+  // caso caería en 'laura' y el cliente acabaría con un chatbot fantasma.
+  if(p === 'pack-ads') return 'ninguno';
   if(p === 'calculadora-itp') return 'itp';
   if(p === 'orion-ia-agent' || p === 'core-orion' || p === 'core-rag') return 'orion';
-  return 'laura';
+  return 'laura'; // spark · mini-core · core-spark-web · whitemoon-360 (CRM y panel aparte)
 }
 // Solo los packs de voz (Orion · Retell) usan el campo Retell agent ID.
 function packUsesRetell(pack){ return agenteTipoFromPack(pack) === 'orion'; }
 // El system prompt de texto se oculta en core-rag: su conocimiento sale de los
 // documentos RAG, no de un prompt escrito a mano.
-function packShowsPrompt(pack){ return String(pack||'').toLowerCase() !== 'core-rag'; }
+function packShowsPrompt(pack){
+  var p = String(pack||'').toLowerCase();
+  return p !== 'core-rag' && p !== 'pack-ads';
+}
 function agenteLabel(pack){
   var p = String(pack||'').toLowerCase();
   var tipo = agenteTipoFromPack(pack);
+  if(tipo === 'ninguno') return 'Sin agente (gestión de campañas)';
   if(tipo === 'laura') return 'Laura IA (chat texto · Claude API)';
   if(tipo === 'itp')   return 'CALCULADORA ITP';
   if(p === 'core-rag') return 'Orion IA + RAG (Retell + ElevenLabs)';
@@ -811,6 +843,7 @@ function agenteLabel(pack){
 }
 function agenteIcon(pack){
   var tipo = agenteTipoFromPack(pack);
+  if(tipo === 'ninguno') return '📣';
   if(tipo === 'laura') return '💬';
   if(tipo === 'itp')   return '🧮';
   return '🎙️';
@@ -866,6 +899,7 @@ function openAgente(id){
   $('aPromptSection').style.display = packShowsPrompt(c.pack) ? 'block' : 'none';
   $('aAgentId').value = c.agente_retell_agent_id || '';
   $('aPrompt').value = c.agente_system_prompt || '';
+  revisarPromptFaltantes($('aPrompt'),'aPromptFalta');
   $('aScript').textContent = agenteScript(c);
   $('agenteBg').classList.add('show');
 }
@@ -890,6 +924,10 @@ function saveAgente(){
   var cli = clientes.filter(function(x){return x.id===currentAgenteCli;})[0];
   // El tipo de agente sigue al pack — ver agenteTipoFromPack().
   var tipo = agenteTipoFromPack(cli && cli.pack);
+  if(packShowsPrompt(cli && cli.pack)){
+    var faltanA = revisarPromptFaltantes($('aPrompt'),'aPromptFalta');
+    if(faltanA.length){ toast('Faltan datos en el prompt: '+faltanA.join(', '),'err'); return; }
+  }
   var body = {
     agente_tipo: tipo,
     agente_retell_agent_id: ($('aAgentId').value||'').trim() || null,
@@ -907,42 +945,99 @@ function copyAgenteScript(){
   navigator.clipboard.writeText($('aScript').textContent).then(function(){ toast('Script copiado 📋'); })
   .catch(function(){ toast('No se pudo copiar','err'); });
 }
-function loadPromptTpl(targetId, nameId, sectorId){
-  var ctx = currentAgenteCli ? (clientes.filter(function(x){return x.id===currentAgenteCli;})[0]||{}) : {};
-  var nombre = (nameId && $(nameId) && $(nameId).value.trim()) || ctx.cliente_nombre || '[NEGOCIO]';
-  var sector = (sectorId && $(sectorId) && $(sectorId).value) || ctx.sector || '[SECTOR]';
-  $(targetId).value =
-'Eres Orion, el agente de voz de '+nombre+',\n'+
-'especializado en '+sector+'.\n'+
-'Eres cálido, cercano y profesional.\n\n'+
-'SOBRE '+nombre+':\n'+
-'[Descripción del negocio]\n'+
-'Servicios: [lista de servicios]\n'+
-'Horario: [horario de atención]\n'+
-'Contacto: [teléfono y email]\n'+
-'Web: [url]\n\n'+
-'MISIÓN:\n'+
-'Atender consultas de clientes 24h,\n'+
-'responder preguntas sobre servicios\n'+
-'y precios, y recoger nombre y teléfono\n'+
-'para que el equipo contacte por WhatsApp.\n\n'+
-'GUARDAR LEAD (OBLIGATORIO):\n'+
-'Cuando el cliente dé su teléfono,\n'+
-'llamar a la función guardar_lead con:\n'+
-'nombre, telefono, sector, mensaje.\n\n'+
-'CIERRE:\n'+
-'¿Me das tu nombre y teléfono?\n'+
-'El equipo de '+nombre+' te contactará\n'+
-'por WhatsApp en breve.\n\n'+
-'REGLAS:\n'+
-'- Siempre en español de España\n'+
-'- Nunca des precios sin confirmar\n'+
-'- Máximo 2 minutos de conversación\n'+
-'- NUNCA menciones competidores\n'+
-'- Si preguntan si eres IA, responde\n'+
-'  con transparencia';
-  // Carga manual explícita → marca el prompt como tocado para no autocompletarlo al cambiar pack.
-  if(targetId === 'nPrompt') promptDirty = true;
+// ─── PLANTILLAS DE PROMPT POR SECTOR ─────────────────────────────────────────
+// Fuente ÚNICA: la RPC generar_prompt_sector de Supabase. La plantilla que antes
+// vivía hardcodeada aquí (loadPromptTpl) se ha eliminado a propósito: con dos
+// fuentes, la de JS se queda obsoleta en cuanto se edita la de Supabase y nadie
+// sabe cuál manda.
+// La RPC resuelve el sector por nombre o alias, cae a 'generico' si no hay
+// plantilla, y devuelve [COMPLETAR: x] para cada dato que le falte.
+// persona_contacto NO se envía: ninguna de las 7 plantillas lo usa.
+function datosPromptFormulario(){
+  return {
+    cliente_nombre:   ($('nNombre').value||'').trim(),
+    cliente_telefono: ($('nTelefono').value||'').trim(),
+    direccion:        ($('nDireccion').value||'').trim(),
+    url_web_cliente:  ($('nUrl').value||'').trim(),
+    horario:          ($('nHorario').value||'').trim(),
+    servicios:        ($('nServicios').value||'').trim()
+  };
+}
+
+function aplicarPromptSector(ta, sector, datos, faltaId){
+  ta.disabled = true;
+  sb.rpc('generar_prompt_sector', { p_sector: sector || '', p_datos: datos })
+  .then(function(res){
+    ta.disabled = false;
+    if(res.error){ toast('No se pudo generar el prompt: '+String(res.error.message||'').slice(0,90),'err'); return; }
+    ta.value = res.data || '';
+    // Marcamos el prompt como tocado para que cambiar de pack no lo pise después.
+    promptDirty = true;
+    var faltan = revisarPromptFaltantes(ta, faltaId);
+    toast(faltan.length ? 'Prompt generado · faltan '+faltan.length+' dato'+(faltan.length===1?'':'s') : 'Prompt generado ✅', faltan.length ? 'info' : 'ok');
+  })
+  .catch(function(e){
+    ta.disabled = false;
+    toast('No se pudo generar el prompt: '+String(e.message||'').slice(0,90),'err');
+  });
+}
+
+// Placeholders que la RPC ha dejado sin rellenar, sin repetidos y en orden.
+function promptFaltantes(txt){
+  var out = [], re = /\[COMPLETAR:\s*([^\]]+)\]/g, m;
+  while((m = re.exec(String(txt||''))) !== null){
+    var k = m[1].trim();
+    if(out.indexOf(k) === -1) out.push(k);
+  }
+  return out;
+}
+
+// Pinta (o esconde) el aviso ámbar y devuelve la lista de datos que faltan.
+// Mientras devuelva algo, el guardado queda bloqueado.
+function revisarPromptFaltantes(ta, faltaId){
+  var el = $(faltaId);
+  var faltan = promptFaltantes(ta && ta.value);
+  if(!el) return faltan;
+  if(faltan.length){
+    el.textContent = (faltan.length === 1 ? 'Falta 1 dato: ' : 'Faltan '+faltan.length+' datos: ')
+      + faltan.join(', ') + '. Complétalos en el prompt para poder guardar.';
+    el.hidden = false;
+  } else {
+    el.hidden = true;
+  }
+  return faltan;
+}
+
+// Botón "Generar prompt del sector" del formulario de alta/edición.
+function generarPromptSector(){
+  var ta = $('nPrompt');
+  if((ta.value||'').trim() && !confirm('Ya hay un prompt escrito. ¿Sobrescribirlo con la plantilla del sector?')) return;
+  aplicarPromptSector(ta, $('nSector').value, datosPromptFormulario(), 'nPromptFalta');
+}
+
+// Cambio de sector: autogenera solo si el textarea está vacío. Si tiene contenido
+// se pregunta antes — la plantilla es un punto de partida, no una jaula.
+function onSectorChange(){
+  var ta = $('nPrompt');
+  if((ta.value||'').trim() &&
+     !confirm('Has cambiado de sector. ¿Regenerar el prompt con la plantilla del nuevo sector? Se perderá el texto actual.')) return;
+  aplicarPromptSector(ta, $('nSector').value, datosPromptFormulario(), 'nPromptFalta');
+}
+
+// Mismo botón en el modal de agente. Aquí los datos salen de la fila del cliente;
+// horario y servicios no se guardan en Supabase, así que saldrán como [COMPLETAR].
+function generarPromptAgente(){
+  var ta = $('aPrompt');
+  var c = clientes.filter(function(x){ return x.id===currentAgenteCli; })[0] || {};
+  if((ta.value||'').trim() && !confirm('Ya hay un prompt escrito. ¿Sobrescribirlo con la plantilla del sector?')) return;
+  aplicarPromptSector(ta, c.sector, {
+    cliente_nombre:   c.cliente_nombre || '',
+    cliente_telefono: c.cliente_telefono || '',
+    direccion:        c.direccion || '',
+    url_web_cliente:  c.url_web_cliente || '',
+    horario:          '',
+    servicios:        ''
+  }, 'aPromptFalta');
 }
 
 // ─── MODO AUTOMÁTICO PAGOS (global) ──────────────────────────────────────────
@@ -956,8 +1051,15 @@ function toggleAutoPay(){
 
 // ─── NUEVO CLIENTE ───────────────────────────────────────────────────────────
 function fillSelects(){
-  $('nSector').innerHTML = '<option value="">—</option>' + SECTORES.map(function(s){ return '<option value="'+s+'">'+s+'</option>'; }).join('');
-  $('nPack').innerHTML = PACKS.map(function(p){ return '<option value="'+p+'">'+esc(packLabel(p))+' — '+(PACK_SETUP[p]||0).toLocaleString('es-ES')+'€ setup + '+(PACK_MRR[p]||0)+'€/mes</option>'; }).join('');
+  // El value es SIEMPRE la clave del CHECK de Supabase; la etiqueta es aparte.
+  $('nSector').innerHTML = '<option value="">—</option>' + SECTORES.map(function(s){
+    return '<option value="'+s+'">'+s+(SECTORES_GENERICOS[s] ? ' · plantilla genérica' : '')+'</option>';
+  }).join('');
+  $('nPack').innerHTML = PACKS.map(function(p){
+    var setup = PACK_SETUP[p] || 0;
+    var precio = (setup ? setup.toLocaleString('es-ES')+'€ setup' : 'sin setup') + ' + '+(PACK_MRR[p]||0)+'€/mes';
+    return '<option value="'+p+'">'+esc(packLabel(p))+' — '+precio+'</option>';
+  }).join('');
 }
 function genTokenValue(){ var a=new Uint8Array(12); crypto.getRandomValues(a); return 'WM-'+Array.from(a,function(b){return b.toString(16).padStart(2,'0');}).join(''); }
 function genToken(){ $('nToken').value=genTokenValue(); refreshNewSnippet(); }
@@ -967,6 +1069,8 @@ function openNew(){
   $('nSave').textContent = 'Crear cliente';
   resetEstadoOptions(); resetPackOptions();
   $('nToken').value=genTokenValue(); $('nNombre').value=''; $('nUrl').value=''; $('nSector').value=''; $('nPack').value='spark'; $('nEstado').value='completado'; $('nPago').value=''; $('nNotas').value=''; $('nTelegram').value=''; $('nAgentId').value=''; $('nPrompt').value='';
+  $('nDireccion').value=''; $('nTelefono').value=''; $('nHorario').value=''; $('nServicios').value='';
+  revisarPromptFaltantes($('nPrompt'),'nPromptFalta');
   promptDirty = false;                 // cliente nuevo: prompt aún no tocado
   switchPackDefaults($('nPack').value); // autocarga el prompt del pack inicial (spark → texto)
   refreshNewSnippet(); refreshFormRag();
@@ -994,6 +1098,11 @@ function openEditCliente(id){
   $('nTelegram').value = c.telegram_chat_id || '';
   $('nAgentId').value = c.agente_retell_agent_id || '';
   $('nPrompt').value = c.agente_system_prompt || '';
+  $('nDireccion').value = c.direccion || '';
+  $('nTelefono').value = c.cliente_telefono || '';
+  // Horario y servicios no se guardan: solo alimentan la generación del prompt.
+  $('nHorario').value = ''; $('nServicios').value = '';
+  revisarPromptFaltantes($('nPrompt'),'nPromptFalta');
   // Editando un cliente: respetamos su prompt guardado (no autocompletar al tocar pack).
   promptDirty = true;
   refreshNewSnippet(); refreshFormRag();
@@ -1081,16 +1190,27 @@ function saveCliente(){
   var token=($('nToken').value||'').trim().replace(/[^A-Za-z0-9\-_]/g,'');
   var nombre=($('nNombre').value||'').trim();
   var url=($('nUrl').value||'').trim();
-  if(!token){ toast('Token obligatorio','err'); return; }
+  var pack = $('nPack').value || null;
+  // Pack Ads no instala nada en la web del cliente, así que no necesita token CDN.
+  var sinToken = String(pack||'').toLowerCase() === 'pack-ads';
+  if(!token && !sinToken){ toast('Token obligatorio','err'); return; }
   if(!nombre){ toast('Nombre obligatorio','err'); return; }
   if(!url){ toast('Dominio web obligatorio','err'); return; }
-  var pack = $('nPack').value || null;
+  // El prompt no puede salir a producción con placeholders sin rellenar.
+  if(packShowsPrompt(pack)){
+    var faltan = revisarPromptFaltantes($('nPrompt'),'nPromptFalta');
+    if(faltan.length){ toast('Faltan datos en el prompt: '+faltan.join(', '),'err'); return; }
+  }
   var body = {
-    token_cdn: token,
+    token_cdn: token || null,
     cliente_nombre: nombre,
     url_web_cliente: url,
     sector: $('nSector').value || null,
     pack: pack,
+    // Dirección y teléfono sí son columnas: los usa la plantilla del prompt y
+    // sería el peor de los mundos que se perdieran al reeditar.
+    direccion: ($('nDireccion').value||'').trim() || null,
+    cliente_telefono: ($('nTelefono').value||'').trim() || null,
     estado: $('nEstado').value || 'completado',
     fecha_proximo_pago: $('nPago').value || null,
     notas: ($('nNotas').value||'').trim() || null,

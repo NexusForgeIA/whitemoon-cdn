@@ -42,7 +42,14 @@
         });
         return;
       }
-      // active === false o falló la llamada → fallback a licenses.json (comportamiento actual).
+      if(res && res.denied === true){
+        // Denegación explícita: pausada por impago, token desconocido o dominio no
+        // autorizado. Se corta aquí, SIN fallback — es la respuesta, no su ausencia.
+        console.warn('[WM-CHAT] Licencia denegada' + (res.reason ? ' (' + res.reason + ')' : ''));
+        return;
+      }
+      // Sin veredicto fiable (avería, red caída, respuesta inesperada) → fallback a
+      // licenses.json, para no dejar sin servicio a quien sí paga.
       fetchLicensesJson().then(function(licenses){
         var lic = licenses && licenses[token];
         if(!lic){ console.warn('[WM-CHAT] Token inválido'); return; }
@@ -52,11 +59,26 @@
     });
   }
 
+  // Contrato de verifyEdge(), apoyado en el de verify-token v30:
+  //   objeto con active:true → licencia activa, se procede
+  //   objeto con denied:true → denegación explícita (paused / unknown_token /
+  //                            domain_not_allowed / token_required) → CORTA sin fallback
+  //   null                   → cualquier otra cosa: avería 503, 5xx, 429, timeout,
+  //                            excepción de red, JSON ilegible, o un active:false SIN
+  //                            denied (deploy antiguo) → fallback a licenses.json
+  // El status HTTP no decide nada: decide el cuerpo. Ante la duda NO se apaga a un
+  // cliente que paga — solo corta lo que viene marcado explícitamente como denegado.
   function verifyEdge(tk){
     return fetch(VERIFY_ENDPOINT + '?token=' + encodeURIComponent(tk))
-    .then(function(r){ if(!r.ok) throw new Error('verify ' + r.status); return r.json(); })
-    .then(function(data){ return data || null; })
-    .catch(function(){ return null; }); // null → Edge Function no disponible → fallback
+    .then(function(r){
+      return r.json().then(function(data){
+        if(!data || typeof data !== 'object') return null;
+        if(data.active === true) return data;
+        if(data.denied === true) return { active:false, denied:true, reason:data.reason || '' };
+        return null; // respuesta inesperada → fallback
+      }, function(){ return null; }); // cuerpo ilegible → fallback
+    })
+    .catch(function(){ return null; }); // red caída / CORS / DNS / timeout → fallback
   }
 
   function fetchLicensesJson(){

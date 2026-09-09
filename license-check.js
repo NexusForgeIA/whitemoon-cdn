@@ -1,8 +1,10 @@
 /**
- * WhiteMoon · license-check.js — comprobación de licencia para clientes
- * Core/Scale/Elite (solo registro). Oculta el chatbot si la licencia no está
- * activa. Verificación vía Edge Function pública (sin keys) → fallback licenses.json.
- * Si todo falla NO desactiva nada (nunca interrumpe a un cliente que paga).
+ * WhiteMoon · license-check.js — comprobación de licencia para clientes con web
+ * propia. Oculta el chatbot si la licencia no está activa. Verificación vía Edge
+ * Function pública (sin keys) → fallback licenses.json SOLO si no hay respuesta.
+ * Si la Edge Function responde que la licencia no está activa, se desactiva sin
+ * fallback. Si no hay respuesta (red caída) NO desactiva nada: nunca se interrumpe
+ * a un cliente que paga por un fallo de red.
  */
 (function(){
   var s = document.currentScript ||
@@ -18,14 +20,19 @@
     if(active === false) disableChat();
   });
 
+  // Solo la denegación explícita de verify-token v30 (denied:true) desactiva.
+  // Todo lo demás — avería 503, 5xx, 429, timeout, JSON ilegible o un active:false
+  // sin denied — cae a licenses.json: ante la duda no se apaga a quien paga.
   function checkToken(cb){
     fetch(VERIFY_ENDPOINT + '?token=' + encodeURIComponent(token))
-    .then(function(r){ if(!r.ok) throw new Error('verify ' + r.status); return r.json(); })
-    .then(function(data){
-      if(data && data.active === true){ cb(true); return; }
-      fallback(cb); // active:false o sin datos → consultar licenses.json
+    .then(function(r){
+      return r.json().then(function(data){
+        if(data && data.active === true){ cb(true); return; }
+        if(data && data.denied === true){ cb(false); return; }
+        fallback(cb);
+      }, function(){ fallback(cb); }); // cuerpo ilegible → fallback
     })
-    .catch(function(){ fallback(cb); }); // Edge Function no disponible → fallback
+    .catch(function(){ fallback(cb); }); // red caída → fallback
   }
 
   // Normalización idéntica a verify-token v16 (strip protocolo, www, puerto).

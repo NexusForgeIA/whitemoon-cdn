@@ -1,8 +1,10 @@
 /**
- * WhiteMoon · license-check.js — comprobación de licencia para clientes
- * Core/Scale/Elite (solo registro). Oculta el chatbot si la licencia no está
- * activa. Verificación vía Edge Function pública (sin keys) → fallback licenses.json.
- * Si todo falla NO desactiva nada (nunca interrumpe a un cliente que paga).
+ * WhiteMoon · license-check.js — comprobación de licencia para clientes con web
+ * propia. Oculta el chatbot si la licencia no está activa. Verificación vía Edge
+ * Function pública (sin keys) → fallback licenses.json SOLO si no hay respuesta.
+ * Si la Edge Function responde que la licencia no está activa, se desactiva sin
+ * fallback. Si no hay respuesta (red caída) NO desactiva nada: nunca se interrumpe
+ * a un cliente que paga por un fallo de red.
  */
 (function(){
   var s = document.currentScript ||
@@ -18,14 +20,26 @@
     if(active === false) disableChat();
   });
 
+  // Un "no" recibido corta; solo la ausencia de respuesta cae a licenses.json.
+  var DENY_HINTS = /license inactive|domain_not_allowed|invalid token|token_required/i;
+
   function checkToken(cb){
     fetch(VERIFY_ENDPOINT + '?token=' + encodeURIComponent(token))
-    .then(function(r){ if(!r.ok) throw new Error('verify ' + r.status); return r.json(); })
-    .then(function(data){
-      if(data && data.active === true){ cb(true); return; }
-      fallback(cb); // active:false o sin datos → consultar licenses.json
+    .then(function(r){
+      // Servicio caído o limitando: falta de respuesta, no veredicto.
+      if(r.status >= 500 || r.status === 429){ fallback(cb); return; }
+      return r.json().then(function(data){
+        if(data && data.active === true){ cb(true); return; }
+        if(data && data.active === false){ cb(false); return; }
+        if(data && DENY_HINTS.test(String(data.error || data.message || ''))){ cb(false); return; }
+        if(!r.ok){ cb(false); return; }
+        fallback(cb);
+      }, function(){
+        if(!r.ok){ cb(false); return; }
+        fallback(cb);
+      });
     })
-    .catch(function(){ fallback(cb); }); // Edge Function no disponible → fallback
+    .catch(function(){ fallback(cb); }); // red caída → fallback
   }
 
   // Normalización idéntica a verify-token v16 (strip protocolo, www, puerto).

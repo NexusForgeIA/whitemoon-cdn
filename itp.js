@@ -44,7 +44,12 @@
         });
         return;
       }
-      // active:false o Edge no disponible → fallback a licenses.json (legacy).
+      if(res){
+        // Respuesta recibida y es que NO: se corta aquí, SIN fallback.
+        console.warn('[WM-ITP] Licencia no activa');
+        return;
+      }
+      // Sin respuesta de la Edge Function → fallback a licenses.json (legacy).
       fetchLicensesJson().then(function(licenses){
         var lic = licenses && licenses[token];
         if(!lic){ console.warn('[WM-ITP] Token inválido'); return; }
@@ -54,11 +59,34 @@
     });
   }
 
+  // Contrato de verifyEdge():
+  //   objeto con active:true  → licencia activa
+  //   objeto con active:false → la Edge Function ha respondido que NO
+  //   null                    → NO ha habido respuesta (red caída, 5xx, 429, cuerpo ilegible)
+  // La distinción entre "me han dicho que no" y "no me han contestado" es la que
+  // hace que el kill-switch por impago funcione: solo el null permite caer a
+  // licenses.json. Antes cualquiera de los dos casos caía al fallback, así que un
+  // cliente pausado en Supabase seguía viendo su widget si estaba en licenses.json.
+  var DENY_HINTS = /license inactive|domain_not_allowed|invalid token|token_required/i;
+
   function verifyEdge(tk){
     return fetch(VERIFY_ENDPOINT + '?token=' + encodeURIComponent(tk))
-    .then(function(r){ if(!r.ok) throw new Error('verify ' + r.status); return r.json(); })
-    .then(function(data){ return data || null; })
-    .catch(function(){ return null; }); // null → Edge no disponible → fallback
+    .then(function(r){
+      // Servicio caído o limitando: eso no es un veredicto, es falta de respuesta.
+      if(r.status >= 500 || r.status === 429) return null;
+      return r.json().then(function(data){
+        if(data && typeof data === 'object'){
+          if(data.active === true) return data;
+          if(data.active === false) return { active:false };
+          if(DENY_HINTS.test(String(data.error || data.message || ''))) return { active:false };
+        }
+        // Sin veredicto legible: si el status ya era de error, el servidor ha dicho no.
+        return r.ok ? null : { active:false };
+      }, function(){
+        return r.ok ? null : { active:false };
+      });
+    })
+    .catch(function(){ return null; }); // red caída / CORS / DNS → fallback legítimo
   }
 
   function fetchLicensesJson(){

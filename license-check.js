@@ -20,24 +20,17 @@
     if(active === false) disableChat();
   });
 
-  // Un "no" recibido corta; solo la ausencia de respuesta cae a licenses.json.
-  var DENY_HINTS = /license inactive|domain_not_allowed|invalid token|token_required/i;
-
+  // Solo la denegación explícita de verify-token v30 (denied:true) desactiva.
+  // Todo lo demás — avería 503, 5xx, 429, timeout, JSON ilegible o un active:false
+  // sin denied — cae a licenses.json: ante la duda no se apaga a quien paga.
   function checkToken(cb){
     fetch(VERIFY_ENDPOINT + '?token=' + encodeURIComponent(token))
     .then(function(r){
-      // Servicio caído o limitando: falta de respuesta, no veredicto.
-      if(r.status >= 500 || r.status === 429){ fallback(cb); return; }
       return r.json().then(function(data){
         if(data && data.active === true){ cb(true); return; }
-        if(data && data.active === false){ cb(false); return; }
-        if(data && DENY_HINTS.test(String(data.error || data.message || ''))){ cb(false); return; }
-        if(!r.ok){ cb(false); return; }
+        if(data && data.denied === true){ cb(false); return; }
         fallback(cb);
-      }, function(){
-        if(!r.ok){ cb(false); return; }
-        fallback(cb);
-      });
+      }, function(){ fallback(cb); }); // cuerpo ilegible → fallback
     })
     .catch(function(){ fallback(cb); }); // red caída → fallback
   }

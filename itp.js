@@ -44,12 +44,13 @@
         });
         return;
       }
-      if(res){
-        // Respuesta recibida y es que NO: se corta aquí, SIN fallback.
-        console.warn('[WM-ITP] Licencia no activa');
+      if(res && res.denied === true){
+        // Denegación explícita: se corta aquí, SIN fallback.
+        console.warn('[WM-ITP] Licencia denegada' + (res.reason ? ' (' + res.reason + ')' : ''));
         return;
       }
-      // Sin respuesta de la Edge Function → fallback a licenses.json (legacy).
+      // Sin veredicto fiable (avería, red caída, respuesta inesperada) → fallback
+      // a licenses.json (legacy).
       fetchLicensesJson().then(function(licenses){
         var lic = licenses && licenses[token];
         if(!lic){ console.warn('[WM-ITP] Token inválido'); return; }
@@ -59,34 +60,26 @@
     });
   }
 
-  // Contrato de verifyEdge():
-  //   objeto con active:true  → licencia activa
-  //   objeto con active:false → la Edge Function ha respondido que NO
-  //   null                    → NO ha habido respuesta (red caída, 5xx, 429, cuerpo ilegible)
-  // La distinción entre "me han dicho que no" y "no me han contestado" es la que
-  // hace que el kill-switch por impago funcione: solo el null permite caer a
-  // licenses.json. Antes cualquiera de los dos casos caía al fallback, así que un
-  // cliente pausado en Supabase seguía viendo su widget si estaba en licenses.json.
-  var DENY_HINTS = /license inactive|domain_not_allowed|invalid token|token_required/i;
-
+  // Contrato de verifyEdge(), apoyado en el de verify-token v30:
+  //   objeto con active:true → licencia activa, se procede
+  //   objeto con denied:true → denegación explícita (paused / unknown_token /
+  //                            domain_not_allowed / token_required) → CORTA sin fallback
+  //   null                   → cualquier otra cosa: avería 503, 5xx, 429, timeout,
+  //                            excepción de red, JSON ilegible, o un active:false SIN
+  //                            denied (deploy antiguo) → fallback a licenses.json
+  // El status HTTP no decide nada: decide el cuerpo. Ante la duda NO se apaga a un
+  // cliente que paga — solo corta lo que viene marcado explícitamente como denegado.
   function verifyEdge(tk){
     return fetch(VERIFY_ENDPOINT + '?token=' + encodeURIComponent(tk))
     .then(function(r){
-      // Servicio caído o limitando: eso no es un veredicto, es falta de respuesta.
-      if(r.status >= 500 || r.status === 429) return null;
       return r.json().then(function(data){
-        if(data && typeof data === 'object'){
-          if(data.active === true) return data;
-          if(data.active === false) return { active:false };
-          if(DENY_HINTS.test(String(data.error || data.message || ''))) return { active:false };
-        }
-        // Sin veredicto legible: si el status ya era de error, el servidor ha dicho no.
-        return r.ok ? null : { active:false };
-      }, function(){
-        return r.ok ? null : { active:false };
-      });
+        if(!data || typeof data !== 'object') return null;
+        if(data.active === true) return data;
+        if(data.denied === true) return { active:false, denied:true, reason:data.reason || '' };
+        return null; // respuesta inesperada → fallback
+      }, function(){ return null; }); // cuerpo ilegible → fallback
     })
-    .catch(function(){ return null; }); // red caída / CORS / DNS → fallback legítimo
+    .catch(function(){ return null; }); // red caída / CORS / DNS / timeout → fallback
   }
 
   function fetchLicensesJson(){

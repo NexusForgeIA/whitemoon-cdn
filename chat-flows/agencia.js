@@ -76,7 +76,7 @@
           { key:'web',    msg:'¿Tu negocio tiene web actualmente?', opts:['Sí tengo web','No tengo web','Está desactualizada'] },
           { key:'perdidas', msg:'¿Cuántos clientes pierdes al mes fuera de horario?', opts:['Muchos','Entre 5 y 20','Más de 20','No lo sé'] }
         ], function(data){
-          var pack = data.web === 'Sí tengo web' ? 'Spark' : 'Core';
+          var pack = data.web === 'Sí tengo web' ? 'Spark' : 'Core Spark Web';
           mostrarRecomendacion(pack, data.sector);
         });
       }
@@ -92,7 +92,7 @@
             '⚡ Operativo en 5-7 días · Sin permanencia';
         } else {
           card =
-            '<b>🌐 Pack Core — 899€ setup + 99€/mes</b><br>'+
+            '<b>🌐 Pack Core Spark Web — 899€ setup + 99€/mes</b><br>'+
             '🌐 Web profesional + Chatbot IA para <b>'+sec+'</b><br>'+
             '📱 Captura leads 24/7 → WhatsApp inmediato<br>'+
             '🔍 SEO básico incluido · Sin permanencia';
@@ -124,10 +124,10 @@
           { key:'dominio', msg:'¿Tienes dominio y hosting?',  opts:['Tengo todo','Necesito todo','No sé'] }
         ], function(data){
           w.bot(
-            '<b>🌐 Pack Core — 899€ setup + 99€/mes</b><br>'+
+            '<b>🌐 Pack Core Spark Web — 899€ setup + 99€/mes</b><br>'+
             'Web profesional + Chatbot IA para <b>'+u.escapeHtml(data.sector)+'</b><br>'+
             '🔍 SEO básico · 📱 Captura 24/7 → WhatsApp · Sin permanencia',
-            function(){ capture('Pack Core', data.sector); }
+            function(){ capture('Pack Core Spark Web', data.sector); }
           );
         });
       }
@@ -156,14 +156,9 @@
             w.flow([
               { key:'equipo', msg:'¿Cuántos comerciales tiene tu equipo?', opts:['Solo yo','2-5 comerciales','Más de 5'] }
             ], function(data){
-              var plan, precio;
-              if(data.equipo === 'Solo yo'){       plan = 'Starter';    precio = '299€ setup + 299€/mes'; }
-              else if(data.equipo === 'Más de 5'){ plan = 'Enterprise'; precio = '699€ setup + 699€/mes'; }
-              else                                { plan = 'Agency';    precio = '499€ setup + 399€/mes'; }
-              w.bot(
-                '<b>🔭 Scout '+plan+'</b><br>'+precio+' · Sin permanencia',
-                function(){ capture('Scout '+plan, 'Agencia IA'); }
-              );
+              // Scout no tiene tarifa publicada en whitemoon.es/precios: el bot no
+              // cotiza, captura el lead con el tamaño de equipo y lo cierra el equipo.
+              capture('Scout', 'Agencia IA · ' + data.equipo);
             });
           }
         );
@@ -183,11 +178,9 @@
         w.bot(
           '💰 <b>Precios WhiteMoon</b> — Sin permanencia:<br>'+
           '🤖 Spark: 499€ setup + 99€/mes<br>'+
-          '🌐 Core (web+chatbot): 899€ setup + 99€/mes<br>'+
-          '📈 Scale (RAG+CRM): 3.500€ setup + 99€/mes<br>'+
-          '🚀 Elite (RAG premium): 6.500€ setup + 599€/mes<br>'+
-          '📋 Auditoría IA: 899€ pago único<br>'+
-          '🔭 Scout Starter: 299€ setup + 299€/mes',
+          '🌐 Core Spark Web (web+chatbot): 899€ setup + 99€/mes<br>'+
+          '📚 Core RAG (agente entrenado con tus documentos): 2.499€ setup + 199€/mes<br>'+
+          '📋 Auditoría IA: 899€ pago único',
           function(){
             w.showOpts([
               { label:'Recomiéndame el mejor', value:'reco' },

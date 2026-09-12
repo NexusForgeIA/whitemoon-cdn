@@ -360,20 +360,19 @@ var FUNCTIONS_BASE = SUPABASE_URL + '/functions/v1';
 // Incluye alias snake_case (core_rag, orion_agent) porque las altas hechas
 // desde el CRM pueden llegar con ese formato — sin el alias el MRR de esas
 // filas saldría 0.
-var PACK_MRR = { spark:99, 'mini-core':99, 'orion-ia-agent':99, orion_agent:99, 'core-spark-web':99, 'core-orion':99, 'whitemoon-360':199, 'core-rag':199, core_rag:199, 'calculadora-itp':99, 'pack-ads':599 };
+var PACK_MRR = { spark:99, 'mini-core':99, 'orion-ia-agent':99, orion_agent:99, 'core-spark-web':99, 'core-orion':99, 'whitemoon-360':199, 'core-rag':199, core_rag:199, 'calculadora-itp':99 };
 // Setup (pago único) por pack — mismos alias que PACK_MRR.
-// Pack Ads va sin setup: la inversión publicitaria es aparte.
-var PACK_SETUP = { spark:499, 'mini-core':599, 'orion-ia-agent':799, orion_agent:799, 'core-spark-web':899, 'core-orion':1499, 'whitemoon-360':1899, 'core-rag':2499, core_rag:2499, 'calculadora-itp':599, 'pack-ads':0 };
+var PACK_SETUP = { spark:499, 'mini-core':599, 'orion-ia-agent':799, orion_agent:799, 'core-spark-web':899, 'core-orion':1499, 'whitemoon-360':1899, 'core-rag':2499, core_rag:2499, 'calculadora-itp':599 };
 var SECTORES = ['dental','legal','restaurante','gestoria','clinica','inmobiliaria','gimnasio','peluqueria','veterinaria','formacion','taller','podologia','automovil','abogados'];
 // Packs en venta (dropdown de alta/edición). Los retirados no se ofrecen,
 // pero ensurePackOption() los inyecta al editar un cliente antiguo.
-var PACKS = ['spark','mini-core','orion-ia-agent','core-spark-web','core-orion','whitemoon-360','core-rag','calculadora-itp','pack-ads'];
+var PACKS = ['spark','mini-core','orion-ia-agent','core-spark-web','core-orion','whitemoon-360','core-rag','calculadora-itp'];
 // Sectores del CHECK que no tienen plantilla propia en plantillas_prompt_sector
 // (ni directa ni por alias): la RPC les devuelve la plantilla 'generico'.
 var SECTORES_GENERICOS = { legal:1, abogados:1, clinica:1, gimnasio:1, veterinaria:1, formacion:1, podologia:1 };
 // Etiqueta legible por pack (dropdown/badge). Sin entrada → se muestra la clave
 // tal cual (comportamiento histórico de spark, core-orion, etc.).
-var PACK_LABEL = { 'mini-core':'Pack Mini Core', 'whitemoon-360':'WhiteMoon 360', 'pack-ads':'Pack Ads', 'calculadora-itp':'Calculadora ITP Pro' };
+var PACK_LABEL = { 'mini-core':'Pack Mini Core', 'whitemoon-360':'WhiteMoon 360', 'calculadora-itp':'Calculadora ITP Pro' };
 function packLabel(p){ if(!p) return '—'; return PACK_LABEL[p] || p; }
 
 var clientes = [];
@@ -778,8 +777,6 @@ var RAG_LIMITES = { 'core-rag':100 };
 function ragLimite(pack){ return RAG_LIMITES[String(pack||'').toLowerCase()]; }
 function snippetForPack(c){
   var pack = String(c.pack||'').toLowerCase();
-  // Pack Ads no instala nada en la web del cliente: ni script ni token CDN.
-  if(pack === 'pack-ads') return '— Pack Ads no lleva script embebido: es gestión de campañas.';
   var token = (c.token_cdn||'').trim();
   if(!token) return '— Falta token CDN para generar el script.';
   // Packs de texto (Laura IA · Claude API): chat.js, sin widget de voz Retell.
@@ -817,9 +814,6 @@ function agenteScript(c){ return snippetForPack(c); }
 //   - calculadora-itp                → Calculadora ITP (widget, sin agente IA)
 function agenteTipoFromPack(pack){
   var p = String(pack||'').toLowerCase();
-  // Pack Ads es gestión de campañas: no lleva agente ni script embebido. Sin este
-  // caso caería en 'laura' y el cliente acabaría con un chatbot fantasma.
-  if(p === 'pack-ads') return 'ninguno';
   if(p === 'calculadora-itp') return 'itp';
   if(p === 'orion-ia-agent' || p === 'core-orion' || p === 'core-rag') return 'orion';
   return 'laura'; // spark · mini-core · core-spark-web · whitemoon-360 (CRM y panel aparte)
@@ -829,13 +823,11 @@ function packUsesRetell(pack){ return agenteTipoFromPack(pack) === 'orion'; }
 // El system prompt de texto se oculta en core-rag: su conocimiento sale de los
 // documentos RAG, no de un prompt escrito a mano.
 function packShowsPrompt(pack){
-  var p = String(pack||'').toLowerCase();
-  return p !== 'core-rag' && p !== 'pack-ads';
+  return String(pack||'').toLowerCase() !== 'core-rag';
 }
 function agenteLabel(pack){
   var p = String(pack||'').toLowerCase();
   var tipo = agenteTipoFromPack(pack);
-  if(tipo === 'ninguno') return 'Sin agente (gestión de campañas)';
   if(tipo === 'laura') return 'Laura IA (chat texto · Claude API)';
   if(tipo === 'itp')   return 'CALCULADORA ITP';
   if(p === 'core-rag') return 'Orion IA + RAG (Retell + ElevenLabs)';
@@ -843,7 +835,6 @@ function agenteLabel(pack){
 }
 function agenteIcon(pack){
   var tipo = agenteTipoFromPack(pack);
-  if(tipo === 'ninguno') return '📣';
   if(tipo === 'laura') return '💬';
   if(tipo === 'itp')   return '🧮';
   return '🎙️';
@@ -1191,9 +1182,7 @@ function saveCliente(){
   var nombre=($('nNombre').value||'').trim();
   var url=($('nUrl').value||'').trim();
   var pack = $('nPack').value || null;
-  // Pack Ads no instala nada en la web del cliente, así que no necesita token CDN.
-  var sinToken = String(pack||'').toLowerCase() === 'pack-ads';
-  if(!token && !sinToken){ toast('Token obligatorio','err'); return; }
+  if(!token){ toast('Token obligatorio','err'); return; }
   if(!nombre){ toast('Nombre obligatorio','err'); return; }
   if(!url){ toast('Dominio web obligatorio','err'); return; }
   // El prompt no puede salir a producción con placeholders sin rellenar.

@@ -1,0 +1,3 @@
+# Solo usuarios autenticados del panel CDN (Supabase Auth) pueden llamarla.
+[functions.fabrica-clonar]
+verify_jwt = true

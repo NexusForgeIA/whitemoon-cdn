@@ -73,6 +73,11 @@ Deno.serve(async (req: Request) => {
     if (!plantillaId || !clienteNombre) {
       return json({ ok: false, error: "faltan_datos" }, 400);
     }
+    // Ficha del cliente: objeto que se guarda tal cual en web_proyectos.config,
+    // con cliente_nombre dentro. Sin config, el formato de siempre.
+    const config = body.config && typeof body.config === "object" && !Array.isArray(body.config)
+      ? { ...(body.config as Record<string, unknown>), cliente_nombre: clienteNombre }
+      : { cliente_nombre: clienteNombre };
     const slug = slugRepo(clienteNombre);
     if (!slug) return json({ ok: false, error: "nombre_invalido" }, 400);
     const repoNuevo = "WHITEMOON-" + slug;
@@ -139,7 +144,7 @@ Deno.serve(async (req: Request) => {
       modulo: plantilla.modulo,
       repo_url: repoUrl,
       estado: "borrador",
-      config: { cliente_nombre: clienteNombre },
+      config,
     });
     if (insError) {
       // El repo ya existe en GitHub: se devuelve su URL para no perderlo de vista.

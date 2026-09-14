@@ -337,6 +337,38 @@ tr:hover td{background:#0d0d16}
   </div>
 </div>
 
+<!-- FICHA DEL CLIENTE (clonar plantilla → web_proyectos.config) -->
+<div class="modal-bg" id="fcBg">
+  <div class="modal">
+    <h3 id="fcTitle">🏭 Ficha del cliente</h3>
+    <p class="muted" id="fcRepo" style="font-size:.74rem;margin:-8px 0 14px"></p>
+    <div class="mb"><label>Nombre del negocio *</label><input type="text" id="fcNombre" placeholder="Peluquería Aurora"></div>
+    <div class="g2">
+      <div><label>Dominio</label><input type="text" id="fcDominio" placeholder="clientexyz.es" autocomplete="off"></div>
+      <div><label>Email</label><input type="email" id="fcEmail" placeholder="hola@clientexyz.es"></div>
+    </div>
+    <div class="g2">
+      <div><label>Teléfono</label><input type="text" id="fcTelefono" placeholder="912345678"></div>
+      <div><label>WhatsApp <span class="muted" style="text-transform:none;font-size:.66rem">(solo dígitos)</span></label><input type="text" id="fcWhatsapp" inputmode="numeric" placeholder="34600000000" oninput="this.value=this.value.replace(/\D/g,'')"></div>
+    </div>
+    <div class="g2">
+      <div><label>Dirección</label><input type="text" id="fcDireccion" placeholder="C/ Mayor 12"></div>
+      <div><label>Ciudad</label><input type="text" id="fcCiudad" placeholder="Majadahonda"></div>
+    </div>
+    <div class="g2">
+      <div><label>Color primario</label><input type="color" id="fcColor1" value="#7c4dff" style="height:42px;padding:4px"></div>
+      <div><label>Color secundario</label><input type="color" id="fcColor2" value="#00d4aa" style="height:42px;padding:4px"></div>
+    </div>
+    <div class="mb"><label>SEO · título <span class="muted" style="text-transform:none;font-size:.66rem">(≤65)</span></label><input type="text" id="fcSeoTitulo" maxlength="65"></div>
+    <div class="mb"><label>SEO · descripción <span class="muted" style="text-transform:none;font-size:.66rem">(≤160)</span></label><textarea id="fcSeoDesc" rows="2" maxlength="160"></textarea></div>
+    <div class="mb"><label>Token CDN del chatbot <span class="muted" style="text-transform:none;font-size:.66rem">(opcional)</span></label><input type="text" id="fcToken" placeholder="WM-..." autocomplete="off"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-ghost" onclick="closeFicha()">Cancelar</button>
+      <button class="btn btn-p" id="fcSave" onclick="guardarFicha()">Clonar y crear ficha</button>
+    </div>
+  </div>
+</div>
+
 <!-- DETALLE DEL CLIENTE: DATOS + PAGOS -->
 <div class="modal-bg" id="pagosBg">
   <div class="modal">
@@ -1152,24 +1184,61 @@ function savePlantilla(){
     else toast('Error: '+msg.slice(0,120),'err');
   }).then(function(){ $('plSave').disabled=false; });
 }
-// Fase 2 de la fábrica: crea el repo del cliente desde el repo demo (template)
-// vía la Edge Function fabrica-clonar. El GITHUB_TOKEN vive solo en Supabase Secrets.
+// Fábrica: crea el repo del cliente desde el repo demo (template) vía la Edge
+// Function fabrica-clonar y guarda la ficha del cliente en web_proyectos.config.
+// El GITHUB_TOKEN vive solo en Supabase Secrets.
+var currentClonPlantilla = null; // id de la plantilla que se va a clonar
+var FICHA_TEXTOS = ['fcNombre','fcDominio','fcTelefono','fcWhatsapp','fcEmail','fcDireccion','fcCiudad','fcSeoTitulo','fcSeoDesc','fcToken'];
 function clonarPlantilla(id){
   var p = plantillas.filter(function(x){ return x.id===id; })[0]; if(!p) return;
-  var cliente = prompt('Nombre del cliente para clonar "'+p.nombre+'" ('+p.repo_demo+'):');
-  if(cliente===null) return;
-  cliente = cliente.trim();
-  if(!cliente){ toast('Nombre del cliente obligatorio','err'); return; }
-  toast('Clonando '+p.repo_demo+'…','info');
+  currentClonPlantilla = id;
+  $('fcTitle').textContent = '🏭 Ficha del cliente · '+p.nombre;
+  $('fcRepo').textContent = 'Se clonará '+p.repo_demo+' en NexusForgeIA/WHITEMOON-<NOMBRE>.';
+  FICHA_TEXTOS.forEach(function(k){ $(k).value=''; });
+  $('fcColor1').value = '#7c4dff'; $('fcColor2').value = '#00d4aa';
+  $('fcSave').disabled = false;
+  $('fcBg').classList.add('show');
+}
+function closeFicha(){ $('fcBg').classList.remove('show'); currentClonPlantilla=null; }
+function fichaVal(id){ return ($(id).value||'').trim() || null; }
+function guardarFicha(){
+  var id = currentClonPlantilla; if(!id) return;
+  var nombre = ($('fcNombre').value||'').trim();
+  var dominio = ($('fcDominio').value||'').trim().toLowerCase();
+  var whatsapp = ($('fcWhatsapp').value||'').replace(/\D/g,'');
+  var email = ($('fcEmail').value||'').trim();
+  var token = ($('fcToken').value||'').trim();
+  if(!nombre){ toast('Nombre del negocio obligatorio','err'); return; }
+  if(dominio && !/^([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$/.test(dominio)){ toast('Dominio no válido (ej: clientexyz.es)','err'); return; }
+  if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ toast('Email no válido','err'); return; }
+  if(token && !/^WM-[A-Za-z0-9]+$/.test(token)){ toast('Token CDN con formato WM-…','err'); return; }
+  var config = {
+    cliente_nombre: nombre,
+    dominio: dominio || null,
+    telefono: fichaVal('fcTelefono'),
+    whatsapp: whatsapp || null,
+    email: email || null,
+    direccion: fichaVal('fcDireccion'),
+    ciudad: fichaVal('fcCiudad'),
+    color_primario: $('fcColor1').value,
+    color_secundario: $('fcColor2').value,
+    seo_titulo: fichaVal('fcSeoTitulo'),
+    seo_descripcion: fichaVal('fcSeoDesc'),
+    token_cdn: token || null
+  };
+  $('fcSave').disabled = true;
+  toast('Clonando…','info');
   fetch(FUNCTIONS_BASE+'/fabrica-clonar', {
     method:'POST',
     headers:{ 'Authorization':'Bearer '+sbAccessToken, 'Content-Type':'application/json' },
-    body: JSON.stringify({ plantilla_id:id, cliente_nombre:cliente })
+    body: JSON.stringify({ plantilla_id:id, cliente_nombre:nombre, config:config })
   })
   .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return { status:r.status, d:d }; }); })
   .then(function(res){
     var url = res.d.repo_url;
+    // Con 409 o error el modal sigue abierto para poder corregir la ficha.
     if(res.status===200 && res.d.ok && /^https:\/\/github\.com\//.test(url||'')){
+      closeFicha();
       toast('Repo creado ✅ ','ok');
       // Enlace dentro del toast; se deja 10 s para poder pulsarlo.
       var a = document.createElement('a');
@@ -1179,12 +1248,13 @@ function clonarPlantilla(id){
       $('toast').appendChild(a);
       clearTimeout(window._tt); window._tt = setTimeout(function(){ $('toast').style.display='none'; }, 10000);
     } else if(res.status===409){
-      toast('Ya existe un repo en GitHub para "'+cliente+'"','err');
+      toast('Ya existe un repo en GitHub para "'+nombre+'"','err');
     } else {
       toast('Error al clonar: '+(res.d.error||('HTTP '+res.status)),'err');
     }
   })
-  .catch(function(){ toast('No se ha podido conectar con fabrica-clonar','err'); });
+  .catch(function(){ toast('No se ha podido conectar con fabrica-clonar','err'); })
+  .then(function(){ $('fcSave').disabled = false; });
 }
 function deletePlantilla(id){
   var p = plantillas.filter(function(x){ return x.id===id; })[0]; if(!p) return;

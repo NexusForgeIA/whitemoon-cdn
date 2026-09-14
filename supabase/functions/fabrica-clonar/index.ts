@@ -139,20 +139,20 @@ Deno.serve(async (req: Request) => {
     }
 
     const repoUrl = String(gh.html_url ?? `https://github.com/${GITHUB_OWNER}/${repoNuevo}`);
-    const { error: insError } = await supabase.from("web_proyectos").insert({
+    const { data: proyecto, error: insError } = await supabase.from("web_proyectos").insert({
       plantilla_sector: plantilla.sector,
       modulo: plantilla.modulo,
       repo_url: repoUrl,
       estado: "borrador",
       config,
-    });
+    }).select("id").single();
     if (insError) {
       // El repo ya existe en GitHub: se devuelve su URL para no perderlo de vista.
       console.error("fabrica-clonar: insert web_proyectos", insError.message);
       return json({ ok: false, error: "registro_fallido", repo_url: repoUrl }, 500);
     }
 
-    return json({ ok: true, repo_url: repoUrl });
+    return json({ ok: true, repo_url: repoUrl, proyecto_id: proyecto.id });
   } catch (err) {
     console.error("fabrica-clonar: server_error", redact(String(err)));
     return json({ ok: false, error: "server_error" }, 500);

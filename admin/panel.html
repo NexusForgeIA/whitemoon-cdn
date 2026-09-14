@@ -1227,7 +1227,7 @@ function guardarFicha(){
     token_cdn: token || null
   };
   $('fcSave').disabled = true;
-  toast('Clonando…','info');
+  toastRepo('Clonando '+nombre+'…', null, 'info', [], 0);
   fetch(FUNCTIONS_BASE+'/fabrica-clonar', {
     method:'POST',
     headers:{ 'Authorization':'Bearer '+sbAccessToken, 'Content-Type':'application/json' },
@@ -1239,14 +1239,9 @@ function guardarFicha(){
     // Con 409 o error el modal sigue abierto para poder corregir la ficha.
     if(res.status===200 && res.d.ok && /^https:\/\/github\.com\//.test(url||'')){
       closeFicha();
-      toast('Repo creado ✅ ','ok');
-      // Enlace dentro del toast; se deja 10 s para poder pulsarlo.
-      var a = document.createElement('a');
-      a.href = url; a.target = '_blank'; a.rel = 'noopener';
-      a.textContent = url.replace('https://github.com/','');
-      a.style.color = 'inherit'; a.style.textDecoration = 'underline';
-      $('toast').appendChild(a);
-      clearTimeout(window._tt); window._tt = setTimeout(function(){ $('toast').style.display='none'; }, 10000);
+      // El reskin se encadena solo; si falla, el repo ya existe y se ofrece reintentar.
+      if(res.d.proyecto_id) reskinProyecto(res.d.proyecto_id, url);
+      else toastRepo('Repo creado ✅ ', url, 'ok', [], 10000);
     } else if(res.status===409){
       toast('Ya existe un repo en GitHub para "'+nombre+'"','err');
     } else {
@@ -1255,6 +1250,51 @@ function guardarFicha(){
   })
   .catch(function(){ toast('No se ha podido conectar con fabrica-clonar','err'); })
   .then(function(){ $('fcSave').disabled = false; });
+}
+// Toast con enlace al repo y botones opcionales. ms = 0 → no se oculta solo.
+function toastRepo(msg, url, type, botones, ms){
+  toast(msg, type);
+  var t = $('toast');
+  if(url && /^https:\/\/github\.com\//.test(url)){
+    var a = document.createElement('a');
+    a.href = url; a.target = '_blank'; a.rel = 'noopener';
+    a.textContent = url.replace('https://github.com/','');
+    a.style.color = 'inherit'; a.style.textDecoration = 'underline';
+    t.appendChild(a);
+  }
+  (botones||[]).forEach(function(b){
+    var el = document.createElement('button');
+    el.type = 'button'; el.className = 'btn btn-sm'; el.style.margin = '8px 8px 0 0';
+    el.textContent = b.texto; el.onclick = b.accion;
+    t.appendChild(document.createElement('br'));
+    t.appendChild(el);
+  });
+  clearTimeout(window._tt);
+  if(ms) window._tt = setTimeout(function(){ t.style.display='none'; }, ms);
+}
+// Fase 3b: reskin del repo clonado con la ficha (Edge Function fabrica-reskin).
+function reskinProyecto(proyectoId, repoUrl){
+  toastRepo('Repo creado ✅ · Reskineando con la ficha… ', repoUrl, 'info', [], 0);
+  fetch(FUNCTIONS_BASE+'/fabrica-reskin', {
+    method:'POST',
+    headers:{ 'Authorization':'Bearer '+sbAccessToken, 'Content-Type':'application/json' },
+    body: JSON.stringify({ proyecto_id:proyectoId })
+  })
+  .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return { status:r.status, d:d }; }); })
+  .then(function(res){
+    if(res.status===200 && res.d.ok){
+      toastRepo('Web lista para revisión ✅ '+(res.d.cambios||0)+' cambios · ', res.d.repo_url || repoUrl, 'ok', [], 15000);
+    } else {
+      falloReskin(proyectoId, repoUrl, res.d.error || ('HTTP '+res.status));
+    }
+  })
+  .catch(function(){ falloReskin(proyectoId, repoUrl, 'sin conexión'); });
+}
+function falloReskin(proyectoId, repoUrl, motivo){
+  toastRepo('Repo creado, pero el reskin falló ('+motivo+') · ', repoUrl, 'err', [
+    { texto:'Reintentar reskin', accion:function(){ reskinProyecto(proyectoId, repoUrl); } },
+    { texto:'Cerrar', accion:function(){ $('toast').style.display='none'; } }
+  ], 0);
 }
 function deletePlantilla(id){
   var p = plantillas.filter(function(x){ return x.id===id; })[0]; if(!p) return;

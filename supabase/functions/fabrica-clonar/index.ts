@@ -75,9 +75,13 @@ Deno.serve(async (req: Request) => {
     }
     // Ficha del cliente: objeto que se guarda tal cual en web_proyectos.config,
     // con cliente_nombre dentro. Sin config, el formato de siempre.
-    const config = body.config && typeof body.config === "object" && !Array.isArray(body.config)
+    const config: Record<string, unknown> = body.config && typeof body.config === "object" && !Array.isArray(body.config)
       ? { ...(body.config as Record<string, unknown>), cliente_nombre: clienteNombre }
       : { cliente_nombre: clienteNombre };
+    // Sin token del salón no se clona: la web no podría reservar en su tenant.
+    if (!/^WM-[A-Za-z0-9]+$/.test(String(config.token_cdn ?? "").trim())) {
+      return json({ ok: false, error: "token_cdn_obligatorio" }, 422);
+    }
     const slug = slugRepo(clienteNombre);
     if (!slug) return json({ ok: false, error: "nombre_invalido" }, 400);
     const repoNuevo = "WHITEMOON-" + slug;

@@ -21,6 +21,8 @@ import Anthropic from "npm:@anthropic-ai/sdk@0.115.0";
 // escribe ninguno.
 // v2.3: activa GitHub Pages en el repo del cliente (vista previa real) y guarda
 // su URL en web_proyectos.preview_url.
+// v2.4: ficha completa. Razón social + NIF resuelven el [COMPLETAR] de la
+// privacidad; region_code rellena addressRegion si no hay nombre de región.
 // La IA queda en el archivo para prosa en una fase posterior, desactivada.
 //
 // Misma seguridad que fabrica-clonar: verify_jwt = true y usuario real de Auth.
@@ -35,6 +37,7 @@ const ORIGENES_PERMITIDOS = new Set([
 ]);
 const RE_LD = /(<script[^>]*type=["']application\/ld\+json["'][^>]*>)([\s\S]*?)(<\/script>)/gi;
 const RE_AVISO_DEMO = /[ \t]*<!-- WM_DEMO_AVISO_START -->[\s\S]*?<!-- WM_DEMO_AVISO_END -->[ \t]*\r?\n?/g;
+const COMPLETAR_RESPONSABLE = "[COMPLETAR: razón social y NIF del responsable]";
 
 // home: index.html (fuente de los originales y único que recibe el SEO de la ficha).
 // html: resto de páginas; texto/xml/js: swaps con el escape de su formato.
@@ -81,6 +84,8 @@ type Ficha = {
   seoDescripcion: string;
   zona: string;
   regionCode: string;       // geo.region, p. ej. ES-MD
+  razonSocial: string;
+  nif: string;
 };
 
 type Swap = { clave: string; buscar: string; poner: string };
@@ -231,6 +236,8 @@ function fichaDe(config: Json, owner: string, repo: string): Ficha {
     seoDescripcion: txt("seo_descripcion"),
     zona: txt("zona"),
     regionCode: txt("region_code"),
+    razonSocial: txt("razon_social"),
+    nif: txt("nif").replace(/[\s-]/g, "").toUpperCase(),
   };
 }
 
@@ -264,6 +271,9 @@ function construirSwaps(o: Originales, f: Ficha, conDireccionCompuesta: boolean)
   add("marca", o.marcaCorta, f.nombre);
   // Zona solo si la ficha la trae; si no, se queda la genérica de la plantilla.
   if (f.zona) add("zona", o.zona, f.zona);
+  // Privacidad: responsable del tratamiento con razón social y NIF de la ficha
+  // (solo si vienen los dos; si no, el [COMPLETAR] se queda a propósito).
+  if (f.razonSocial && f.nif) add("responsable", COMPLETAR_RESPONSABLE, `${f.razonSocial}, NIF ${f.nif}`);
   return swaps.sort((a, b) => b.buscar.length - a.buscar.length);
 }
 
@@ -314,7 +324,7 @@ function ajustarLd(nodo: unknown, f: Ficha, detalle: Json, conSeo: boolean): boo
     const antes = JSON.stringify(a);
     poner(a, "addressLocality", f.ciudad);
     poner(a, "postalCode", f.cp);
-    poner(a, "addressRegion", f.region);
+    poner(a, "addressRegion", f.region || f.regionCode);
     if (JSON.stringify(a) !== antes) detalle.ld_direccion = (detalle.ld_direccion ?? 0) + 1;
     // La descripción del negocio es la SEO de la ficha si la trae (solo home).
     if (conSeo && f.seoDescripcion && typeof o.description === "string" && o.description !== f.seoDescripcion) {
@@ -647,7 +657,7 @@ Deno.serve(async (req: Request) => {
     const cambios = suma(cambiosPorArchivo);
     console.log(JSON.stringify({
       fn: "fabrica-reskin",
-      version: "2.3",
+      version: "2.4",
       repo: `${owner}/${repo}`,
       cambios,
       cambios_por_archivo: cambiosPorArchivo,

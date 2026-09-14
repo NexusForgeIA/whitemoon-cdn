@@ -1092,7 +1092,8 @@ function renderPlantillas(){
     h+='<td class="token">'+esc(p.repo_demo)+'<div class="src-note">rama '+esc(p.rama||'main')+'</div></td>';
     h+='<td>'+esc(p.modulo||'—')+'</td>';
     h+='<td><span class="badge '+(p.activa?'badge-on':'badge-off')+'">'+(p.activa?'ACTIVA':'INACTIVA')+'</span></td>';
-    h+='<td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" onclick="openPlantilla(\''+esc(p.id)+'\')">✏️ Editar</button>'
+    h+='<td style="white-space:nowrap"><button class="btn btn-a btn-sm" onclick="clonarPlantilla(\''+esc(p.id)+'\')">🏭 Clonar a cliente</button>'
+      +' <button class="btn btn-ghost btn-sm" onclick="openPlantilla(\''+esc(p.id)+'\')">✏️ Editar</button>'
       +' <button class="btn btn-d btn-sm" onclick="deletePlantilla(\''+esc(p.id)+'\')">🗑 Borrar</button></td>';
     h+='</tr>';
   });
@@ -1150,6 +1151,40 @@ function savePlantilla(){
     if(/23505|duplicate key|409/.test(msg)) toast('Ya existe una plantilla para el sector "'+body.sector+'"','err');
     else toast('Error: '+msg.slice(0,120),'err');
   }).then(function(){ $('plSave').disabled=false; });
+}
+// Fase 2 de la fábrica: crea el repo del cliente desde el repo demo (template)
+// vía la Edge Function fabrica-clonar. El GITHUB_TOKEN vive solo en Supabase Secrets.
+function clonarPlantilla(id){
+  var p = plantillas.filter(function(x){ return x.id===id; })[0]; if(!p) return;
+  var cliente = prompt('Nombre del cliente para clonar "'+p.nombre+'" ('+p.repo_demo+'):');
+  if(cliente===null) return;
+  cliente = cliente.trim();
+  if(!cliente){ toast('Nombre del cliente obligatorio','err'); return; }
+  toast('Clonando '+p.repo_demo+'…','info');
+  fetch(FUNCTIONS_BASE+'/fabrica-clonar', {
+    method:'POST',
+    headers:{ 'Authorization':'Bearer '+sbAccessToken, 'Content-Type':'application/json' },
+    body: JSON.stringify({ plantilla_id:id, cliente_nombre:cliente })
+  })
+  .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return { status:r.status, d:d }; }); })
+  .then(function(res){
+    var url = res.d.repo_url;
+    if(res.status===200 && res.d.ok && /^https:\/\/github\.com\//.test(url||'')){
+      toast('Repo creado ✅ ','ok');
+      // Enlace dentro del toast; se deja 10 s para poder pulsarlo.
+      var a = document.createElement('a');
+      a.href = url; a.target = '_blank'; a.rel = 'noopener';
+      a.textContent = url.replace('https://github.com/','');
+      a.style.color = 'inherit'; a.style.textDecoration = 'underline';
+      $('toast').appendChild(a);
+      clearTimeout(window._tt); window._tt = setTimeout(function(){ $('toast').style.display='none'; }, 10000);
+    } else if(res.status===409){
+      toast('Ya existe un repo en GitHub para "'+cliente+'"','err');
+    } else {
+      toast('Error al clonar: '+(res.d.error||('HTTP '+res.status)),'err');
+    }
+  })
+  .catch(function(){ toast('No se ha podido conectar con fabrica-clonar','err'); });
 }
 function deletePlantilla(id){
   var p = plantillas.filter(function(x){ return x.id===id; })[0]; if(!p) return;

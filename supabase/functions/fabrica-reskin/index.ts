@@ -1,5 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "jsr:@supabase/supabase-js@2";
+import { createClient, type SupabaseClient } from "jsr:@supabase/supabase-js@2";
 import { decodeBase64 } from "jsr:@std/encoding/base64";
 import Anthropic from "npm:@anthropic-ai/sdk@0.115.0";
 
@@ -24,6 +24,10 @@ import Anthropic from "npm:@anthropic-ai/sdk@0.115.0";
 // v2.4: ficha completa. Razón social + NIF resuelven el [COMPLETAR] de la
 // privacidad; region_code rellena addressRegion si no hay nombre de región.
 // La IA queda en el archivo para prosa en una fase posterior, desactivada.
+// v2.5: el clon nace como tenant de la agenda. alexia.js recibe el token_cdn de
+// la ficha (sin token, 422) y, antes de publicar, se asegura la fila de control
+// en onboarding_clientes (valida el token público y da el chat de Telegram), la
+// peluqueria_config del tenant y su catálogo base SIN precios (0 e inactivos).
 //
 // Misma seguridad que fabrica-clonar: verify_jwt = true y usuario real de Auth.
 // GITHUB_TOKEN y ANTHROPIC_API_KEY solo salen de Deno.env: nunca van a la
@@ -38,6 +42,11 @@ const ORIGENES_PERMITIDOS = new Set([
 const RE_LD = /(<script[^>]*type=["']application\/ld\+json["'][^>]*>)([\s\S]*?)(<\/script>)/gi;
 const RE_AVISO_DEMO = /[ \t]*<!-- WM_DEMO_AVISO_START -->[\s\S]*?<!-- WM_DEMO_AVISO_END -->[ \t]*\r?\n?/g;
 const COMPLETAR_RESPONSABLE = "[COMPLETAR: razón social y NIF del responsable]";
+// Agenda multi-tenant: la plantilla declara el tenant demo en alexia.js y el clon
+// lleva el token_cdn de la ficha.
+const DEMO_TENANT = "demo-peluquerias";
+const RE_TENANT_DEMO = /(const\s+TENANT_TOKEN\s*=\s*)(["'])demo-peluquerias\2/;
+const RE_TOKEN_CDN = /^WM-[A-Za-z0-9]+$/;
 
 // home: index.html (fuente de los originales y único que recibe el SEO de la ficha).
 // html: resto de páginas; texto/xml/js: swaps con el escape de su formato.
@@ -86,6 +95,8 @@ type Ficha = {
   regionCode: string;       // geo.region, p. ej. ES-MD
   razonSocial: string;
   nif: string;
+  token: string;            // token_cdn: el tenant de la agenda
+  telegramChatId: string;   // destino de los avisos del salón
 };
 
 type Swap = { clave: string; buscar: string; poner: string };
@@ -238,6 +249,8 @@ function fichaDe(config: Json, owner: string, repo: string): Ficha {
     regionCode: txt("region_code"),
     razonSocial: txt("razon_social"),
     nif: txt("nif").replace(/[\s-]/g, "").toUpperCase(),
+    token: txt("token_cdn"),
+    telegramChatId: txt("telegram_chat_id"),
   };
 }
 
@@ -386,11 +399,126 @@ function aplicarSeoMetas(html: string, f: Ficha, detalle: Json): string {
   return html;
 }
 
+// Constante del tenant en alexia.js: la de la demo pasa al token de la ficha.
+// Fuera del mapa de swaps porque el escape JS de "poner" rompería las comillas;
+// el token ya viene validado (WM-alfanumérico), no necesita escape.
+function swapTenant(texto: string, f: Ficha, detalle: Json): string {
+  return texto.replace(RE_TENANT_DEMO, (_m, antes: string, comilla: string) => {
+    detalle.tenant = (detalle.tenant ?? 0) + 1;
+    return antes + comilla + f.token + comilla;
+  });
+}
+
+type Siembra = { onboarding: "creada" | "completada" | "existente"; config: boolean; servicios_sembrados: number };
+type Alta = { ok: true; siembra: Siembra } | { ok: false; status: number; error: string };
+
+// Alta del salón como tenant, idempotente. Sin fila en onboarding_clientes el
+// token público da 403 y no hay telegram_chat_id al que avisar.
+async function sembrarTenant(
+  // deno-lint-ignore no-explicit-any
+  supabase: SupabaseClient<any, "public", any>,
+  f: Ficha,
+  config: Json,
+  sector: string,
+  modulo: string,
+  repo: string,
+): Promise<Alta> {
+  const falla = (paso: string, msg: string, status = 500): Alta => {
+    console.error(`fabrica-reskin: alta tenant (${paso})`, msg);
+    return { ok: false, status, error: `alta_${paso}_fallida` };
+  };
+  const urlWeb = f.base.includes(".github.io/") ? sinBarra(f.base) : new URL(f.base).host;
+
+  // 1) Fila de control. token_cdn no es único en la tabla: se busca a mano.
+  const { data: filas, error: selError } = await supabase
+    .from("onboarding_clientes")
+    .select("id, cliente_email, telegram_chat_id, sector, url_web_cliente, repo_github")
+    .eq("token_cdn", f.token)
+    .limit(2);
+  if (selError || !filas) return falla("onboarding", selError?.message ?? "sin datos");
+  if (filas.length > 1) return { ok: false, status: 409, error: "token_duplicado" };
+  let onboarding: Siembra["onboarding"] = "existente";
+  if (filas.length === 1) {
+    const fila = filas[0] as Json;
+    // Un token con email de otro cliente no se reutiliza: sería entrar en su agenda.
+    const emailFila = String(fila.cliente_email ?? "").trim().toLowerCase();
+    if (emailFila && f.email && emailFila !== f.email.toLowerCase()) {
+      return { ok: false, status: 409, error: "token_de_otro_cliente" };
+    }
+    // Solo se rellenan huecos: nunca se pisa lo que ya tiene (ni el estado).
+    const vacio = (k: string) => !String(fila[k] ?? "").trim();
+    const completar: Json = {};
+    if (vacio("cliente_email") && f.email) completar.cliente_email = f.email;
+    if (vacio("telegram_chat_id") && f.telegramChatId) completar.telegram_chat_id = f.telegramChatId;
+    if (vacio("sector") && sector) completar.sector = sector;
+    if (vacio("url_web_cliente")) completar.url_web_cliente = urlWeb;
+    if (vacio("repo_github")) completar.repo_github = repo;
+    if (Object.keys(completar).length) {
+      const { error } = await supabase.from("onboarding_clientes").update(completar).eq("id", fila.id);
+      if (error) return falla("onboarding", error.message);
+      onboarding = "completada";
+    }
+  } else {
+    const { error } = await supabase.from("onboarding_clientes").insert({
+      cliente_nombre: f.nombre,
+      cliente_email: f.email || null,
+      cliente_telefono: f.telefono || null,
+      direccion: f.direccion || null,
+      sector: sector || null,
+      token_cdn: f.token,
+      telegram_chat_id: f.telegramChatId || null,
+      url_web_cliente: urlWeb,
+      repo_github: repo,
+      estado: "pendiente", // el CHECK no admite 'activo'
+    });
+    if (error) return falla("onboarding", error.message);
+    onboarding = "creada";
+  }
+
+  // 2) y 3) Solo las plantillas con agenda de peluquería tienen config y catálogo.
+  if (sector !== "peluqueria" || modulo !== "agenda") {
+    return { ok: true, siembra: { onboarding, config: false, servicios_sembrados: 0 } };
+  }
+
+  const cfg: Json = { tenant: f.token, salon_nombre: f.nombre, updated_at: new Date().toISOString() };
+  const wa = nacional(String(config.whatsapp ?? "").replace(/\D/g, ""));
+  if (/^\d{9}$/.test(wa)) cfg.wa_number = "34" + wa;
+  for (const k of ["gmb_url", "gerente_nombre"]) {
+    const v = String(config[k] ?? "").trim();
+    if (v) cfg[k] = v;
+  }
+  const { error: cfgError } = await supabase.from("peluqueria_config").upsert(cfg, { onConflict: "tenant" });
+  if (cfgError) return falla("config", cfgError.message);
+
+  // Catálogo: nombres y duraciones de la demo (los que usa alexia.js para
+  // reservar), con precio 0 e inactivos. Nunca precios de la plantilla en un
+  // cliente real: el dueño los pone y activa desde su panel. Lo ya sembrado no se toca.
+  const { data: base, error: baseError } = await supabase
+    .from("servicios_peluqueria")
+    .select("nombre, duracion_min, orden")
+    .eq("tenant", DEMO_TENANT)
+    .order("orden");
+  if (baseError || !base?.length) return falla("catalogo", baseError?.message ?? "catalogo_base_vacio");
+  const { data: sembrados, error: svcError } = await supabase
+    .from("servicios_peluqueria")
+    .upsert(
+      (base as Json[]).map((s) => ({
+        tenant: f.token, nombre: s.nombre, duracion_min: s.duracion_min, orden: s.orden, precio_eur: 0, activo: false,
+      })),
+      { onConflict: "tenant,nombre", ignoreDuplicates: true },
+    )
+    .select("id");
+  if (svcError) return falla("catalogo", svcError.message);
+
+  return { ok: true, siembra: { onboarding, config: true, servicios_sembrados: sembrados?.length ?? 0 } };
+}
+
 // Reskin de un archivo según su formato.
 function reskinArchivo(texto: string, modo: Modo, o: Originales, f: Ficha, detalle: Json, avisos: string[]): string {
   if (modo === "texto" || modo === "xml" || modo === "js") {
     const esc = modo === "xml" ? escXml : modo === "js" ? escJson : sinEscape;
-    return aplicarSwaps(texto, construirSwaps(o, f, true), esc, detalle);
+    const nuevo = aplicarSwaps(texto, construirSwaps(o, f, true), esc, detalle);
+    return modo === "js" ? swapTenant(nuevo, f, detalle) : nuevo;
   }
   let nuevo = texto;
   // Aviso de demo: solo entre marcadores; sin marcadores no se adivina por texto.
@@ -452,6 +580,13 @@ function puertaSeguridad(modo: Modo, original: string, nuevo: string, o: Origina
   // Ningún resto de textos de demo.
   const demo = RESTOS_DEMO.filter(([, re]) => re.test(nuevo)).map(([n]) => n);
   if (demo.length) return { error: "restos_demo", motivo: "quedan_textos_de_demo", restos: demo };
+
+  // Un chat que usa la agenda tiene que llevar el token del cliente: con el de la
+  // demo (o sin él) las reservas caerían en el tenant de la demo.
+  if (modo === "js" && original.includes("peluquerias-cita") &&
+      !new RegExp(`const\\s+TENANT_TOKEN\\s*=\\s*["']${escRe(f.token)}["']`).test(nuevo)) {
+    return inseguro("tenant_token_no_aplicado");
+  }
 
   // Ningún valor original de NAP puede seguir presente.
   const valoresFicha = [f.nombre, f.direccion, f.email, f.base, f.telefono, f.telE164].filter(Boolean);
@@ -551,7 +686,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: proyecto, error: pError } = await supabase
       .from("web_proyectos")
-      .select("config, repo_url")
+      .select("config, repo_url, plantilla_sector, modulo")
       .eq("id", proyectoId)
       .maybeSingle();
     if (pError) console.error("fabrica-reskin: lectura proyecto", pError.message);
@@ -620,9 +755,13 @@ Deno.serve(async (req: Request) => {
       o.email && !f.email && "email",
       o.calles.length && !f.direccion && "direccion",
       o.localidad && !f.ciudad && "ciudad",
+      !f.token && "token_cdn",
     ].filter(Boolean);
     if (faltan.length) {
       return json({ ok: false, error: "reskin_incompleto", motivo: "faltan_datos_en_ficha", faltan }, 422);
+    }
+    if (!RE_TOKEN_CDN.test(f.token)) {
+      return json({ ok: false, error: "reskin_incompleto", motivo: "token_cdn_invalido" }, 422);
     }
 
     // Reskin de cada archivo presente.
@@ -657,7 +796,7 @@ Deno.serve(async (req: Request) => {
     const cambios = suma(cambiosPorArchivo);
     console.log(JSON.stringify({
       fn: "fabrica-reskin",
-      version: "2.4",
+      version: "2.5",
       repo: `${owner}/${repo}`,
       cambios,
       cambios_por_archivo: cambiosPorArchivo,
@@ -666,6 +805,13 @@ Deno.serve(async (req: Request) => {
       fallos,
     }));
     if (fallos.length) return json({ ok: false, ...fallos[0], fallos }, 422);
+
+    // Alta del tenant ANTES de publicar: no se publica un clon sin su fila de control.
+    const alta = await sembrarTenant(
+      supabase, f, config, String(proyecto.plantilla_sector ?? ""), String(proyecto.modulo ?? ""), repo,
+    );
+    if (!alta.ok) return json({ ok: false, error: alta.error }, alta.status);
+    console.log(JSON.stringify({ fn: "fabrica-reskin", repo: `${owner}/${repo}`, tenant: alta.siembra }));
 
     // Commit ÚNICO con todos los archivos cambiados (Git Data API).
     const info = await gh("GET", api);
@@ -724,6 +870,7 @@ Deno.serve(async (req: Request) => {
       cambios_por_archivo: cambiosPorArchivo,
       repo_url: repoUrl,
       preview_url: previewUrl,
+      tenant: alta.siembra,
       ...(previewError ? { preview_error: previewError } : {}),
     });
   } catch (err) {

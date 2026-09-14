@@ -373,7 +373,10 @@ tr:hover td{background:#0d0d16}
     </div>
     <div class="mb"><label>SEO · título <span class="muted" style="text-transform:none;font-size:.66rem">(≤65)</span></label><input type="text" id="fcSeoTitulo" maxlength="65"></div>
     <div class="mb"><label>SEO · descripción <span class="muted" style="text-transform:none;font-size:.66rem">(≤160)</span></label><textarea id="fcSeoDesc" rows="2" maxlength="160"></textarea></div>
-    <div class="mb"><label>Token CDN del chatbot <span class="muted" style="text-transform:none;font-size:.66rem">(opcional)</span></label><input type="text" id="fcToken" placeholder="WM-..." autocomplete="off"></div>
+    <div class="g2">
+      <div><label>Token CDN del cliente *</label><input type="text" id="fcToken" placeholder="WM-..." autocomplete="off"></div>
+      <div><label>Telegram chat_id <span class="muted" style="text-transform:none;font-size:.66rem">(avisos de citas)</span></label><input type="text" id="fcTelegram" inputmode="numeric" placeholder="861432965" autocomplete="off"></div>
+    </div>
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
       <button class="btn btn-ghost" onclick="closeFicha()">Cancelar</button>
       <button class="btn btn-p" id="fcSave" onclick="guardarFicha()">Clonar y crear ficha</button>
@@ -1200,7 +1203,7 @@ function savePlantilla(){
 // Function fabrica-clonar y guarda la ficha del cliente en web_proyectos.config.
 // El GITHUB_TOKEN vive solo en Supabase Secrets.
 var currentClonPlantilla = null; // id de la plantilla que se va a clonar
-var FICHA_TEXTOS = ['fcNombre','fcDominio','fcTelefono','fcWhatsapp','fcEmail','fcDireccion','fcCiudad','fcCp','fcZona','fcRegionCode','fcLat','fcLon','fcRazonSocial','fcNif','fcSeoTitulo','fcSeoDesc','fcToken'];
+var FICHA_TEXTOS = ['fcNombre','fcDominio','fcTelefono','fcWhatsapp','fcEmail','fcDireccion','fcCiudad','fcCp','fcZona','fcRegionCode','fcLat','fcLon','fcRazonSocial','fcNif','fcSeoTitulo','fcSeoDesc','fcToken','fcTelegram'];
 function clonarPlantilla(id){
   var p = plantillas.filter(function(x){ return x.id===id; })[0]; if(!p) return;
   currentClonPlantilla = id;
@@ -1223,7 +1226,10 @@ function guardarFicha(){
   if(!nombre){ toast('Nombre del negocio obligatorio','err'); return; }
   if(dominio && !/^([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$/.test(dominio)){ toast('Dominio no válido (ej: clientexyz.es)','err'); return; }
   if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ toast('Email no válido','err'); return; }
-  if(token && !/^WM-[A-Za-z0-9]+$/.test(token)){ toast('Token CDN con formato WM-…','err'); return; }
+  // El token es el tenant de la agenda del clon: sin él la web no puede reservar.
+  if(!/^WM-[A-Za-z0-9]+$/.test(token)){ toast('Token CDN obligatorio, formato WM-…','err'); return; }
+  var telegram = ($('fcTelegram').value||'').trim();
+  if(telegram && !/^-?\d{5,20}$/.test(telegram)){ toast('Telegram chat_id: solo dígitos (los grupos empiezan por -)','err'); return; }
   // Datos opcionales de la ficha completa: se validan solo si se rellenan.
   var cp = ($('fcCp').value||'').trim();
   var regionCode = ($('fcRegionCode').value||'').trim().toUpperCase();
@@ -1251,7 +1257,8 @@ function guardarFicha(){
     color_secundario: $('fcColor2').value,
     seo_titulo: fichaVal('fcSeoTitulo'),
     seo_descripcion: fichaVal('fcSeoDesc'),
-    token_cdn: token || null,
+    token_cdn: token,
+    telegram_chat_id: telegram || null,
     zona: fichaVal('fcZona'),
     region_code: regionCode || null,
     codigo_postal: cp || null,

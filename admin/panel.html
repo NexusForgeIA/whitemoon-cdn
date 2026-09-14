@@ -214,6 +214,14 @@ tr:hover td{background:#0d0d16}
       </div>
       <div style="overflow-x:auto"><div id="tbl"><div class="empty">Cargando…</div></div></div>
     </div>
+
+    <h2 style="justify-content:space-between">
+      <span>🧩 Plantillas por sector</span>
+      <button class="btn btn-p btn-sm" onclick="openPlantilla()">➕ Nueva plantilla</button>
+    </h2>
+    <div class="card">
+      <div style="overflow-x:auto"><div id="plTbl"><div class="empty">Cargando…</div></div></div>
+    </div>
   </div>
 </div>
 
@@ -295,6 +303,36 @@ tr:hover td{background:#0d0d16}
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
       <button class="btn btn-ghost" onclick="closeNew()">Cancelar</button>
       <button class="btn btn-p" id="nSave" onclick="saveCliente()">Crear cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- NUEVA / EDITAR PLANTILLA POR SECTOR -->
+<div class="modal-bg" id="plBg">
+  <div class="modal">
+    <h3 id="plTitle">🧩 Nueva plantilla</h3>
+    <div class="g2">
+      <div><label>Sector *</label><select id="plSector"></select></div>
+      <div><label>Nombre *</label><input type="text" id="plNombre" placeholder="Peluquería Aurora"></div>
+    </div>
+    <div class="g2">
+      <div><label>Repo demo *</label><input type="text" id="plRepo" placeholder="NexusForgeIA/WHITEMOON-PELUQUERIAS" autocomplete="off"></div>
+      <div><label>Rama</label><input type="text" id="plRama" placeholder="main" autocomplete="off"></div>
+    </div>
+    <div class="g2">
+      <div><label>Módulo</label><select id="plModulo">
+        <option value="agenda">agenda</option>
+        <option value="propiedades">propiedades</option>
+        <option value="eventos">eventos</option>
+      </select></div>
+      <div><label>Activa</label>
+        <span class="switch"><span class="sw"><input type="checkbox" id="plActiva"><span class="slider"></span></span></span>
+      </div>
+    </div>
+    <div class="mb"><label>Notas</label><textarea id="plNotas" rows="3" placeholder="Notas internas de la plantilla…"></textarea></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-ghost" onclick="closePlantilla()">Cancelar</button>
+      <button class="btn btn-p" id="plSave" onclick="savePlantilla()">Crear plantilla</button>
     </div>
   </div>
 </div>
@@ -486,6 +524,8 @@ function doLogout(){
 
 // ─── CARGA DE DATOS ──────────────────────────────────────────────────────────
 function loadData(){
+  // Va aparte del Promise.all: si falla la carga de plantillas, el panel de clientes sigue.
+  loadPlantillas();
   $('tbl').innerHTML='<div class="empty">Cargando…</div>';
   Promise.all([
     sbGet('onboarding_clientes?select=id,token_cdn,estado,cliente_nombre,cliente_email,cliente_telefono,direccion,sector,pack,url_web_cliente,notas,fecha_proximo_pago,fecha_inicio,created_at,agente_tipo,agente_retell_agent_id,agente_system_prompt,telegram_chat_id&order=created_at.desc'),
@@ -1031,6 +1071,94 @@ function generarPromptAgente(){
   }, 'aPromptFalta');
 }
 
+// ─── PLANTILLAS POR SECTOR (catálogo de la fábrica de webs) ──────────────────
+// Repos demo que luego se clonan por cliente. Tabla `plantillas` (RLS: authenticated).
+var plantillas = [];
+var currentPlantilla = null; // id en edición (null = nueva)
+
+function loadPlantillas(){
+  $('plTbl').innerHTML='<div class="empty">Cargando…</div>';
+  sbGet('plantillas?select=*&order=sector.asc')
+  .then(function(rows){ plantillas = rows || []; renderPlantillas(); })
+  .catch(function(e){ $('plTbl').innerHTML='<div class="empty" style="color:var(--danger)">❌ '+esc(e.message)+'</div>'; });
+}
+function renderPlantillas(){
+  if(!plantillas.length){ $('plTbl').innerHTML='<div class="empty">Sin plantillas todavía.</div>'; return; }
+  var h='<table><thead><tr><th>Sector</th><th>Nombre</th><th>Repo demo</th><th>Módulo</th><th>Activa</th><th>Acciones</th></tr></thead><tbody>';
+  plantillas.forEach(function(p){
+    h+='<tr>';
+    h+='<td>'+esc(p.sector)+'</td>';
+    h+='<td class="biz">'+esc(p.nombre)+(p.notas?' <span class="note-ico" title="'+esc(p.notas)+'">📝</span>':'')+'</td>';
+    h+='<td class="token">'+esc(p.repo_demo)+'<div class="src-note">rama '+esc(p.rama||'main')+'</div></td>';
+    h+='<td>'+esc(p.modulo||'—')+'</td>';
+    h+='<td><span class="badge '+(p.activa?'badge-on':'badge-off')+'">'+(p.activa?'ACTIVA':'INACTIVA')+'</span></td>';
+    h+='<td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" onclick="openPlantilla(\''+esc(p.id)+'\')">✏️ Editar</button>'
+      +' <button class="btn btn-d btn-sm" onclick="deletePlantilla(\''+esc(p.id)+'\')">🗑 Borrar</button></td>';
+    h+='</tr>';
+  });
+  h+='</tbody></table>';
+  $('plTbl').innerHTML=h;
+}
+function openPlantilla(id){
+  var p = id ? plantillas.filter(function(x){ return x.id===id; })[0] : null;
+  if(id && !p) return;
+  currentPlantilla = p ? p.id : null;
+  $('plTitle').textContent = p ? '✏️ Editar plantilla' : '🧩 Nueva plantilla';
+  $('plSave').textContent = p ? 'Guardar cambios' : 'Crear plantilla';
+  // Un sector creado fuera del panel puede no estar en SECTORES: se inyecta para no pisarlo.
+  var sel = $('plSector');
+  if(p && p.sector && !Array.prototype.some.call(sel.options, function(o){ return o.value===p.sector; })){
+    var o=document.createElement('option'); o.value=p.sector; o.textContent=p.sector; sel.appendChild(o);
+  }
+  sel.value = p ? p.sector : '';
+  $('plNombre').value = p ? p.nombre : '';
+  $('plRepo').value = p ? p.repo_demo : '';
+  $('plRama').value = p ? (p.rama||'main') : 'main';
+  $('plModulo').value = p ? (p.modulo||'') : 'agenda';
+  $('plActiva').checked = p ? !!p.activa : true;
+  $('plNotas').value = p ? (p.notas||'') : '';
+  $('plBg').classList.add('show');
+}
+function closePlantilla(){ $('plBg').classList.remove('show'); currentPlantilla=null; }
+function savePlantilla(){
+  var body = {
+    sector: $('plSector').value,
+    nombre: ($('plNombre').value||'').trim(),
+    repo_demo: ($('plRepo').value||'').trim(),
+    rama: ($('plRama').value||'').trim() || 'main',
+    modulo: $('plModulo').value || null,
+    activa: $('plActiva').checked,
+    notas: ($('plNotas').value||'').trim() || null
+  };
+  if(!body.sector){ toast('Sector obligatorio','err'); return; }
+  if(!body.nombre){ toast('Nombre obligatorio','err'); return; }
+  if(!/^[\w.-]+\/[\w.-]+$/.test(body.repo_demo)){ toast('Repo demo con formato owner/repo','err'); return; }
+  var req;
+  if(currentPlantilla){
+    body.updated_at = new Date().toISOString(); // la tabla no tiene trigger de updated_at
+    req = sbPatch('plantillas','id=eq.'+encodeURIComponent(currentPlantilla), body);
+  } else {
+    req = sbInsert('plantillas', body);
+  }
+  $('plSave').disabled=true;
+  req.then(function(){
+    toast(currentPlantilla ? 'Plantilla actualizada ✅' : 'Plantilla creada ✅');
+    closePlantilla(); loadPlantillas();
+  }).catch(function(e){
+    var msg = String(e.message||'');
+    // UNIQUE(sector): el POST trae el cuerpo de PostgREST (23505); el PATCH solo el 409.
+    if(/23505|duplicate key|409/.test(msg)) toast('Ya existe una plantilla para el sector "'+body.sector+'"','err');
+    else toast('Error: '+msg.slice(0,120),'err');
+  }).then(function(){ $('plSave').disabled=false; });
+}
+function deletePlantilla(id){
+  var p = plantillas.filter(function(x){ return x.id===id; })[0]; if(!p) return;
+  if(!confirm('¿Borrar la plantilla "'+p.nombre+'" ('+p.sector+')?')) return;
+  sbDelete('plantillas','id=eq.'+encodeURIComponent(id))
+  .then(function(){ toast('Plantilla borrada 🗑'); loadPlantillas(); })
+  .catch(function(e){ toast('Error: '+e.message,'err'); });
+}
+
 // ─── MODO AUTOMÁTICO PAGOS (global) ──────────────────────────────────────────
 function setAutoPayUI(on){ $('autoPay').checked=on; $('autoPayLbl').textContent=on?'ON':'OFF'; $('autoPayLbl').style.color=on?'var(--accent)':'var(--muted)'; }
 function toggleAutoPay(){
@@ -1046,6 +1174,8 @@ function fillSelects(){
   $('nSector').innerHTML = '<option value="">—</option>' + SECTORES.map(function(s){
     return '<option value="'+s+'">'+s+(SECTORES_GENERICOS[s] ? ' · plantilla genérica' : '')+'</option>';
   }).join('');
+  // Plantillas por sector: mismas opciones que el alta de cliente.
+  $('plSector').innerHTML = $('nSector').innerHTML;
   $('nPack').innerHTML = PACKS.map(function(p){
     var setup = PACK_SETUP[p] || 0;
     var precio = (setup ? setup.toLocaleString('es-ES')+'€ setup' : 'sin setup') + ' + '+(PACK_MRR[p]||0)+'€/mes';

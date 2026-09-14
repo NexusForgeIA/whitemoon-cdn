@@ -1,23 +1,24 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
-import { decodeBase64, encodeBase64 } from "jsr:@std/encoding/base64";
+import { decodeBase64 } from "jsr:@std/encoding/base64";
 import Anthropic from "npm:@anthropic-ai/sdk@0.115.0";
 
-// fabrica-reskin v2 — reskin DETERMINISTA del NAP.
+// fabrica-reskin — reskin DETERMINISTA del repo clonado con la ficha del cliente.
 //
-// Sustituye en el index.html del repo clonado los datos de la plantilla (marca,
-// dirección, localidad, teléfono, WhatsApp, email, dominio y URLs de imagen) por
-// los de la ficha del cliente (web_proyectos.config) y deja el proyecto en
-// estado 'revision'.
+// Sustituye en los archivos servidos del repo (index.html, agenda.html, llms.txt,
+// sitemap.xml, robots.txt y el chat assets/js/alexia.js) los datos de la
+// plantilla (marca, dirección, localidad, teléfono, WhatsApp, email, dominio y
+// URLs de imagen) por los de la ficha (web_proyectos.config) y deja el proyecto
+// en estado 'revision'.
 //
-// v1 dejaba que la IA propusiera reemplazos libres y metió datos inventados. En
-// v2 los originales se EXTRAEN de la propia plantilla (JSON-LD + metas) y el mapa
-// de swaps lo construye el código, aplicado de original más largo a más corto:
-// "Calle de la Aurora 14" se sustituye antes que la marca "Aurora".
-// Una puerta de seguridad bloquea el commit (422) si queda algún dato original,
-// si hay URLs mal formadas o coordenadas que no salen de la ficha.
-// v2.1: aplica el SEO de la ficha (título y descripción enteros), la zona si la
-// ficha la trae y bloquea (422 restos_demo) los textos de demo que queden.
+// v2: los originales se EXTRAEN de la propia plantilla (JSON-LD + metas de
+// index.html) y el mapa de swaps lo construye el código, aplicado de original
+// más largo a más corto ("Calle de la Aurora 14" antes que la marca "Aurora").
+// v2.1: SEO de la ficha en el home, zona si la ficha la trae y puerta
+// restos_demo.
+// v2.2: cubre todos los archivos servidos. La puerta de seguridad corre sobre
+// CADA archivo y el commit es único (Git Data API): si cualquiera falla, no se
+// escribe ninguno.
 // La IA queda en el archivo para prosa en una fase posterior, desactivada.
 //
 // Misma seguridad que fabrica-clonar: verify_jwt = true y usuario real de Auth.
@@ -33,13 +34,26 @@ const ORIGENES_PERMITIDOS = new Set([
 const RE_LD = /(<script[^>]*type=["']application\/ld\+json["'][^>]*>)([\s\S]*?)(<\/script>)/gi;
 const RE_AVISO_DEMO = /[ \t]*<!-- WM_DEMO_AVISO_START -->[\s\S]*?<!-- WM_DEMO_AVISO_END -->[ \t]*\r?\n?/g;
 
-// Valores NAP de la plantilla, extraídos del propio index.html.
+// home: index.html (fuente de los originales y único que recibe el SEO de la ficha).
+// html: resto de páginas; texto/xml/js: swaps con el escape de su formato.
+type Modo = "home" | "html" | "texto" | "xml" | "js";
+const ARCHIVOS: { ruta: string; modo: Modo }[] = [
+  { ruta: "index.html", modo: "home" },
+  { ruta: "agenda.html", modo: "html" },
+  { ruta: "llms.txt", modo: "texto" },
+  { ruta: "sitemap.xml", modo: "xml" },
+  { ruta: "robots.txt", modo: "texto" },
+  { ruta: "assets/js/alexia.js", modo: "js" },
+];
+
+// Valores NAP de la plantilla, extraídos del index.html.
 type Originales = {
   marca: string;
   marcaCorta: string;       // "Aurora" de "Peluquería Aurora", si aparece suelta
   calles: string[];         // la del JSON-LD y, si difiere, la variante visible
   cp: string;
   localidad: string;
+  region: string;           // addressRegion del JSON-LD: "Comunidad de Madrid"
   telefono: string;         // tal cual en el JSON-LD: +34643199580
   email: string;
   base: string;             // canonical / og:url, siempre con "/" final
@@ -68,6 +82,7 @@ type Ficha = {
 };
 
 type Swap = { clave: string; buscar: string; poner: string };
+type Fallo = { error: string; motivo: string; archivo?: string; restos?: string[] };
 type Json = Record<string, any>;
 
 function corsHeaders(req: Request): Record<string, string> {
@@ -99,13 +114,19 @@ function redact(raw: unknown): string {
 
 const escHtml = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const escXml = (s: string) => escHtml(s).replace(/'/g, "&apos;");
 const escJson = (s: string) => JSON.stringify(s).slice(1, -1);
+const sinEscape = (s: string) => s;
 const escRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const contar = (texto: string, s: string) => (s ? texto.split(s).length - 1 : 0);
 const conBarra = (u: string) => (u.endsWith("/") ? u : u + "/");
+const sinBarra = (u: string) => u.replace(/\/$/, "");
 const nacional = (digitos: string) =>
   digitos.length === 11 && digitos.startsWith("34") ? digitos.slice(2) : digitos;
 const agrupado = (n: string) => (n.length === 9 ? `${n.slice(0, 3)} ${n.slice(3, 6)} ${n.slice(6)}` : "");
+const suma = (detalle: Json) => Object.values(detalle).reduce((s: number, n) => s + Number(n), 0);
+const localidadFicha = (f: Ficha, conCp: boolean) =>
+  [conCp ? f.cp : "", f.ciudad].filter(Boolean).join(" ") + (f.region ? ", " + f.region : "");
 
 // Aplica fn al contenido de cada bloque JSON-LD (esJson = true) y al resto del HTML.
 function porSegmentos(html: string, fn: (texto: string, esJson: boolean) => string): string {
@@ -172,6 +193,7 @@ function extraerOriginales(html: string): Originales | null {
     calles,
     cp,
     localidad: String(addr.addressLocality ?? ""),
+    region: String(addr.addressRegion ?? ""),
     telefono: String(biz.telephone ?? ""),
     email: String(biz.email ?? ""),
     base: base ? conBarra(base) : "",
@@ -211,7 +233,9 @@ function fichaDe(config: Json, owner: string, repo: string): Ficha {
 }
 
 // Mapa original → ficha, ordenado de original más largo a más corto.
-function construirSwaps(o: Originales, f: Ficha): Swap[] {
+// conDireccionCompuesta: "28220 Majadahonda, Comunidad de Madrid" tal cual, para
+// texto plano; en HTML la localidad va por swapLocalidad.
+function construirSwaps(o: Originales, f: Ficha, conDireccionCompuesta: boolean): Swap[] {
   const swaps: Swap[] = [];
   const add = (clave: string, buscar: string, poner: string) => {
     if (buscar && buscar !== poner) swaps.push({ clave, buscar, poner });
@@ -221,7 +245,12 @@ function construirSwaps(o: Originales, f: Ficha): Swap[] {
     if (o.base && img.startsWith(o.base)) add("imagen", img, f.base + img.slice(o.base.length));
   }
   add("dominio", o.base, f.base);
+  add("dominio", sinBarra(o.base), sinBarra(f.base));
   for (const calle of o.calles) add("direccion", calle, f.direccion);
+  if (conDireccionCompuesta && o.cp && o.localidad) {
+    if (o.region) add("localidad", `${o.cp} ${o.localidad}, ${o.region}`, localidadFicha(f, true));
+    add("localidad", `${o.cp} ${o.localidad}`, localidadFicha(f, true));
+  }
   const digitos = o.telefono.replace(/\D/g, "");
   if (digitos) {
     add("whatsapp", "wa.me/" + digitos, "wa.me/" + f.whatsapp);
@@ -251,25 +280,23 @@ function aplicarSwaps(texto: string, swaps: Swap[], esc: (s: string) => string, 
 // palabra suelta: areaServed y la prosa pueden nombrarla con otro sentido.
 function swapLocalidad(texto: string, o: Originales, f: Ficha, detalle: Json): string {
   if (!o.localidad) return texto;
-  const nueva = (conCp: boolean) =>
-    escHtml([conCp ? f.cp : "", f.ciudad].filter(Boolean).join(" ") + (f.region ? ", " + f.region : ""));
   const cola = `(?:,\\s*[^<>"\\n,]{2,40})?`;
   const loc = escRe(o.localidad);
   if (o.cp) {
     texto = texto.replace(new RegExp(`${escRe(o.cp)}\\s+${loc}${cola}(?=[<"])`, "g"), () => {
       detalle.localidad = (detalle.localidad ?? 0) + 1;
-      return nueva(true);
+      return escHtml(localidadFicha(f, true));
     });
   }
   return texto.replace(new RegExp(`(?<=[>"])${loc},\\s*[^<>"\\n,]{2,40}(?=[<"])`, "g"), () => {
     detalle.localidad = (detalle.localidad ?? 0) + 1;
-    return nueva(false);
+    return escHtml(localidadFicha(f, false));
   });
 }
 
 // Ajuste estructural del JSON-LD: dirección y geo solo con datos de la ficha.
-function ajustarLd(nodo: unknown, f: Ficha, detalle: Json): boolean {
-  if (Array.isArray(nodo)) return nodo.map((n) => ajustarLd(n, f, detalle)).some(Boolean);
+function ajustarLd(nodo: unknown, f: Ficha, detalle: Json, conSeo: boolean): boolean {
+  if (Array.isArray(nodo)) return nodo.map((n) => ajustarLd(n, f, detalle, conSeo)).some(Boolean);
   if (!nodo || typeof nodo !== "object") return false;
   const o = nodo as Json;
   let cambiado = false;
@@ -287,8 +314,8 @@ function ajustarLd(nodo: unknown, f: Ficha, detalle: Json): boolean {
     poner(a, "postalCode", f.cp);
     poner(a, "addressRegion", f.region);
     if (JSON.stringify(a) !== antes) detalle.ld_direccion = (detalle.ld_direccion ?? 0) + 1;
-    // La descripción del negocio es la SEO de la ficha si la trae.
-    if (f.seoDescripcion && typeof o.description === "string" && o.description !== f.seoDescripcion) {
+    // La descripción del negocio es la SEO de la ficha si la trae (solo home).
+    if (conSeo && f.seoDescripcion && typeof o.description === "string" && o.description !== f.seoDescripcion) {
       o.description = f.seoDescripcion;
       cambiado = true;
       detalle.seo = (detalle.seo ?? 0) + 1;
@@ -306,7 +333,9 @@ function ajustarLd(nodo: unknown, f: Ficha, detalle: Json): boolean {
     detalle.geo = (detalle.geo ?? 0) + 1;
   }
   for (const k of Object.keys(o)) {
-    if (k !== "address" && k !== "geo" && typeof o[k] === "object") cambiado = ajustarLd(o[k], f, detalle) || cambiado;
+    if (k !== "address" && k !== "geo" && typeof o[k] === "object") {
+      cambiado = ajustarLd(o[k], f, detalle, conSeo) || cambiado;
+    }
   }
   return cambiado;
 }
@@ -345,6 +374,40 @@ function aplicarSeoMetas(html: string, f: Ficha, detalle: Json): string {
   return html;
 }
 
+// Reskin de un archivo según su formato.
+function reskinArchivo(texto: string, modo: Modo, o: Originales, f: Ficha, detalle: Json, avisos: string[]): string {
+  if (modo === "texto" || modo === "xml" || modo === "js") {
+    const esc = modo === "xml" ? escXml : modo === "js" ? escJson : sinEscape;
+    return aplicarSwaps(texto, construirSwaps(o, f, true), esc, detalle);
+  }
+  let nuevo = texto;
+  // Aviso de demo: solo entre marcadores; sin marcadores no se adivina por texto.
+  if (/<!-- WM_DEMO_AVISO_START -->[\s\S]*?<!-- WM_DEMO_AVISO_END -->/.test(nuevo)) {
+    nuevo = nuevo.replace(RE_AVISO_DEMO, "");
+    detalle.aviso_demo = 1;
+  } else if (modo === "home") {
+    avisos.push("plantilla_sin_marcadores_WM_DEMO_AVISO");
+    console.warn("fabrica-reskin: la plantilla no tiene marcadores WM_DEMO_AVISO; el aviso de demo no se toca");
+  }
+  const swaps = construirSwaps(o, f, false);
+  const conSeo = modo === "home";
+  nuevo = porSegmentos(nuevo, (t, esJson) => {
+    if (!esJson) return swapLocalidad(aplicarSwaps(t, swaps, escHtml, detalle), o, f, detalle);
+    const t2 = aplicarSwaps(t, swaps, escJson, detalle);
+    try {
+      const nodo = JSON.parse(t2);
+      return ajustarLd(nodo, f, detalle, conSeo) ? "\n" + JSON.stringify(nodo, null, 2) + "\n" : t2;
+    } catch {
+      return t2; // la puerta de seguridad lo detecta
+    }
+  });
+  // Coordenadas en metas: las de la ficha o ninguna. Colores: no se tocan.
+  nuevo = ajustarGeoMetas(nuevo, f, detalle);
+  // SEO de la ficha solo en el home; el resto conserva su title/meta (con marca/zona ya cambiadas).
+  if (conSeo) nuevo = aplicarSeoMetas(nuevo, f, detalle);
+  return nuevo;
+}
+
 // Textos de la plantilla demo que en la web de un cliente real hacen daño.
 const RESTOS_DEMO: [string, RegExp][] = [
   ["ficticio", /ficticio/i],
@@ -354,24 +417,25 @@ const RESTOS_DEMO: [string, RegExp][] = [
   ["responsable junto a WhiteMoon", /responsable[^.<]{0,80}whitemoon|whitemoon[^.<]{0,80}responsable/i],
 ];
 
-// Puerta de seguridad final: devuelve el fallo o null si se puede hacer commit.
-function puertaSeguridad(
-  original: string, nuevo: string, o: Originales, f: Ficha,
-): { error: string; motivo: string; restos?: string[] } | null {
+// Puerta de seguridad de UN archivo: devuelve el fallo o null si se puede escribir.
+function puertaSeguridad(modo: Modo, original: string, nuevo: string, o: Originales, f: Ficha): Fallo | null {
   const inseguro = (motivo: string) => ({ error: "reskin_inseguro", motivo });
-  if (!/<title>[\s\S]*?<\/title>/i.test(nuevo)) return inseguro("sin_title");
-  const ldOriginal = [...original.matchAll(RE_LD)].length;
-  const ld = [...nuevo.matchAll(RE_LD)];
-  if (ld.length !== ldOriginal) return inseguro("json_ld_perdido");
+  const esHtml = modo === "home" || modo === "html";
   const ldParseados: unknown[] = [];
-  for (const m of ld) {
-    try {
-      ldParseados.push(JSON.parse(m[2]));
-    } catch {
-      return inseguro("json_ld_invalido");
+  if (esHtml) {
+    if (/<title>/i.test(original) && !/<title>[\s\S]*?<\/title>/i.test(nuevo)) return inseguro("sin_title");
+    const ldOriginal = [...original.matchAll(RE_LD)].length;
+    const ld = [...nuevo.matchAll(RE_LD)];
+    if (ld.length !== ldOriginal) return inseguro("json_ld_perdido");
+    for (const m of ld) {
+      try {
+        ldParseados.push(JSON.parse(m[2]));
+      } catch {
+        return inseguro("json_ld_invalido");
+      }
     }
+    if (Math.abs(nuevo.length - original.length) > original.length * 0.15) return inseguro("longitud_fuera_de_rango");
   }
-  if (Math.abs(nuevo.length - original.length) > original.length * 0.15) return inseguro("longitud_fuera_de_rango");
 
   // Ningún resto de textos de demo.
   const demo = RESTOS_DEMO.filter(([, re]) => re.test(nuevo)).map(([n]) => n);
@@ -384,7 +448,7 @@ function puertaSeguridad(
     ["marca", o.marca], ["marca", o.marcaCorta],
     ...o.calles.map((c): [string, string] => ["direccion", c]),
     ["telefono", o.telefono], ["telefono", agrupado(nacional(digitos))], ["telefono", nacional(digitos)],
-    ["email", o.email], ["dominio", o.base],
+    ["email", o.email], ["dominio", sinBarra(o.base)],
   ];
   const restos = [...new Set(candidatos
     .filter(([, v]) => v && nuevo.includes(v) && !valoresFicha.some((x) => x.includes(v)))
@@ -393,29 +457,31 @@ function puertaSeguridad(
 
   // URLs mal formadas: el dominio nuevo pegado a un path sin "/".
   const host = new URL(f.base).host;
-  if (new RegExp(`https?://${escRe(host)}(?![/"'#?<\\s)]|$)`).test(nuevo)) return inseguro("url_mal_formada");
+  if (new RegExp(`https?://${escRe(host)}(?![/"'#?<\\s)]|$)`, "m").test(nuevo)) return inseguro("url_mal_formada");
 
   // Si queda geo, tiene que ser exactamente el de la ficha.
-  const geosLd: Json[] = [];
-  const buscarGeo = (n: unknown) => {
-    if (Array.isArray(n)) return n.forEach(buscarGeo);
-    if (!n || typeof n !== "object") return;
-    const obj = n as Json;
-    if (obj.geo && typeof obj.geo === "object") geosLd.push(obj.geo as Json);
-    Object.values(obj).forEach(buscarGeo);
-  };
-  ldParseados.forEach(buscarGeo);
-  const geoMetas = [...nuevo.matchAll(/<meta[^>]+name=["'](?:geo\.position|ICBM)["'][^>]*content=["']([^"']*)["']/gi)];
-  if (geosLd.length || geoMetas.length) {
-    if (f.lat === null || f.lon === null) return inseguro("geo_sin_datos_en_ficha");
-    const ok = geosLd.every((g) => g.latitude === f.lat && g.longitude === f.lon) &&
-      geoMetas.every((m) => m[1].replace(/\s/g, "") === `${f.lat};${f.lon}` || m[1].replace(/\s/g, "") === `${f.lat},${f.lon}`);
-    if (!ok) return inseguro("geo_no_coincide_con_ficha");
+  if (esHtml) {
+    const geosLd: Json[] = [];
+    const buscarGeo = (n: unknown) => {
+      if (Array.isArray(n)) return n.forEach(buscarGeo);
+      if (!n || typeof n !== "object") return;
+      const obj = n as Json;
+      if (obj.geo && typeof obj.geo === "object") geosLd.push(obj.geo as Json);
+      Object.values(obj).forEach(buscarGeo);
+    };
+    ldParseados.forEach(buscarGeo);
+    const geoMetas = [...nuevo.matchAll(/<meta[^>]+name=["'](?:geo\.position|ICBM)["'][^>]*content=["']([^"']*)["']/gi)];
+    if (geosLd.length || geoMetas.length) {
+      if (f.lat === null || f.lon === null) return inseguro("geo_sin_datos_en_ficha");
+      const ok = geosLd.every((g) => g.latitude === f.lat && g.longitude === f.lon) &&
+        geoMetas.every((m) => m[1].replace(/\s/g, "") === `${f.lat};${f.lon}` || m[1].replace(/\s/g, "") === `${f.lat},${f.lon}`);
+      if (!ok) return inseguro("geo_no_coincide_con_ficha");
+    }
   }
   return null;
 }
 
-// ─── IA para prosa (fase posterior) — DESACTIVADA en v2 con USAR_IA_PROSA ─────
+// ─── IA para prosa (fase posterior) — DESACTIVADA con USAR_IA_PROSA ────────────
 const MODELO_PROSA = "claude-haiku-4-5-20251001";
 const SYSTEM_PROMPT_PROSA =
   "Te doy el HTML de una web demo y una ficha con datos REALES de un cliente. Devuelve " +
@@ -497,27 +563,42 @@ Deno.serve(async (req: Request) => {
       "User-Agent": "whitemoon-fabrica",
       "X-GitHub-Api-Version": "2022-11-28",
     };
-    const contentsUrl =
-      `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/index.html`;
-
-    // GitHub genera el repo desde el template en diferido: justo después de
-    // clonar, index.html puede dar 404 unos segundos.
-    let ghGet = await fetch(contentsUrl, { headers: ghHeaders });
-    for (let intento = 1; ghGet.status === 404 && intento < 6; intento++) {
-      await ghGet.body?.cancel();
-      await new Promise((r) => setTimeout(r, 2000));
-      ghGet = await fetch(contentsUrl, { headers: ghHeaders });
-    }
-    const archivo = (await ghGet.json().catch(() => ({}))) as Record<string, unknown>;
-    if (!ghGet.ok || typeof archivo.content !== "string" || typeof archivo.sha !== "string" || !archivo.content) {
-      const detalle = { status: ghGet.status, message: redact(archivo.message ?? "sin_contenido") };
-      console.error("fabrica-reskin: GitHub GET fallo", redact(detalle));
+    const api = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`;
+    const gh = async (method: string, url: string, payload?: unknown) => {
+      const res = await fetch(url, {
+        method,
+        headers: payload ? { ...ghHeaders, "Content-Type": "application/json" } : ghHeaders,
+        body: payload ? JSON.stringify(payload) : undefined,
+      });
+      const data = (await res.json().catch(() => ({}))) as Json;
+      return { ok: res.ok, status: res.status, data };
+    };
+    const errorGithub = (paso: string, r: { status: number; data: Json }) => {
+      const detalle = { paso, status: r.status, message: redact(r.data?.message ?? "") };
+      console.error("fabrica-reskin: GitHub fallo", redact(detalle));
       return json({ ok: false, error: "github_error", detalle }, 502);
-    }
-    const html = new TextDecoder().decode(decodeBase64(archivo.content.replace(/\s/g, "")));
+    };
 
-    const o = extraerOriginales(html);
-    if (!o) return json({ ok: false, error: "reskin_inseguro", motivo: "plantilla_sin_json_ld_de_negocio" }, 422);
+    // Lectura de archivos. GitHub genera el repo desde el template en diferido:
+    // justo después de clonar, index.html puede dar 404 unos segundos.
+    const leer = async (ruta: string, intentos: number) => {
+      const url = `${api}/contents/${ruta.split("/").map(encodeURIComponent).join("/")}`;
+      let r = await gh("GET", url);
+      for (let i = 1; r.status === 404 && i < intentos; i++) {
+        await new Promise((res) => setTimeout(res, 2000));
+        r = await gh("GET", url);
+      }
+      const texto = r.ok && typeof r.data.content === "string" && r.data.content
+        ? new TextDecoder().decode(decodeBase64(String(r.data.content).replace(/\s/g, "")))
+        : null;
+      return { r, texto };
+    };
+    const home = await leer("index.html", 6);
+    if (home.texto === null) return errorGithub("leer_index.html", home.r);
+    const resto = await Promise.all(ARCHIVOS.slice(1).map((a) => leer(a.ruta, 1)));
+
+    const o = extraerOriginales(home.texto);
+    if (!o) return json({ ok: false, error: "reskin_inseguro", motivo: "plantilla_sin_json_ld_de_negocio", archivo: "index.html" }, 422);
     const f = fichaDe(config, owner, repo);
 
     // Datos imprescindibles: si la plantilla los tiene y la ficha no, no hay swap posible.
@@ -532,75 +613,72 @@ Deno.serve(async (req: Request) => {
       return json({ ok: false, error: "reskin_incompleto", motivo: "faltan_datos_en_ficha", faltan }, 422);
     }
 
-    const detalle: Json = {};
+    // Reskin de cada archivo presente.
     const avisos: string[] = [];
-    let nuevo = html;
-
-    // 1) Aviso de demo: solo entre marcadores; sin marcadores no se adivina por texto.
-    if (/<!-- WM_DEMO_AVISO_START -->[\s\S]*?<!-- WM_DEMO_AVISO_END -->/.test(nuevo)) {
-      nuevo = nuevo.replace(RE_AVISO_DEMO, "");
-      detalle.aviso_demo = 1;
-    } else {
-      avisos.push("plantilla_sin_marcadores_WM_DEMO_AVISO");
-      console.warn("fabrica-reskin: la plantilla no tiene marcadores WM_DEMO_AVISO; el aviso de demo no se toca");
-    }
-
-    // 2) Swaps deterministas por segmento (JSON-LD con escape JSON, resto con escape HTML).
-    const swaps = construirSwaps(o, f);
-    nuevo = porSegmentos(nuevo, (texto, esJson) => {
-      if (!esJson) return swapLocalidad(aplicarSwaps(texto, swaps, escHtml, detalle), o, f, detalle);
-      const t = aplicarSwaps(texto, swaps, escJson, detalle);
-      try {
-        const nodo = JSON.parse(t);
-        return ajustarLd(nodo, f, detalle) ? "\n" + JSON.stringify(nodo, null, 2) + "\n" : t;
-      } catch {
-        return t; // la puerta de seguridad lo detecta
+    const resultados: { ruta: string; modo: Modo; original: string; nuevo: string; detalle: Json }[] = [];
+    const textos = [home.texto, ...resto.map((x) => x.texto)];
+    for (let i = 0; i < ARCHIVOS.length; i++) {
+      const { ruta, modo } = ARCHIVOS[i];
+      const original = textos[i];
+      if (original === null) {
+        const { r } = resto[i - 1];
+        if (r.status !== 404) return errorGithub(`leer_${ruta}`, r);
+        avisos.push(`no_existe:${ruta}`);
+        continue;
       }
-    });
-
-    // 3) Coordenadas en metas: las de la ficha o ninguna. Colores: no se tocan.
-    nuevo = ajustarGeoMetas(nuevo, f, detalle);
-
-    // 4) SEO de la ficha (título/descripción enteros) y geo.region si viene.
-    nuevo = aplicarSeoMetas(nuevo, f, detalle);
-
-    if (USAR_IA_PROSA) {
-      nuevo = aplicarSwaps(nuevo, await proponerProsaIA(nuevo, f), escHtml, detalle);
+      const detalle: Json = {};
+      let nuevo = reskinArchivo(original, modo, o, f, detalle, avisos);
+      if (modo === "home" && USAR_IA_PROSA) {
+        nuevo = aplicarSwaps(nuevo, await proponerProsaIA(nuevo, f), escHtml, detalle);
+      }
+      resultados.push({ ruta, modo, original, nuevo, detalle });
     }
 
-    const cambios = Object.values(detalle).reduce((s: number, n) => s + Number(n), 0);
-    const fallo = puertaSeguridad(html, nuevo, o, f);
+    // Puerta de seguridad sobre CADA archivo: todo o nada.
+    const fallos = resultados
+      .map((r) => {
+        const fallo = puertaSeguridad(r.modo, r.original, r.nuevo, o, f);
+        return fallo ? { ...fallo, archivo: r.ruta } : null;
+      })
+      .filter((x) => x !== null) as Fallo[];
+    const cambiosPorArchivo = Object.fromEntries(resultados.map((r) => [r.ruta, suma(r.detalle)]));
+    const cambios = suma(cambiosPorArchivo);
     console.log(JSON.stringify({
       fn: "fabrica-reskin",
-      version: "2.1",
+      version: "2.2",
       repo: `${owner}/${repo}`,
-      swaps: swaps.length,
       cambios,
-      detalle,
+      cambios_por_archivo: cambiosPorArchivo,
+      detalle: Object.fromEntries(resultados.map((r) => [r.ruta, r.detalle])),
       avisos,
-      chars_antes: html.length,
-      chars_despues: nuevo.length,
-      puerta: fallo,
+      fallos,
     }));
-    if (fallo) return json({ ok: false, ...fallo }, 422);
+    if (fallos.length) return json({ ok: false, ...fallos[0], fallos }, 422);
 
-    if (nuevo !== html) {
-      const ghPut = await fetch(contentsUrl, {
-        method: "PUT",
-        headers: { ...ghHeaders, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: `reskin: datos de ${f.nombre}`,
-          content: encodeBase64(new TextEncoder().encode(nuevo)),
-          sha: archivo.sha,
-        }),
+    // Commit ÚNICO con todos los archivos cambiados (Git Data API).
+    const cambiados = resultados.filter((r) => r.nuevo !== r.original);
+    if (cambiados.length) {
+      const info = await gh("GET", api);
+      if (!info.ok) return errorGithub("repo", info);
+      const rama = String(info.data.default_branch ?? "main");
+      const ref = await gh("GET", `${api}/git/ref/heads/${rama}`);
+      if (!ref.ok) return errorGithub("ref", ref);
+      const padre = String(ref.data.object?.sha ?? "");
+      const commitPadre = await gh("GET", `${api}/git/commits/${padre}`);
+      if (!commitPadre.ok) return errorGithub("commit_padre", commitPadre);
+      const arbol = await gh("POST", `${api}/git/trees`, {
+        base_tree: commitPadre.data.tree?.sha,
+        tree: cambiados.map((r) => ({ path: r.ruta, mode: "100644", type: "blob", content: r.nuevo })),
       });
-      if (!ghPut.ok) {
-        const put = (await ghPut.json().catch(() => ({}))) as Record<string, unknown>;
-        const detallePut = { status: ghPut.status, message: redact(put.message ?? "") };
-        console.error("fabrica-reskin: GitHub PUT fallo", redact(detallePut));
-        return json({ ok: false, error: "github_error", detalle: detallePut }, 502);
-      }
-      await ghPut.body?.cancel();
+      if (!arbol.ok) return errorGithub("arbol", arbol);
+      const commit = await gh("POST", `${api}/git/commits`, {
+        message: `reskin: datos de ${f.nombre}`,
+        tree: arbol.data.sha,
+        parents: [padre],
+      });
+      if (!commit.ok) return errorGithub("commit", commit);
+      const mover = await gh("PATCH", `${api}/git/refs/heads/${rama}`, { sha: commit.data.sha });
+      if (!mover.ok) return errorGithub("mover_rama", mover);
     }
 
     const { error: upError } = await supabase
@@ -612,7 +690,7 @@ Deno.serve(async (req: Request) => {
       return json({ ok: false, error: "estado_no_actualizado", repo_url: repoUrl }, 500);
     }
 
-    return json({ ok: true, cambios, repo_url: repoUrl });
+    return json({ ok: true, cambios, cambios_por_archivo: cambiosPorArchivo, repo_url: repoUrl });
   } catch (err) {
     console.error("fabrica-reskin: server_error", redact(String(err)));
     return json({ ok: false, error: "server_error" }, 500);

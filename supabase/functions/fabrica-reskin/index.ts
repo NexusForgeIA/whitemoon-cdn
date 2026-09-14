@@ -16,6 +16,8 @@ import Anthropic from "npm:@anthropic-ai/sdk@0.115.0";
 // "Calle de la Aurora 14" se sustituye antes que la marca "Aurora".
 // Una puerta de seguridad bloquea el commit (422) si queda algún dato original,
 // si hay URLs mal formadas o coordenadas que no salen de la ficha.
+// v2.1: aplica el SEO de la ficha (título y descripción enteros), la zona si la
+// ficha la trae y bloquea (422 restos_demo) los textos de demo que queden.
 // La IA queda en el archivo para prosa en una fase posterior, desactivada.
 //
 // Misma seguridad que fabrica-clonar: verify_jwt = true y usuario real de Auth.
@@ -42,6 +44,7 @@ type Originales = {
   email: string;
   base: string;             // canonical / og:url, siempre con "/" final
   imagenes: string[];       // og:image, twitter:image, image del JSON-LD
+  zona: string;             // <!-- WM_ZONA: Madrid Oeste --> de la plantilla (opcional)
 };
 
 // Valores del cliente, normalizados desde web_proyectos.config.
@@ -58,6 +61,10 @@ type Ficha = {
   lat: number | null;
   lon: number | null;
   base: string;             // https://dominio/ (o el GitHub Pages del repo)
+  seoTitulo: string;
+  seoDescripcion: string;
+  zona: string;
+  regionCode: string;       // geo.region, p. ej. ES-MD
 };
 
 type Swap = { clave: string; buscar: string; poner: string };
@@ -168,6 +175,7 @@ function extraerOriginales(html: string): Originales | null {
     telefono: String(biz.telephone ?? ""),
     email: String(biz.email ?? ""),
     base: base ? conBarra(base) : "",
+    zona: meta(/<!--\s*WM_ZONA:\s*(.+?)\s*-->/),
     imagenes,
   };
 }
@@ -195,6 +203,10 @@ function fichaDe(config: Json, owner: string, repo: string): Ficha {
     lat: num("lat"),
     lon: num("lon"),
     base: dominio ? `https://${dominio}/` : `https://${owner.toLowerCase()}.github.io/${repo}/`,
+    seoTitulo: txt("seo_titulo"),
+    seoDescripcion: txt("seo_descripcion"),
+    zona: txt("zona"),
+    regionCode: txt("region_code"),
   };
 }
 
@@ -219,6 +231,8 @@ function construirSwaps(o: Originales, f: Ficha): Swap[] {
   add("email", o.email, f.email);
   add("marca", o.marca, f.nombre);
   add("marca", o.marcaCorta, f.nombre);
+  // Zona solo si la ficha la trae; si no, se queda la genérica de la plantilla.
+  if (f.zona) add("zona", o.zona, f.zona);
   return swaps.sort((a, b) => b.buscar.length - a.buscar.length);
 }
 
@@ -273,6 +287,12 @@ function ajustarLd(nodo: unknown, f: Ficha, detalle: Json): boolean {
     poner(a, "postalCode", f.cp);
     poner(a, "addressRegion", f.region);
     if (JSON.stringify(a) !== antes) detalle.ld_direccion = (detalle.ld_direccion ?? 0) + 1;
+    // La descripción del negocio es la SEO de la ficha si la trae.
+    if (f.seoDescripcion && typeof o.description === "string" && o.description !== f.seoDescripcion) {
+      o.description = f.seoDescripcion;
+      cambiado = true;
+      detalle.seo = (detalle.seo ?? 0) + 1;
+    }
   }
   if (o.geo && typeof o.geo === "object") {
     if (f.lat !== null && f.lon !== null) {
@@ -302,6 +322,38 @@ function ajustarGeoMetas(html: string, f: Ficha, detalle: Json): string {
   });
 }
 
+// SEO de la ficha: título y descripción ENTEROS en <title>, og: y twitter:;
+// geo.region solo si la ficha trae region_code. Sin dato en la ficha no se toca.
+function aplicarSeoMetas(html: string, f: Ficha, detalle: Json): string {
+  const metas = (nombres: string, valor: string, clave: string) => {
+    if (!valor) return;
+    const re = new RegExp(`(<meta[^>]+(?:name|property)=["'](?:${nombres})["'][^>]*?content=)(["'])[\\s\\S]*?\\2`, "gi");
+    html = html.replace(re, (_m, antes: string, comilla: string) => {
+      detalle[clave] = (detalle[clave] ?? 0) + 1;
+      return antes + comilla + escHtml(valor) + comilla;
+    });
+  };
+  if (f.seoTitulo) {
+    html = html.replace(/<title>[\s\S]*?<\/title>/i, () => {
+      detalle.seo = (detalle.seo ?? 0) + 1;
+      return `<title>${escHtml(f.seoTitulo)}</title>`;
+    });
+  }
+  metas("og:title|twitter:title", f.seoTitulo, "seo");
+  metas("description|og:description|twitter:description", f.seoDescripcion, "seo");
+  metas("geo\\.region", f.regionCode, "geo_region");
+  return html;
+}
+
+// Textos de la plantilla demo que en la web de un cliente real hacen daño.
+const RESTOS_DEMO: [string, RegExp][] = [
+  ["ficticio", /ficticio/i],
+  ["esta demo", /esta demo\b/i],
+  ["Demo IA por WhiteMoon", /Demo IA por\s*(?:<[^>]*>\s*)?WhiteMoon/i],
+  ["· Demo", /·\s*Demo(?=\s*(?:<|"|·|$))/m],
+  ["responsable junto a WhiteMoon", /responsable[^.<]{0,80}whitemoon|whitemoon[^.<]{0,80}responsable/i],
+];
+
 // Puerta de seguridad final: devuelve el fallo o null si se puede hacer commit.
 function puertaSeguridad(
   original: string, nuevo: string, o: Originales, f: Ficha,
@@ -320,6 +372,10 @@ function puertaSeguridad(
     }
   }
   if (Math.abs(nuevo.length - original.length) > original.length * 0.15) return inseguro("longitud_fuera_de_rango");
+
+  // Ningún resto de textos de demo.
+  const demo = RESTOS_DEMO.filter(([, re]) => re.test(nuevo)).map(([n]) => n);
+  if (demo.length) return { error: "restos_demo", motivo: "quedan_textos_de_demo", restos: demo };
 
   // Ningún valor original de NAP puede seguir presente.
   const valoresFicha = [f.nombre, f.direccion, f.email, f.base, f.telefono, f.telE164].filter(Boolean);
@@ -505,6 +561,9 @@ Deno.serve(async (req: Request) => {
     // 3) Coordenadas en metas: las de la ficha o ninguna. Colores: no se tocan.
     nuevo = ajustarGeoMetas(nuevo, f, detalle);
 
+    // 4) SEO de la ficha (título/descripción enteros) y geo.region si viene.
+    nuevo = aplicarSeoMetas(nuevo, f, detalle);
+
     if (USAR_IA_PROSA) {
       nuevo = aplicarSwaps(nuevo, await proponerProsaIA(nuevo, f), escHtml, detalle);
     }
@@ -513,7 +572,7 @@ Deno.serve(async (req: Request) => {
     const fallo = puertaSeguridad(html, nuevo, o, f);
     console.log(JSON.stringify({
       fn: "fabrica-reskin",
-      version: 2,
+      version: "2.1",
       repo: `${owner}/${repo}`,
       swaps: swaps.length,
       cambios,

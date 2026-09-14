@@ -19,6 +19,8 @@ import Anthropic from "npm:@anthropic-ai/sdk@0.115.0";
 // v2.2: cubre todos los archivos servidos. La puerta de seguridad corre sobre
 // CADA archivo y el commit es único (Git Data API): si cualquiera falla, no se
 // escribe ninguno.
+// v2.3: activa GitHub Pages en el repo del cliente (vista previa real) y guarda
+// su URL en web_proyectos.preview_url.
 // La IA queda en el archivo para prosa en una fase posterior, desactivada.
 //
 // Misma seguridad que fabrica-clonar: verify_jwt = true y usuario real de Auth.
@@ -645,7 +647,7 @@ Deno.serve(async (req: Request) => {
     const cambios = suma(cambiosPorArchivo);
     console.log(JSON.stringify({
       fn: "fabrica-reskin",
-      version: "2.2",
+      version: "2.3",
       repo: `${owner}/${repo}`,
       cambios,
       cambios_por_archivo: cambiosPorArchivo,
@@ -656,11 +658,11 @@ Deno.serve(async (req: Request) => {
     if (fallos.length) return json({ ok: false, ...fallos[0], fallos }, 422);
 
     // Commit ÚNICO con todos los archivos cambiados (Git Data API).
+    const info = await gh("GET", api);
+    if (!info.ok) return errorGithub("repo", info);
+    const rama = String(info.data.default_branch ?? "main");
     const cambiados = resultados.filter((r) => r.nuevo !== r.original);
     if (cambiados.length) {
-      const info = await gh("GET", api);
-      if (!info.ok) return errorGithub("repo", info);
-      const rama = String(info.data.default_branch ?? "main");
       const ref = await gh("GET", `${api}/git/ref/heads/${rama}`);
       if (!ref.ok) return errorGithub("ref", ref);
       const padre = String(ref.data.object?.sha ?? "");
@@ -681,16 +683,39 @@ Deno.serve(async (req: Request) => {
       if (!mover.ok) return errorGithub("mover_rama", mover);
     }
 
+    // Vista previa: GitHub Pages del repo del cliente, idempotente (si ya está
+    // activo no se toca). Si falla, el reskin sigue siendo válido.
+    let previewUrl: string | null = `https://${owner.toLowerCase()}.github.io/${repo}/`;
+    let previewError: string | null = null;
+    const pages = await gh("GET", `${api}/pages`);
+    if (pages.status === 404) {
+      const crear = await gh("POST", `${api}/pages`, { source: { branch: rama, path: "/" } });
+      if (!crear.ok) previewError = `pages_${crear.status}`;
+    } else if (!pages.ok) {
+      previewError = `pages_${pages.status}`;
+    }
+    if (previewError) {
+      console.error("fabrica-reskin: GitHub Pages fallo", previewError, redact(pages.data?.message ?? ""));
+      previewUrl = null;
+    }
+
     const { error: upError } = await supabase
       .from("web_proyectos")
-      .update({ estado: "revision", updated_at: new Date().toISOString() })
+      .update({ estado: "revision", preview_url: previewUrl, updated_at: new Date().toISOString() })
       .eq("id", proyectoId);
     if (upError) {
       console.error("fabrica-reskin: update estado", upError.message);
       return json({ ok: false, error: "estado_no_actualizado", repo_url: repoUrl }, 500);
     }
 
-    return json({ ok: true, cambios, cambios_por_archivo: cambiosPorArchivo, repo_url: repoUrl });
+    return json({
+      ok: true,
+      cambios,
+      cambios_por_archivo: cambiosPorArchivo,
+      repo_url: repoUrl,
+      preview_url: previewUrl,
+      ...(previewError ? { preview_error: previewError } : {}),
+    });
   } catch (err) {
     console.error("fabrica-reskin: server_error", redact(String(err)));
     return json({ ok: false, error: "server_error" }, 500);

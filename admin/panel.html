@@ -1283,7 +1283,15 @@ function reskinProyecto(proyectoId, repoUrl){
   .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return { status:r.status, d:d }; }); })
   .then(function(res){
     if(res.status===200 && res.d.ok){
-      toastRepo('Web lista para revisión ✅ '+(res.d.cambios||0)+' cambios · ', res.d.repo_url || repoUrl, 'ok', [], 15000);
+      // Vista previa real en GitHub Pages: tarda ~1 min en publicarse tras el reskin.
+      var preview = /^https:\/\/nexusforgeia\.github\.io\//.test(res.d.preview_url||'') ? res.d.preview_url : null;
+      var botones = [];
+      if(preview) botones.push({ texto:'Ver web ↗', accion:function(){ window.open(preview, '_blank', 'noopener'); } });
+      botones.push({ texto:'Cerrar', accion:function(){ $('toast').style.display='none'; } });
+      var nota = preview
+        ? 'Vista previa en ~1 min; si ves la versión antigua, Ctrl+Shift+R · '
+        : (res.d.preview_error ? 'Vista previa no disponible ('+res.d.preview_error+') · ' : '');
+      toastRepo('Web lista para revisión ✅ '+(res.d.cambios||0)+' cambios · '+nota, res.d.repo_url || repoUrl, 'ok', botones, 0);
     } else {
       falloReskin(proyectoId, repoUrl, res.d.error || ('HTTP '+res.status));
     }

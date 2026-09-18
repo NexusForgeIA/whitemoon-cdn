@@ -503,7 +503,7 @@ async function sembrarTenant(
     .from("servicios_peluqueria")
     .upsert(
       (base as Json[]).map((s) => ({
-        tenant: f.token, nombre: s.nombre, duracion_min: s.duracion_min, orden: s.orden, precio_eur: 0, activo: false,
+        tenant: f.token, nombre: s.nombre, duracion_min: s.duracion_min, orden: s.orden, precio_modo: "consulta", precio_eur: null, activo: false,
       })),
       { onConflict: "tenant,nombre", ignoreDuplicates: true },
     )

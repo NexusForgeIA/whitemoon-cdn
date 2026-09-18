@@ -66,6 +66,11 @@ Deno.serve(async (req: Request) => {
     const jwt = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
     const { data: auth, error: authError } = await supabase.auth.getUser(jwt);
     if (authError || !auth?.user) return json({ ok: false, error: "no_autorizado" }, 401);
+    // Solo staff de WhiteMoon: el rol va en app_metadata, que solo escribe
+    // service_role (user_metadata lo puede cambiar el propio usuario). Se
+    // comprueba ANTES de tocar nada con service_role: una cuenta demo tiene
+    // sesión válida y no puede clonar ni reskinear.
+    if (auth.user.app_metadata?.role !== "staff") return json({ ok: false, error: "solo_staff" }, 403);
 
     const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
     const plantillaId = String(body.plantilla_id ?? "").trim();

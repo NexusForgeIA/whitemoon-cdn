@@ -545,7 +545,8 @@ function reskinArchivo(texto: string, modo: Modo, o: Originales, f: Ficha, detal
   nuevo = ajustarGeoMetas(nuevo, f, detalle);
   // SEO de la ficha solo en el home; el resto conserva su title/meta (con marca/zona ya cambiadas).
   if (conSeo) nuevo = aplicarSeoMetas(nuevo, f, detalle);
-  return nuevo;
+  // agenda.html declara el mismo TENANT_TOKEN que alexia.js; en index.html es no-op.
+  return swapTenant(nuevo, f, detalle);
 }
 
 // Textos de la plantilla demo que en la web de un cliente real hacen daño.
@@ -583,7 +584,9 @@ function puertaSeguridad(modo: Modo, original: string, nuevo: string, o: Origina
 
   // Un chat que usa la agenda tiene que llevar el token del cliente: con el de la
   // demo (o sin él) las reservas caerían en el tenant de la demo.
-  if (modo === "js" && original.includes("peluquerias-cita") &&
+  // La agenda con el token de la demo abriría el clon en modo demo (sin login).
+  const agendaDemo = esHtml && RE_TENANT_DEMO.test(original);
+  if (((modo === "js" && original.includes("peluquerias-cita")) || agendaDemo) &&
       !new RegExp(`const\\s+TENANT_TOKEN\\s*=\\s*["']${escRe(f.token)}["']`).test(nuevo)) {
     return inseguro("tenant_token_no_aplicado");
   }

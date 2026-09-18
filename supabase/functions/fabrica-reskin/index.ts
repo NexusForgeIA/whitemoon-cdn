@@ -27,7 +27,7 @@ import Anthropic from "npm:@anthropic-ai/sdk@0.115.0";
 // v2.5: el clon nace como tenant de la agenda. alexia.js recibe el token_cdn de
 // la ficha (sin token, 422) y, antes de publicar, se asegura la fila de control
 // en onboarding_clientes (valida el token público y da el chat de Telegram), la
-// peluqueria_config del tenant y su catálogo base SIN precios (0 e inactivos).
+// peluqueria_config del tenant y su catálogo base SIN precios (modo 'consulta', inactivos).
 //
 // Misma seguridad que fabrica-clonar: verify_jwt = true y usuario real de Auth.
 // GITHUB_TOKEN y ANTHROPIC_API_KEY solo salen de Deno.env: nunca van a la
@@ -491,7 +491,7 @@ async function sembrarTenant(
   if (cfgError) return falla("config", cfgError.message);
 
   // Catálogo: nombres y duraciones de la demo (los que usa alexia.js para
-  // reservar), con precio 0 e inactivos. Nunca precios de la plantilla en un
+  // reservar), en modo 'consulta' (sin precio) e inactivos. Nunca precios de la plantilla en un
   // cliente real: el dueño los pone y activa desde su panel. Lo ya sembrado no se toca.
   const { data: base, error: baseError } = await supabase
     .from("servicios_peluqueria")
@@ -503,7 +503,7 @@ async function sembrarTenant(
     .from("servicios_peluqueria")
     .upsert(
       (base as Json[]).map((s) => ({
-        tenant: f.token, nombre: s.nombre, duracion_min: s.duracion_min, orden: s.orden, precio_eur: 0, activo: false,
+        tenant: f.token, nombre: s.nombre, duracion_min: s.duracion_min, orden: s.orden, precio_modo: "consulta", precio_eur: null, activo: false,
       })),
       { onConflict: "tenant,nombre", ignoreDuplicates: true },
     )

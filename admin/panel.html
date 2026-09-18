@@ -264,6 +264,30 @@ tbody tr:last-child td{border-bottom:none}
 .login-err{margin-top:15px;background:rgba(255,84,112,.1);border:1px solid rgba(255,84,112,.3);border-radius:10px;padding:10px 13px;font-size:.74rem;color:var(--danger);text-align:left;line-height:1.5}
 .login-note{margin-top:20px;font-size:.67rem;color:var(--muted);line-height:1.55}
 
+/* ─── DOCUMENTOS DEL CLIENTE ─────────────────────────────────────────────── */
+.docs-box{border-top:1px solid var(--line);margin-top:8px;padding-top:16px}
+.docs-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.docs-bar .docs-tipo-lbl{margin:0}
+.docs-tipo{width:auto;min-width:140px;padding:7px 11px;font-size:.8rem}
+.docs-count{font-size:.7rem;font-weight:700;color:var(--muted);margin-left:auto;white-space:nowrap}
+.docs-drop{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:20px 16px;border:1.5px dashed rgba(124,77,255,.35);border-radius:14px;background:rgba(124,77,255,.04);color:var(--p2);margin-bottom:12px;transition:border-color var(--t) var(--ease),background var(--t) var(--ease)}
+.docs-drop.over{border-color:var(--p2);background:rgba(124,77,255,.12)}
+.docs-drop.busy{opacity:.55;pointer-events:none}
+.docs-drop-txt{font-size:.82rem;color:var(--text);font-weight:500}
+.docs-drop-sub{font-size:.68rem;color:var(--muted)}
+.docs-pick{background:none;border:none;padding:0;font:inherit;font-weight:700;color:var(--p2);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.docs-pick:focus-visible{outline:2px solid var(--p2);outline-offset:2px;border-radius:4px}
+.doc-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 13px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;background:var(--card);transition:border-color var(--t) var(--ease)}
+.doc-item:hover{border-color:var(--border)}
+.doc-body{min-width:0;display:flex;align-items:center;gap:11px}
+.doc-ico{width:34px;height:34px;flex-shrink:0;border-radius:10px;display:grid;place-items:center;background:rgba(124,77,255,.12);color:var(--p2)}
+.doc-name{font-weight:600;font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.doc-meta{font-size:.7rem;color:var(--muted);margin-top:4px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.doc-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.badge-factura{background:rgba(0,212,170,.12);color:var(--g);border-color:rgba(0,212,170,.25)}
+.badge-contrato{background:rgba(124,77,255,.13);color:#b39dff;border-color:var(--border)}
+.badge-otro{background:rgba(255,255,255,.06);color:var(--muted);border-color:var(--line)}
+
 /* ─── RESPONSIVE ─────────────────────────────────────────────────────────── */
 @media(max-width:900px){
   .top-in{flex-wrap:wrap;padding:10px 16px;gap:10px}
@@ -304,6 +328,11 @@ tbody tr:last-child td{border-bottom:none}
   .pagos-resumen{grid-template-columns:1fr}
   .pago-add{grid-template-columns:1fr}
   .pago-item{flex-direction:column;align-items:flex-start}
+  .doc-item{flex-direction:column;align-items:stretch}
+  .doc-body{width:100%}
+  .doc-actions .btn{flex:1}
+  .docs-tipo{flex:1}
+  .docs-count{margin-left:0;width:100%}
   .modal-bg{padding:16px 10px}
   .modal{padding:20px 18px;border-radius:16px}
   .modal-foot .btn{flex:1}
@@ -563,6 +592,33 @@ tbody tr:last-child td{border-bottom:none}
         <button type="button" class="btn btn-ghost btn-sm btn-mt" onclick="copyNewSnippet()"><svg class="ico"><use href="#i-copy"/></svg>Copiar script</button>
       </div>
     </div>
+
+    <!-- Documentos del cliente (facturas, contratos…) · bucket privado clientes-docs
+         + tabla documentos_cliente. Para todos los packs. Ver docsReset(). -->
+    <div class="docs-box">
+      <label>Documentos <span class="hint">(facturas, contratos… · privados, solo staff)</span></label>
+      <div id="docsNew" class="warn-box flush">Guarda el cliente primero para poder subir documentos.</div>
+      <div id="docsExisting" class="is-hidden">
+        <div class="docs-bar">
+          <label for="docsTipo" class="docs-tipo-lbl">Tipo al subir</label>
+          <select id="docsTipo" class="docs-tipo">
+            <option value="factura">Factura</option>
+            <option value="contrato">Contrato</option>
+            <option value="otro" selected>Otro</option>
+          </select>
+          <span id="docsCount" class="docs-count">—</span>
+        </div>
+        <div class="docs-drop" id="docsDrop" ondragover="docsDragOver(event)" ondragleave="docsDragLeave(event)" ondrop="docsDrop(event)">
+          <svg class="ico ico-lg"><use href="#i-upload"/></svg>
+          <div class="docs-drop-txt">Arrastra aquí el archivo o <button type="button" class="docs-pick" onclick="$('docsFile').click()">elígelo</button></div>
+          <div class="docs-drop-sub">PDF, imágenes, Word, Excel, PowerPoint, TXT · máx. 20 MB</div>
+          <input type="file" id="docsFile" class="is-hidden" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,.heic,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.odt,.ods,.txt,.csv" onchange="docsUpload(this.files); this.value='';">
+        </div>
+        <div id="docsProgress" class="rag-prog is-hidden"></div>
+        <div id="docsList"><div class="empty">—</div></div>
+      </div>
+    </div>
+
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeNew()">Cancelar</button>
       <button class="btn btn-p" id="nSave" onclick="saveCliente()">Crear cliente</button>
@@ -1666,6 +1722,7 @@ function openNew(){
   promptDirty = false;                 // cliente nuevo: prompt aún no tocado
   switchPackDefaults($('nPack').value); // autocarga el prompt del pack inicial (spark → texto)
   refreshNewSnippet(); refreshFormRag();
+  docsReset(null);
   $('newBg').classList.add('show');
 }
 // Abre el mismo formulario en modo edición, precargando el cliente. Aquí sí
@@ -1698,6 +1755,7 @@ function openEditCliente(id){
   // Editando un cliente: respetamos su prompt guardado (no autocompletar al tocar pack).
   promptDirty = true;
   refreshNewSnippet(); refreshFormRag();
+  docsReset(id);
   $('newBg').classList.add('show');
 }
 function closeNew(){ stopRagPoll(); $('newBg').classList.remove('show'); currentFormCli=null; }
@@ -1956,6 +2014,161 @@ function deleteRagArchivo(id){
   .then(function(){ return sbDelete('rag_archivos','id=eq.'+encodeURIComponent(id)); })
   .then(function(){ toast('Documento eliminado'); loadRagArchivos(); })
   .catch(function(e){ toast('Error: '+e.message,'err'); });
+}
+
+// ─── DOCUMENTOS DEL CLIENTE (Storage clientes-docs + documentos_cliente) ─────
+// Bucket PRIVADO: todo pasa por supabase-js con la sesión de staff (RLS
+// staff_all / clientes_docs_staff). Nunca URL pública: descarga con URL firmada
+// de 60 s. Archivo y fila se crean y se borran juntos (sin huérfanos).
+var DOCS_BUCKET = 'clientes-docs';
+var DOCS_MAX_BYTES = 20 * 1048576;
+var DOCS_EXT = /\.(pdf|jpe?g|png|webp|gif|heic|docx?|xlsx?|pptx?|odt|ods|txt|csv)$/i;
+var DOCS_TIPO_LABEL = { factura:'Factura', contrato:'Contrato', otro:'Otro' };
+var docsCli = null;   // onboarding_id del cliente abierto en el formulario
+var docs = [];        // filas de documentos_cliente de ese cliente
+var docsBusy = false; // hay una subida en curso
+
+// Lo llaman openNew() (id null → aviso "guarda primero") y openEditCliente(id).
+function docsReset(id){
+  docsCli = id || null;
+  docs = [];
+  $('docsNew').classList.toggle('is-hidden', !!docsCli);
+  $('docsExisting').classList.toggle('is-hidden', !docsCli);
+  $('docsTipo').value = 'otro';
+  docsProgress(null);
+  if(docsCli){ $('docsList').innerHTML='<div class="empty">Cargando…</div>'; loadDocs(); }
+}
+
+function loadDocs(){
+  var id = docsCli; if(!id) return;
+  sb.from('documentos_cliente')
+    .select('id,tipo,nombre,ruta_storage,mime,tamano_bytes,subido_por,created_at')
+    .eq('onboarding_id', id)
+    .order('created_at', { ascending:false })
+  .then(function(res){
+    if(docsCli !== id) return; // el modal ya cambió de cliente
+    if(res.error){ $('docsList').innerHTML='<div class="empty">No se pudieron cargar los documentos: '+esc(res.error.message)+'</div>'; return; }
+    docs = res.data || [];
+    renderDocs();
+  });
+}
+
+function renderDocs(){
+  $('docsCount').textContent = docs.length+' documento'+(docs.length===1?'':'s');
+  if(!docs.length){ $('docsList').innerHTML='<div class="empty">Sin documentos todavía.</div>'; return; }
+  var h='';
+  docs.forEach(function(d){
+    var tipo = DOCS_TIPO_LABEL[d.tipo] ? d.tipo : 'otro';
+    h+='<div class="doc-item">'
+      +'<div class="doc-body"><span class="doc-ico">'+ico('note')+'</span><div class="rag-body">'
+      +'<div class="doc-name" title="'+esc(d.nombre)+'">'+esc(d.nombre)+'</div>'
+      +'<div class="doc-meta"><span class="badge badge-'+tipo+'">'+DOCS_TIPO_LABEL[tipo]+'</span>'
+      +'<span>'+fmtBytes(d.tamano_bytes)+' · '+fmtDate(d.created_at)+(d.subido_por?' · '+esc(d.subido_por):'')+'</span></div>'
+      +'</div></div>'
+      +'<div class="doc-actions">'
+      +'<button type="button" class="btn btn-ghost btn-sm" onclick="docsDownload(\''+esc(d.id)+'\')">'+ico('download')+'Descargar</button>'
+      +'<button type="button" class="btn btn-d btn-sm btn-icon" onclick="docsDelete(\''+esc(d.id)+'\')" title="Borrar documento" aria-label="Borrar documento">'+ico('trash')+'</button>'
+      +'</div></div>';
+  });
+  $('docsList').innerHTML=h;
+}
+
+function docsProgress(msg){
+  var p = $('docsProgress');
+  if(!msg){ p.classList.add('is-hidden'); p.innerHTML=''; $('docsDrop').classList.remove('busy'); return; }
+  p.innerHTML = '<span class="spin">'+ico('loader')+'</span> '+esc(msg);
+  p.classList.remove('is-hidden');
+  $('docsDrop').classList.add('busy');
+}
+
+function docsDragOver(e){ e.preventDefault(); if(docsCli && !docsBusy) $('docsDrop').classList.add('over'); }
+function docsDragLeave(e){ $('docsDrop').classList.remove('over'); }
+function docsDrop(e){
+  e.preventDefault();
+  $('docsDrop').classList.remove('over');
+  if(e.dataTransfer && e.dataTransfer.files) docsUpload(e.dataTransfer.files);
+}
+
+// Clave de Storage segura: sin tildes, espacios ni símbolos (el nombre real se
+// guarda tal cual en la fila).
+function docsSafeName(n){
+  return String(n||'archivo').normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/[^A-Za-z0-9._-]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'').slice(-120) || 'archivo';
+}
+
+function docsUpload(fileList){
+  var files = Array.prototype.slice.call(fileList||[]);
+  if(!docsCli || docsBusy || !files.length) return;
+  var malos = files.filter(function(f){ return !DOCS_EXT.test(f.name) || f.size > DOCS_MAX_BYTES || !f.size; });
+  if(malos.length){
+    toast('«'+malos[0].name+'»: '+(!DOCS_EXT.test(malos[0].name) ? 'formato no admitido' : (!malos[0].size ? 'archivo vacío' : 'supera 20 MB')),'err');
+    return;
+  }
+  var id = docsCli, tipo = $('docsTipo').value || 'otro';
+  docsBusy = true;
+  sb.auth.getSession().then(function(r){
+    var email = (r.data && r.data.session && r.data.session.user && r.data.session.user.email) || null;
+    // Secuencial: un archivo detrás de otro, parando en el primer error.
+    return files.reduce(function(prev, f, i){
+      return prev.then(function(){
+        docsProgress('Subiendo «'+f.name+'» ('+fmtBytes(f.size)+')'+(files.length>1?' · '+(i+1)+'/'+files.length:'')+'…');
+        return docsUploadOne(id, f, tipo, email);
+      });
+    }, Promise.resolve());
+  })
+  .then(function(){ toast(files.length===1 ? 'Documento subido ✅' : files.length+' documentos subidos ✅'); })
+  .catch(function(e){ toast('Error al subir: '+String(e && e.message || e).slice(0,140),'err'); })
+  .then(function(){ docsBusy = false; docsProgress(null); if(docsCli===id) loadDocs(); });
+}
+
+// Sube el archivo y registra la fila. Si falla el INSERT, borra el archivo.
+function docsUploadOne(id, f, tipo, email){
+  var ruta = id+'/'+crypto.randomUUID()+'-'+docsSafeName(f.name);
+  return sb.storage.from(DOCS_BUCKET).upload(ruta, f, { contentType: f.type || undefined, upsert:false })
+  .then(function(up){
+    if(up.error) throw up.error;
+    return sb.from('documentos_cliente').insert({
+      onboarding_id: id, tipo: tipo, nombre: f.name, ruta_storage: ruta,
+      mime: f.type || null, tamano_bytes: f.size, subido_por: email
+    }).then(function(ins){
+      if(!ins.error) return;
+      return sb.storage.from(DOCS_BUCKET).remove([ruta]).then(function(){ throw ins.error; });
+    });
+  });
+}
+
+function docsDownload(docId){
+  var d = docs.filter(function(x){ return x.id===docId; })[0]; if(!d) return;
+  // La ventana se abre en el clic (si no, el bloqueador de pop-ups la para) y
+  // recibe la URL firmada cuando llega.
+  var w = window.open('', '_blank');
+  sb.storage.from(DOCS_BUCKET).createSignedUrl(d.ruta_storage, 60).then(function(r){
+    if(r.error || !r.data || !r.data.signedUrl){
+      if(w) w.close();
+      toast('No se pudo generar el enlace: '+String(r.error && r.error.message || 'desconocido').slice(0,120),'err');
+      return;
+    }
+    if(w){ w.opener = null; w.location.href = r.data.signedUrl; }
+    else window.open(r.data.signedUrl, '_blank', 'noopener');
+  });
+}
+
+// Borra primero el archivo y después la fila. Si falla la fila, reintentar es
+// seguro: remove() de un archivo que ya no existe no da error.
+function docsDelete(docId){
+  var d = docs.filter(function(x){ return x.id===docId; })[0]; if(!d) return;
+  if(!confirm('¿Borrar «'+d.nombre+'»?\n\nSe elimina el archivo y su registro. No se puede deshacer.')) return;
+  sb.storage.from(DOCS_BUCKET).remove([d.ruta_storage])
+  .then(function(r){
+    if(r.error) throw r.error;
+    return sb.from('documentos_cliente').delete().eq('id', d.id);
+  })
+  .then(function(r){
+    if(r.error) throw r.error;
+    toast('Documento borrado');
+  })
+  .catch(function(e){ toast('Error al borrar: '+String(e && e.message || e).slice(0,140),'err'); })
+  .then(loadDocs);
 }
 
 // ─── EXPORT CSV ──────────────────────────────────────────────────────────────

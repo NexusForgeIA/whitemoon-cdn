@@ -772,7 +772,7 @@ var PACK_SETUP = { spark:499, 'mini-core':599, 'orion-ia-agent':799, orion_agent
 var SECTORES = ['dental','legal','restaurante','gestoria','clinica','inmobiliaria','gimnasio','peluqueria','veterinaria','formacion','taller','podologia','automovil','abogados'];
 // Packs en venta (dropdown de alta/edición). Los retirados no se ofrecen,
 // pero ensurePackOption() los inyecta al editar un cliente antiguo.
-var PACKS = ['spark','mini-core','orion-ia-agent','core-spark-web','core-orion','whitemoon-360','core-rag','calculadora-itp','agente-ia-citas'];
+var PACKS = ['spark','core-spark-web','agente-ia-citas'];
 // Packs que se entregan por QR/enlace + panel, sin web del cliente: el dominio
 // no es obligatorio y no hay script de instalación.
 var PACKS_SIN_WEB = { 'agente-ia-citas':1 };
@@ -1193,6 +1193,9 @@ function deletePago(pagoId){
 //   - orion-ia-agent / core-orion  → orion-widget.js (voz · Retell, data-agent)
 //   - core-rag                     → orion-widget.js con data-agent + data-rag="true" (voz + RAG)
 //   - calculadora-itp              → itp.js (widget de calculadora ITP)
+//   - agente-ia-citas              → sin script (se entrega por QR/enlace)
+// Solo spark, core-spark-web y agente-ia-citas están en venta (PACKS); el resto
+// de ramas siguen aquí para los clientes antiguos que ya tienen ese pack.
 // El atributo data-agent solo aparece en los snippets de orion-widget.js (voz).
 // El atributo data-rag lo emite orion-widget.js para activar la base de conocimiento RAG.
 var PACKS_WITH_RAG = { 'core-rag':1 };
@@ -1203,6 +1206,7 @@ function ragLimite(pack){ return RAG_LIMITES[String(pack||'').toLowerCase()]; }
 function snippetForPack(c){
   var pack = String(c.pack||'').toLowerCase();
   var token = (c.token_cdn||'').trim();
+  if(PACKS_SIN_WEB[pack]) return '— Este producto se entrega por QR/enlace, no con script de web.';
   if(!token) return '— Falta token CDN para generar el script.';
   // Packs de texto (Laura IA · Claude API): chat.js, sin widget de voz Retell.
   if(pack === 'spark' || pack === 'mini-core' || pack === 'core-spark-web'){

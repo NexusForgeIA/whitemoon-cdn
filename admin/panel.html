@@ -558,8 +558,7 @@ tbody tr:last-child td{border-bottom:none}
       <div><label>Servicios <span class="hint">(solo para el prompt)</span></label><input type="text" id="nServicios" placeholder="Implantes, ortodoncia invisible, estética dental"></div>
     </div>
     <div class="agente-box">
-      <span class="agente-tag" id="nAgenteBadge">Agente: Orion IA (Retell + ElevenLabs)</span>
-      <div class="mb" id="nRetellSection"><label>Retell agent ID <span class="hint">(solo Orion IA Agent / Core Orion / Core RAG)</span></label><input type="text" id="nAgentId" placeholder="agent_xxxxxxxxxxxxxxxx" oninput="refreshNewSnippet()"></div>
+      <span class="agente-tag" id="nAgenteBadge">Agente: —</span>
       <div class="mb" id="nPromptSection"><label>System prompt</label><textarea id="nPrompt" rows="6" placeholder="Se autocompleta según el pack. Edítalo si quieres personalizarlo." oninput="markPromptDirty();revisarPromptFaltantes(this,'nPromptFalta')"></textarea>
         <div class="prompt-actions">
           <button type="button" class="btn btn-ghost btn-sm" onclick="generarPromptSector()"><svg class="ico"><use href="#i-sparkle"/></svg>Generar prompt del sector</button>
@@ -730,9 +729,8 @@ tbody tr:last-child td{border-bottom:none}
 <div class="modal-bg" id="agenteBg">
   <div class="modal">
     <h3 id="agenteTitle">Agente</h3>
-    <span class="agente-tag" id="aAgenteBadge">Orion IA (Retell + ElevenLabs)</span>
-    <div class="mb" id="aRetellSection"><label>Retell agent ID <span class="hint">(solo Orion IA Agent / Core Orion / Core RAG)</span></label><input type="text" id="aAgentId" placeholder="agent_xxxxxxxxxxxxxxxx" oninput="refreshAgenteSnippet()"></div>
-    <div class="mb" id="aPromptSection"><label>System prompt de Orion</label><textarea id="aPrompt" rows="8" placeholder="Eres Orion, el agente de voz de [NEGOCIO]..." oninput="revisarPromptFaltantes(this,'aPromptFalta')"></textarea>
+    <span class="agente-tag" id="aAgenteBadge">—</span>
+    <div class="mb" id="aPromptSection"><label>System prompt</label><textarea id="aPrompt" rows="8" placeholder="Eres Laura, el asistente virtual de [NEGOCIO]..." oninput="revisarPromptFaltantes(this,'aPromptFalta')"></textarea>
       <div class="prompt-actions">
         <button type="button" class="btn btn-ghost btn-sm" onclick="generarPromptAgente()"><svg class="ico"><use href="#i-sparkle"/></svg>Generar prompt del sector</button>
       </div>
@@ -899,7 +897,7 @@ function loadData(){
   loadPlantillas();
   $('tbl').innerHTML='<div class="empty">Cargando…</div>';
   Promise.all([
-    sbGet('onboarding_clientes?select=id,token_cdn,estado,cliente_nombre,cliente_email,cliente_telefono,direccion,sector,pack,url_web_cliente,notas,fecha_proximo_pago,fecha_inicio,created_at,agente_tipo,agente_retell_agent_id,agente_system_prompt,telegram_chat_id&order=created_at.desc'),
+    sbGet('onboarding_clientes?select=id,token_cdn,estado,cliente_nombre,cliente_email,cliente_telefono,direccion,sector,pack,url_web_cliente,notas,fecha_proximo_pago,fecha_inicio,created_at,agente_tipo,agente_system_prompt,telegram_chat_id&order=created_at.desc'),
     sbGet('cdn_config?id=eq.true&select=modo_automatico_pagos'),
     sbGet('historial_pagos?select=id,cliente_id,concepto,importe,fecha_vencimiento,pagado,fecha_pago,notas,created_at&order=fecha_vencimiento.asc')
   ]).then(function(res){
@@ -1190,14 +1188,11 @@ function deletePago(pagoId){
 // ─── AGENTE IA (snippet por pack · onboarding_clientes) ──────────────────────
 // El snippet que se instala en la web del cliente depende del pack:
 //   - spark / mini-core / core-spark-web → chat.js (chatbot texto · Laura IA · Claude API)
-//   - orion-ia-agent / core-orion  → orion-widget.js (voz · Retell, data-agent)
-//   - core-rag                     → orion-widget.js con data-agent + data-rag="true" (voz + RAG)
 //   - calculadora-itp              → itp.js (widget de calculadora ITP)
 //   - agente-ia-citas              → sin script (se entrega por QR/enlace)
+//   - resto (packs de voz retirados) → sin script: ya no se trabaja con voz.
 // Solo spark, core-spark-web y agente-ia-citas están en venta (PACKS); el resto
 // de ramas siguen aquí para los clientes antiguos que ya tienen ese pack.
-// El atributo data-agent solo aparece en los snippets de orion-widget.js (voz).
-// El atributo data-rag lo emite orion-widget.js para activar la base de conocimiento RAG.
 var PACKS_WITH_RAG = { 'core-rag':1 };
 // Límite de documentos RAG por pack (cuenta archivos con estado != 'error').
 // Solo se cuentan packs presentes en PACKS_WITH_RAG.
@@ -1208,12 +1203,12 @@ function snippetForPack(c){
   var token = (c.token_cdn||'').trim();
   if(PACKS_SIN_WEB[pack]) return '— Este producto se entrega por QR/enlace, no con script de web.';
   if(!token) return '— Falta token CDN para generar el script.';
-  // Packs de texto (Laura IA · Claude API): chat.js, sin widget de voz Retell.
+  // Packs de texto (Laura IA · Claude API): chat.js.
   if(pack === 'spark' || pack === 'mini-core' || pack === 'core-spark-web'){
     return '<script src="'+CDN_BASE+'/chat.js"\n  data-token="'+esc(token)+'"><\/script>';
   }
   if(pack === 'calculadora-itp'){
-    // itp.js no necesita Retell agent — es un widget standalone con su propia
+    // itp.js es un widget standalone con su propia
     // verificación de token. Bakeamos data-nombre y data-tel desde Supabase
     // para que el widget los pinte sin tener que consultar nada en runtime.
     var nombre = (c.cliente_nombre||'').trim();
@@ -1223,23 +1218,13 @@ function snippetForPack(c){
       + (tel ? '\n  data-tel="'+esc(tel)+'"' : '')
       + '\n  defer><\/script>';
   }
-  // Packs de voz (Orion IA · Retell): orion-ia-agent, core-orion y core-rag.
-  // core-rag añade data-rag="true" para activar la base de conocimiento RAG.
-  var agentId = (c.agente_retell_agent_id||'').trim();
-  if(!agentId){
-    return '— Falta Retell agent ID para generar el script de Orion.';
-  }
-  var rag = !!PACKS_WITH_RAG[pack];
-  return '<script src="'+CDN_BASE+'/orion-widget.js"\n  data-token="'+esc(token)+'"\n  data-agent="'+esc(agentId)+'"'
-    + (rag ? '\n  data-rag="true"' : '')
-    + '\n  defer><\/script>';
+  return '— Este pack no tiene script de instalación.';
 }
 function agenteScript(c){ return snippetForPack(c); }
 
 // Tipo + etiqueta + icono del badge según pack:
 //   - spark / core-spark-web         → Laura IA (chat texto · Claude API)
-//   - orion-ia-agent / core-orion    → Orion IA (voz Retell)
-//   - core-rag                       → Orion IA + RAG (voz Retell + base de conocimiento)
+//   - orion-ia-agent / core-orion / core-rag → Orion IA (voz · retirado, sin script)
 //   - calculadora-itp                → Calculadora ITP (widget, sin agente IA)
 function agenteTipoFromPack(pack){
   var p = String(pack||'').toLowerCase();
@@ -1247,8 +1232,6 @@ function agenteTipoFromPack(pack){
   if(p === 'orion-ia-agent' || p === 'core-orion' || p === 'core-rag') return 'orion';
   return 'laura'; // spark · mini-core · core-spark-web · whitemoon-360 (CRM y panel aparte)
 }
-// Solo los packs de voz (Orion · Retell) usan el campo Retell agent ID.
-function packUsesRetell(pack){ return agenteTipoFromPack(pack) === 'orion'; }
 // El system prompt de texto se oculta en core-rag: su conocimiento sale de los
 // documentos RAG, no de un prompt escrito a mano.
 function packShowsPrompt(pack){
@@ -1259,8 +1242,8 @@ function agenteLabel(pack){
   var tipo = agenteTipoFromPack(pack);
   if(tipo === 'laura') return 'Laura IA (chat texto · Claude API)';
   if(tipo === 'itp')   return 'CALCULADORA ITP';
-  if(p === 'core-rag') return 'Orion IA + RAG (Retell + ElevenLabs)';
-  return 'Orion IA (Retell + ElevenLabs)';
+  if(p === 'core-rag') return 'Orion IA + RAG (voz · retirado)';
+  return 'Orion IA (voz · retirado)';
 }
 function agenteIcon(pack){
   var tipo = agenteTipoFromPack(pack);
@@ -1270,32 +1253,14 @@ function agenteIcon(pack){
 }
 
 // ─── AUTO-DEFAULTS POR PACK (solo formulario de alta) ────────────────────────
-// System prompt por defecto según el pack. Texto (chat.js) para spark/core-spark-web,
-// voz (orion-widget.js) para orion-ia-agent/core-orion, y voz+RAG para core-rag.
+// System prompt por defecto del alta. Todos los packs en venta son de texto (chat.js).
 // [NEGOCIO] se sustituye por el nombre del cliente si ya está escrito.
 function packPromptDefault(pack, negocio){
   var neg = (negocio && negocio.trim()) ? negocio.trim() : '[NEGOCIO]';
-  var p = String(pack||'').toLowerCase();
-  if(agenteTipoFromPack(pack) !== 'orion'){
-    // TEXTO — spark / core-spark-web (chat.js)
-    return 'Eres Laura, el asistente virtual de '+neg+'.\n'
-      + 'Atiendes consultas 24/7 por chat. Eres amable, conciso y profesional. '
-      + 'Máximo 3 frases por respuesta. Una pregunta a la vez. '
-      + 'Cuando tengas nombre y teléfono del cliente, cierra la conversación y registra el lead.';
-  }
-  if(p === 'core-rag'){
-    // VOZ + RAG — core-rag (orion-widget.js + base de conocimiento)
-    return 'Eres Orion, el agente de voz de '+neg+'.\n'
-      + 'Tienes acceso a la base de conocimiento de la empresa. '
-      + 'Atiendes llamadas 24/7 con información precisa y actualizada. '
-      + 'Máximo 2-3 frases por turno. Consulta siempre los documentos antes de responder. '
-      + 'Cuando tengas nombre y teléfono, registra el lead.';
-  }
-  // VOZ — orion-ia-agent / core-orion (orion-widget.js)
-  return 'Eres Orion, el agente de voz de '+neg+'.\n'
-    + 'Atiendes llamadas 24/7. Eres natural, empático y directo. '
-    + 'Máximo 2-3 frases por turno. Gestiona citas vía Cal.com. '
-    + 'Cuando tengas nombre y teléfono, confirma la cita o registra el lead.';
+  return 'Eres Laura, el asistente virtual de '+neg+'.\n'
+    + 'Atiendes consultas 24/7 por chat. Eres amable, conciso y profesional. '
+    + 'Máximo 3 frases por respuesta. Una pregunta a la vez. '
+    + 'Cuando tengas nombre y teléfono del cliente, cierra la conversación y registra el lead.';
 }
 // Flag: el usuario ha editado el prompt a mano → no lo autocompletamos al cambiar pack.
 var promptDirty = false;
@@ -1313,30 +1278,12 @@ function openAgente(id){
   currentAgenteCli = id;
   $('agenteTitle').innerHTML = agenteIcon(c.pack)+' Agente · '+esc(c.cliente_nombre||'cliente');
   $('aAgenteBadge').textContent = agenteLabel(c.pack);
-  // El campo Retell agent ID solo aplica a packs de voz (orion-ia-agent, core-orion, core-rag).
-  $('aRetellSection').style.display = packUsesRetell(c.pack) ? 'block' : 'none';
   // core-rag oculta el system prompt de texto (su conocimiento viene del RAG).
   $('aPromptSection').style.display = packShowsPrompt(c.pack) ? 'block' : 'none';
-  $('aAgentId').value = c.agente_retell_agent_id || '';
   $('aPrompt').value = c.agente_system_prompt || '';
   revisarPromptFaltantes($('aPrompt'),'aPromptFalta');
   $('aScript').textContent = agenteScript(c);
   $('agenteBg').classList.add('show');
-}
-// Live preview en el modal de agente — refleja cambios en el input del agent ID
-// sin tener que pulsar Guardar. Para calculadora-itp también pasamos
-// cliente_nombre y cliente_telefono porque el snippet los baka como data-*.
-function refreshAgenteSnippet(){
-  if(!currentAgenteCli) return;
-  var c = clientes.filter(function(x){ return x.id===currentAgenteCli; })[0]; if(!c) return;
-  var preview = {
-    token_cdn: c.token_cdn,
-    pack: c.pack,
-    agente_retell_agent_id: ($('aAgentId').value||'').trim(),
-    cliente_nombre: c.cliente_nombre,
-    cliente_telefono: c.cliente_telefono
-  };
-  $('aScript').textContent = snippetForPack(preview);
 }
 function closeAgente(){ $('agenteBg').classList.remove('show'); currentAgenteCli=null; }
 function saveAgente(){
@@ -1350,13 +1297,12 @@ function saveAgente(){
   }
   var body = {
     agente_tipo: tipo,
-    agente_retell_agent_id: ($('aAgentId').value||'').trim() || null,
     agente_system_prompt: ($('aPrompt').value||'').trim() || null
   };
   $('aSave').disabled=true;
   sbPatch('onboarding_clientes','id=eq.'+encodeURIComponent(currentAgenteCli), body)
   .then(function(){
-    if(cli){ cli.agente_tipo=tipo; cli.agente_retell_agent_id=body.agente_retell_agent_id; cli.agente_system_prompt=body.agente_system_prompt; $('aScript').textContent=agenteScript(cli); }
+    if(cli){ cli.agente_tipo=tipo; cli.agente_system_prompt=body.agente_system_prompt; $('aScript').textContent=agenteScript(cli); }
     $('aSave').disabled=false; toast('Agente guardado ✅');
   })
   .catch(function(e){ $('aSave').disabled=false; toast('Error: '+e.message,'err'); });
@@ -1725,7 +1671,7 @@ function openNew(){
   $('newTitle').textContent = '➕ Nuevo cliente';
   $('nSave').textContent = 'Crear cliente';
   resetEstadoOptions(); resetPackOptions();
-  $('nToken').value=genTokenValue(); $('nNombre').value=''; $('nUrl').value=''; $('nSector').value=''; $('nPack').value='spark'; $('nEstado').value='completado'; $('nPago').value=''; $('nNotas').value=''; $('nTelegram').value=''; $('nAgentId').value=''; $('nPrompt').value='';
+  $('nToken').value=genTokenValue(); $('nNombre').value=''; $('nUrl').value=''; $('nSector').value=''; $('nPack').value='spark'; $('nEstado').value='completado'; $('nPago').value=''; $('nNotas').value=''; $('nTelegram').value=''; $('nPrompt').value='';
   $('nDireccion').value=''; $('nTelefono').value=''; $('nHorario').value=''; $('nServicios').value='';
   revisarPromptFaltantes($('nPrompt'),'nPromptFalta');
   promptDirty = false;                 // cliente nuevo: prompt aún no tocado
@@ -1754,7 +1700,6 @@ function openEditCliente(id){
   $('nPago').value = c.fecha_proximo_pago || '';
   $('nNotas').value = c.notas || '';
   $('nTelegram').value = c.telegram_chat_id || '';
-  $('nAgentId').value = c.agente_retell_agent_id || '';
   $('nPrompt').value = c.agente_system_prompt || '';
   $('nDireccion').value = c.direccion || '';
   $('nTelefono').value = c.cliente_telefono || '';
@@ -1828,13 +1773,10 @@ function refreshNewSnippet(){
   var c = {
     token_cdn: ($('nToken').value||'').trim(),
     pack: $('nPack').value,
-    agente_retell_agent_id: ($('nAgentId').value||'').trim(),
     cliente_nombre: ($('nNombre').value||'').trim()
   };
   $('nScript').textContent = snippetForPack(c);
   $('nAgenteBadge').textContent = agenteIcon(c.pack)+' Agente: '+agenteLabel(c.pack);
-  // El campo Retell agent ID solo aplica a packs de voz (orion-ia-agent, core-orion, core-rag).
-  $('nRetellSection').style.display = packUsesRetell(c.pack) ? 'block' : 'none';
   // core-rag oculta el system prompt de texto (su conocimiento viene del RAG).
   $('nPromptSection').style.display = packShowsPrompt(c.pack) ? 'block' : 'none';
   // Packs sin web (QR/enlace): sin script de instalación y dominio opcional.
@@ -1881,7 +1823,6 @@ function saveCliente(){
     telegram_chat_id: ($('nTelegram').value||'').trim() || null,
     // El tipo de agente sigue al pack — ver agenteTipoFromPack().
     agente_tipo: agenteTipoFromPack(pack),
-    agente_retell_agent_id: ($('nAgentId').value||'').trim() || null,
     agente_system_prompt: ($('nPrompt').value||'').trim() || null
   };
   $('nSave').disabled=true;

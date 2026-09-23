@@ -530,7 +530,7 @@ tbody tr:last-child td{border-bottom:none}
     </div>
     <div class="g2">
       <div><label>Nombre cliente *</label><input type="text" id="nNombre" placeholder="Clínica Dental Sonríe" oninput="refreshNewSnippet()"></div>
-      <div><label>Dominio web <span class="req">*</span></label><input type="text" id="nUrl" placeholder="clinicasonrie.es"></div>
+      <div><label>Dominio web <span class="req" id="nUrlReq">*</span></label><input type="text" id="nUrl" placeholder="clinicasonrie.es"></div>
     </div>
     <div class="g2">
       <div><label>Dirección</label><input type="text" id="nDireccion" placeholder="C/ Mayor 12, Majadahonda"></div>
@@ -586,11 +586,13 @@ tbody tr:last-child td{border-bottom:none}
         </div>
       </div>
 
-      <div class="mb">
+      <div class="mb" id="nScriptSection">
         <label>Script de instalación</label>
         <div class="code-box" id="nScript">—</div>
         <button type="button" class="btn btn-ghost btn-sm btn-mt" onclick="copyNewSnippet()"><svg class="ico"><use href="#i-copy"/></svg>Copiar script</button>
       </div>
+      <!-- Packs sin web del cliente (ver PACKS_SIN_WEB): no hay script que instalar. -->
+      <div class="mb warn-box flush start-hidden" id="nScriptQr">Este producto se entrega por QR/enlace, no con script de web.</div>
     </div>
 
     <!-- Documentos del cliente (facturas, contratos…) · bucket privado clientes-docs
@@ -764,19 +766,22 @@ var FUNCTIONS_BASE = SUPABASE_URL + '/functions/v1';
 // Incluye alias snake_case (core_rag, orion_agent) porque las altas hechas
 // desde el CRM pueden llegar con ese formato — sin el alias el MRR de esas
 // filas saldría 0.
-var PACK_MRR = { spark:99, 'mini-core':99, 'orion-ia-agent':99, orion_agent:99, 'core-spark-web':99, 'core-orion':99, 'whitemoon-360':199, 'core-rag':199, core_rag:199, 'calculadora-itp':99 };
+var PACK_MRR = { spark:99, 'mini-core':99, 'orion-ia-agent':99, orion_agent:99, 'core-spark-web':99, 'core-orion':99, 'whitemoon-360':199, 'core-rag':199, core_rag:199, 'calculadora-itp':99, 'agente-ia-citas':99 };
 // Setup (pago único) por pack — mismos alias que PACK_MRR.
-var PACK_SETUP = { spark:499, 'mini-core':599, 'orion-ia-agent':799, orion_agent:799, 'core-spark-web':899, 'core-orion':1499, 'whitemoon-360':1899, 'core-rag':2499, core_rag:2499, 'calculadora-itp':599 };
+var PACK_SETUP = { spark:499, 'mini-core':599, 'orion-ia-agent':799, orion_agent:799, 'core-spark-web':899, 'core-orion':1499, 'whitemoon-360':1899, 'core-rag':2499, core_rag:2499, 'calculadora-itp':599, 'agente-ia-citas':699 };
 var SECTORES = ['dental','legal','restaurante','gestoria','clinica','inmobiliaria','gimnasio','peluqueria','veterinaria','formacion','taller','podologia','automovil','abogados'];
 // Packs en venta (dropdown de alta/edición). Los retirados no se ofrecen,
 // pero ensurePackOption() los inyecta al editar un cliente antiguo.
-var PACKS = ['spark','mini-core','orion-ia-agent','core-spark-web','core-orion','whitemoon-360','core-rag','calculadora-itp'];
+var PACKS = ['spark','mini-core','orion-ia-agent','core-spark-web','core-orion','whitemoon-360','core-rag','calculadora-itp','agente-ia-citas'];
+// Packs que se entregan por QR/enlace + panel, sin web del cliente: el dominio
+// no es obligatorio y no hay script de instalación.
+var PACKS_SIN_WEB = { 'agente-ia-citas':1 };
 // Sectores del CHECK que no tienen plantilla propia en plantillas_prompt_sector
 // (ni directa ni por alias): la RPC les devuelve la plantilla 'generico'.
 var SECTORES_GENERICOS = { legal:1, abogados:1, clinica:1, gimnasio:1, veterinaria:1, formacion:1, podologia:1 };
 // Etiqueta legible por pack (dropdown/badge). Sin entrada → se muestra la clave
 // tal cual (comportamiento histórico de spark, core-orion, etc.).
-var PACK_LABEL = { 'mini-core':'Pack Mini Core', 'whitemoon-360':'WhiteMoon 360', 'calculadora-itp':'Calculadora ITP Pro' };
+var PACK_LABEL = { 'mini-core':'Pack Mini Core', 'whitemoon-360':'WhiteMoon 360', 'calculadora-itp':'Calculadora ITP Pro', 'agente-ia-citas':'Agente IA Citas' };
 function packLabel(p){ if(!p) return '—'; return PACK_LABEL[p] || p; }
 
 var clientes = [];
@@ -1828,6 +1833,11 @@ function refreshNewSnippet(){
   $('nRetellSection').style.display = packUsesRetell(c.pack) ? 'block' : 'none';
   // core-rag oculta el system prompt de texto (su conocimiento viene del RAG).
   $('nPromptSection').style.display = packShowsPrompt(c.pack) ? 'block' : 'none';
+  // Packs sin web (QR/enlace): sin script de instalación y dominio opcional.
+  var sinWeb = !!PACKS_SIN_WEB[String(c.pack||'').toLowerCase()];
+  $('nScriptSection').style.display = sinWeb ? 'none' : 'block';
+  $('nScriptQr').style.display = sinWeb ? 'block' : 'none';
+  $('nUrlReq').style.display = sinWeb ? 'none' : '';
 }
 function copyNewSnippet(){
   var txt = ($('nScript').textContent||'').trim();
@@ -1843,7 +1853,7 @@ function saveCliente(){
   var pack = $('nPack').value || null;
   if(!token){ toast('Token obligatorio','err'); return; }
   if(!nombre){ toast('Nombre obligatorio','err'); return; }
-  if(!url){ toast('Dominio web obligatorio','err'); return; }
+  if(!url && !PACKS_SIN_WEB[String(pack||'').toLowerCase()]){ toast('Dominio web obligatorio','err'); return; }
   // El prompt no puede salir a producción con placeholders sin rellenar.
   if(packShowsPrompt(pack)){
     var faltan = revisarPromptFaltantes($('nPrompt'),'nPromptFalta');

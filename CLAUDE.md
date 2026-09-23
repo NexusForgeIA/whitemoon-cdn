@@ -29,13 +29,12 @@ respeta al editarlo pero no lo ofrece en el alta.
   - `chat.js` — spark, core-spark-web
   - agente-ia-citas — SIN script, se entrega por QR/enlace (panel de citas)
   - `chat.js` — mini-core (retirado — solo clientes ya instalados, no se vende)
-  - `orion-widget.js` — orion-ia-agent, core-orion (retirado — solo clientes ya
-    instalados, no se vende)
-  - `orion-widget.js` + `data-rag="true"` — core-rag (retirado — solo clientes ya
-    instalados, no se vende)
   - `itp.js` — calculadora-itp (retirado — solo clientes ya instalados, no se vende)
-  - whitemoon-360 (retirado — solo clientes ya instalados, no se vende): no tiene
-    rama propia y cae en la de `orion-widget.js`
+  - orion-ia-agent, core-orion, core-rag — sin script (voz retirada)
+  - whitemoon-360 — sin script. Se gestiona en su propio stack (repo
+    WHITEMOON-360-BASE, alta wm360-alta), no desde este panel.
+- Retell/ElevenLabs está retirado del panel: la voz ya no es un producto activo.
+  `orion-widget.js` sigue en el repo, pero el panel ya no lo genera.
 - Nunca directo a main, siempre rama + PR
 - La API key de Claude nunca va en el repo
 

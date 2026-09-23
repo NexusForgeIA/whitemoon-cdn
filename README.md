@@ -1,7 +1,7 @@
 # WhiteMoon CDN
 
 Scripts embebibles que WhiteMoon sirve a las webs de sus clientes desde GitHub Pages:
-chatbot de texto, agente de voz y calculadora de ITP.
+chatbot de texto y calculadora de ITP. El agente de voz está retirado.
 
 Cada script se activa con un token de licencia. Si la licencia no está activa, el script
 no pinta nada en la web del cliente — no muestra ningún error.
@@ -28,7 +28,7 @@ web en cuestión de minutos.
 
 ## Scripts disponibles
 
-Los tres se pegan igual: una etiqueta `<script>` antes de `</body>`, con su
+Todos se pegan igual: una etiqueta `<script>` antes de `</body>`, con su
 `data-token`. El panel indica cuál corresponde a cada pack.
 
 ### `chat.js` — chatbot de texto
@@ -54,17 +54,10 @@ Los tres se pegan igual: una etiqueta `<script>` antes de `</body>`, con su
 
 Si no se indica `data-biz`, se usa el nombre con el que el cliente está dado de alta.
 
-### `orion-widget.js` — agente de voz
+### `orion-widget.js` — agente de voz (RETIRADO)
 
-```html
-<script src="https://nexusforgeia.github.io/whitemoon-cdn/orion-widget.js"
-  data-token="WM-xxxxxxxxxxxx"
-  data-agent="agent_xxxxxxxx">
-</script>
-```
-
-`data-agent` es el identificador del agente de voz y lo rellena el panel al generar el
-snippet.
+Retirado: ya no se instala ni se ofrece, y el panel ya no genera su snippet. Sigue en
+el repo, pero sin uso (0 clientes).
 
 ### `itp.js` — calculadora de ITP
 
@@ -124,7 +117,7 @@ Bloque "HTML personalizado" en el footer → pegar el script.
 ```
 whitemoon-cdn/
 ├── chat.js            ← Chatbot de texto
-├── orion-widget.js    ← Agente de voz
+├── orion-widget.js    ← Agente de voz (RETIRADO, sin uso)
 ├── itp.js             ← Calculadora de ITP
 ├── license-check.js   ← Comprobador de licencia
 ├── licenses.json      ← Compatibilidad con instalaciones antiguas — no borrar

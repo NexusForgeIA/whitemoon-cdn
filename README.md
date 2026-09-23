@@ -61,7 +61,8 @@ el repo, pero sin uso (0 clientes).
 
 ### `itp.js` — calculadora de ITP (RETIRADO)
 
-Retirado: ya no se instala ni se ofrece. Sigue en el repo, pero sin uso (0 clientes).
+Retirado: ya no se instala ni se ofrece, y el panel ya no genera su snippet. Sigue en
+el repo, pero sin uso (0 clientes).
 
 ### `license-check.js` — comprobador de licencia
 

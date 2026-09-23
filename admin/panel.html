@@ -529,7 +529,7 @@ tbody tr:last-child td{border-bottom:none}
       </div>
     </div>
     <div class="g2">
-      <div><label>Nombre cliente *</label><input type="text" id="nNombre" placeholder="Clínica Dental Sonríe" oninput="refreshNewSnippet()"></div>
+      <div><label>Nombre cliente *</label><input type="text" id="nNombre" placeholder="Clínica Dental Sonríe"></div>
       <div><label>Dominio web <span class="req" id="nUrlReq">*</span></label><input type="text" id="nUrl" placeholder="clinicasonrie.es"></div>
     </div>
     <div class="g2">
@@ -1188,9 +1188,8 @@ function deletePago(pagoId){
 // ─── AGENTE IA (snippet por pack · onboarding_clientes) ──────────────────────
 // El snippet que se instala en la web del cliente depende del pack:
 //   - spark / mini-core / core-spark-web → chat.js (chatbot texto · Laura IA · Claude API)
-//   - calculadora-itp              → itp.js (widget de calculadora ITP)
 //   - agente-ia-citas              → sin script (se entrega por QR/enlace)
-//   - resto (packs de voz retirados) → sin script: ya no se trabaja con voz.
+//   - resto (voz y calculadora-itp retirados) → sin script.
 // Solo spark, core-spark-web y agente-ia-citas están en venta (PACKS); el resto
 // de ramas siguen aquí para los clientes antiguos que ya tienen ese pack.
 var PACKS_WITH_RAG = { 'core-rag':1 };
@@ -1206,17 +1205,6 @@ function snippetForPack(c){
   // Packs de texto (Laura IA · Claude API): chat.js.
   if(pack === 'spark' || pack === 'mini-core' || pack === 'core-spark-web'){
     return '<script src="'+CDN_BASE+'/chat.js"\n  data-token="'+esc(token)+'"><\/script>';
-  }
-  if(pack === 'calculadora-itp'){
-    // itp.js es un widget standalone con su propia
-    // verificación de token. Bakeamos data-nombre y data-tel desde Supabase
-    // para que el widget los pinte sin tener que consultar nada en runtime.
-    var nombre = (c.cliente_nombre||'').trim();
-    var tel = (c.cliente_telefono||'').trim();
-    return '<script src="'+CDN_BASE+'/itp.js"\n  data-token="'+esc(token)+'"'
-      + (nombre ? '\n  data-nombre="'+esc(nombre)+'"' : '')
-      + (tel ? '\n  data-tel="'+esc(tel)+'"' : '')
-      + '\n  defer><\/script>';
   }
   return '— Este pack no tiene script de instalación.';
 }
@@ -1765,15 +1753,11 @@ function refreshFormRag(){
   }
 }
 // Live preview del snippet en el modal de nuevo cliente — se recalcula al
-// cambiar token, nombre, pack o agent ID. El badge "Agente: …" también se adapta.
-// Para calculadora-itp pasamos cliente_nombre porque el snippet baka data-nombre
-// (cliente_telefono no se captura en este modal — el snippet lo emitirá vacío
-// y el usuario puede editarlo en Supabase o vía panel después).
+// cambiar token o pack. El badge "Agente: …" también se adapta.
 function refreshNewSnippet(){
   var c = {
     token_cdn: ($('nToken').value||'').trim(),
-    pack: $('nPack').value,
-    cliente_nombre: ($('nNombre').value||'').trim()
+    pack: $('nPack').value
   };
   $('nScript').textContent = snippetForPack(c);
   $('nAgenteBadge').textContent = agenteIcon(c.pack)+' Agente: '+agenteLabel(c.pack);

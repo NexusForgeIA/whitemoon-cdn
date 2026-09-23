@@ -1,7 +1,7 @@
 # WhiteMoon CDN
 
 Scripts embebibles que WhiteMoon sirve a las webs de sus clientes desde GitHub Pages:
-chatbot de texto y calculadora de ITP. El agente de voz está retirado.
+chatbot de texto. El agente de voz y la calculadora de ITP están retirados.
 
 Cada script se activa con un token de licencia. Si la licencia no está activa, el script
 no pinta nada en la web del cliente — no muestra ningún error.
@@ -59,13 +59,9 @@ Si no se indica `data-biz`, se usa el nombre con el que el cliente está dado de
 Retirado: ya no se instala ni se ofrece, y el panel ya no genera su snippet. Sigue en
 el repo, pero sin uso (0 clientes).
 
-### `itp.js` — calculadora de ITP
+### `itp.js` — calculadora de ITP (RETIRADO)
 
-```html
-<script src="https://nexusforgeia.github.io/whitemoon-cdn/itp.js"
-  data-token="WM-xxxxxxxxxxxx">
-</script>
-```
+Retirado: ya no se instala ni se ofrece. Sigue en el repo, pero sin uso (0 clientes).
 
 ### `license-check.js` — comprobador de licencia
 
@@ -118,7 +114,7 @@ Bloque "HTML personalizado" en el footer → pegar el script.
 whitemoon-cdn/
 ├── chat.js            ← Chatbot de texto
 ├── orion-widget.js    ← Agente de voz (RETIRADO, sin uso)
-├── itp.js             ← Calculadora de ITP
+├── itp.js             ← Calculadora de ITP (RETIRADO, sin uso)
 ├── license-check.js   ← Comprobador de licencia
 ├── licenses.json      ← Compatibilidad con instalaciones antiguas — no borrar
 ├── chat-flows/        ← Flujos de conversación por sector

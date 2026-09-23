@@ -12,27 +12,13 @@ NO es Scout (ese es WHITEMOON-CRM-EMPRESA).
   del usuario (rol `authenticated`), no con la clave publishable
 - GitHub Pages
 
-## Packs y precios — tarifa 2026 (ninguno tiene permanencia)
-FUENTE DE VERDAD: https://whitemoon.es/precios/ y la página de cada pack.
-NUNCA citar precios de memoria: comprobarlos ahí antes de escribirlos.
+## Packs y precios (ninguno tiene permanencia)
+Fuente de verdad de packs y precios = el PANEL DEL CDN (admin/panel.html,
+desplegable de packs) + el CHECK de onboarding_clientes.pack. No hay página pública de
+precios y no se ponen precios en la web. No duplicar cifras aquí.
 
-| Pack | Clave en el panel | Setup | Cuota |
-|------|-------------------|-------|-------|
-| Spark | `spark` | 499€ | 99€/mes |
-| Pack Mini Core | `mini-core` | 599€ | 99€/mes |
-| Orion IA Agent | `orion-ia-agent` | 799€ | 99€/mes |
-| Core Spark Web | `core-spark-web` | 899€ | 99€/mes |
-| Core Orion | `core-orion` | 1.499€ | 99€/mes |
-| Core RAG | `core-rag` | 2.499€ | 199€/mes |
-| Calculadora ITP Pro | `calculadora-itp` | 599€ | 99€/mes |
-| Auditoría GEO IA | — | 899€ pago único | — |
-
-Los importes de esta tabla son los mismos que `PACK_SETUP` y `PACK_MRR` en
-`admin/panel.html`: si cambia uno, cambian los dos.
-
-Cualquier pack que no esté en esta tabla no se ofrece. Si aparece en la ficha de un
-cliente antiguo, el panel lo respeta al editarlo pero no lo muestra en el desplegable
-de alta.
+Si un cliente antiguo tiene un pack que ya no está en el desplegable, el panel lo
+respeta al editarlo pero no lo ofrece en el alta.
 
 ## Reglas
 - Cada pack genera su script embebido desde el panel, según el tipo de agente:

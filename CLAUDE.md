@@ -28,7 +28,8 @@ respeta al editarlo pero no lo ofrece en el alta.
 - Script embebido por pack (`snippetForPack()` en `admin/panel.html`):
   - `chat.js` — spark, core-spark-web
   - agente-ia-citas — SIN script, se entrega por QR/enlace (panel de citas)
-  - `chat.js` — mini-core (retirado — solo clientes ya instalados, no se vende)
+  - `chat.js` — mini-core (retirado — solo clientes instalados). No se vende, pero
+    sigue generando `chat.js` a propósito para los clientes que ya lo tengan.
   - calculadora-itp — sin script (ITP retirado)
   - orion-ia-agent, core-orion, core-rag — sin script (voz retirada)
   - whitemoon-360 — sin script. Se gestiona en su propio stack (repo

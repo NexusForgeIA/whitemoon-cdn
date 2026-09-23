@@ -29,7 +29,7 @@ respeta al editarlo pero no lo ofrece en el alta.
   - `chat.js` — spark, core-spark-web
   - agente-ia-citas — SIN script, se entrega por QR/enlace (panel de citas)
   - `chat.js` — mini-core (retirado — solo clientes ya instalados, no se vende)
-  - `itp.js` — calculadora-itp (retirado — solo clientes ya instalados, no se vende)
+  - calculadora-itp — sin script (ITP retirado)
   - orion-ia-agent, core-orion, core-rag — sin script (voz retirada)
   - whitemoon-360 — sin script. Se gestiona en su propio stack (repo
     WHITEMOON-360-BASE, alta wm360-alta), no desde este panel.

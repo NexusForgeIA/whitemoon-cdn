@@ -21,10 +21,21 @@ Si un cliente antiguo tiene un pack que ya no está en el desplegable, el panel 
 respeta al editarlo pero no lo ofrece en el alta.
 
 ## Reglas
-- Cada pack genera su script embebido desde el panel, según el tipo de agente:
-  - `chat.js` — spark, mini-core, core-spark-web
-  - `orion-widget.js` — orion-ia-agent, core-orion, core-rag
-  - `itp.js` — calculadora-itp
+- El desplegable de alta ofrece SOLO 3 packs (`PACKS` en `admin/panel.html`):
+  spark, core-spark-web y agente-ia-citas. El CHECK de onboarding_clientes.pack y
+  `snippetForPack()` siguen soportando los packs viejos a propósito, para los
+  clientes ya instalados.
+- Script embebido por pack (`snippetForPack()` en `admin/panel.html`):
+  - `chat.js` — spark, core-spark-web
+  - agente-ia-citas — SIN script, se entrega por QR/enlace (panel de citas)
+  - `chat.js` — mini-core (retirado — solo clientes ya instalados, no se vende)
+  - `orion-widget.js` — orion-ia-agent, core-orion (retirado — solo clientes ya
+    instalados, no se vende)
+  - `orion-widget.js` + `data-rag="true"` — core-rag (retirado — solo clientes ya
+    instalados, no se vende)
+  - `itp.js` — calculadora-itp (retirado — solo clientes ya instalados, no se vende)
+  - whitemoon-360 (retirado — solo clientes ya instalados, no se vende): no tiene
+    rama propia y cae en la de `orion-widget.js`
 - Nunca directo a main, siempre rama + PR
 - La API key de Claude nunca va en el repo
 

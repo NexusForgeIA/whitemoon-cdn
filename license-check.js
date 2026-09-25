@@ -12,6 +12,13 @@
   var token = s && s.getAttribute('data-token');
   if(!token) return;
 
+  // Base del CDN = carpeta desde la que se cargó este script (GitHub Pages o
+  // cdn.whitemoon.es), igual que chat.js. licenses.json se lee del mismo sitio.
+  var tag = (s && s.src && s.src.indexOf('license-check.js') !== -1) ? s :
+    document.querySelector('script[src*="license-check.js"]');
+  var BASE = (tag && tag.src) ? tag.src.replace(/\/license-check\.js.*$/, '') :
+    'https://cdn.whitemoon.es';
+
   // Edge Function pública: usa una clave de servidor (nunca expuesta).
   // Este archivo público NO incluye ninguna credencial de Supabase.
   var VERIFY_ENDPOINT = 'https://mlaqtniujnvfxcvcourm.supabase.co/functions/v1/verify-token';
@@ -46,7 +53,7 @@
   }
 
   function fallback(cb){
-    fetch('https://nexusforgeia.github.io/whitemoon-cdn/licenses.json?_=' + Date.now())
+    fetch(BASE + '/licenses.json?_=' + Date.now())
     .then(function(r){ return r.json(); })
     .then(function(data){
       var lic = data.licenses && data.licenses[token];

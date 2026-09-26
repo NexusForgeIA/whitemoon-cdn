@@ -18,5 +18,5 @@ resuelto. Te pedimos que no lo hagas público mientras tanto.
 ## Alcance
 
 Entra en el alcance cualquier cosa servida desde
-`https://nexusforgeia.github.io/whitemoon-cdn/`, que se ejecuta en el navegador de los
+`https://cdn.whitemoon.es/` y su respaldo `https://nexusforgeia.github.io/whitemoon-cdn/`, que se ejecuta en el navegador de los
 visitantes de las webs de nuestros clientes.

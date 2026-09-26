@@ -44,7 +44,7 @@ Todo cliente necesita:
 1. Cliente creado en el panel CDN con su token
 2. Pagos pendientes configurados en el panel
 3. Si tiene web propia, `license-check.js` instalado en su repo:
-   <script src="https://nexusforgeia.github.io/whitemoon-cdn/license-check.js"
+   <script src="https://cdn.whitemoon.es/license-check.js"
      data-token="WM-xxxxx"></script>
 4. Si no paga → desactivar el token desde el panel
 

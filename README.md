@@ -9,8 +9,10 @@ no pinta nada en la web del cliente — no muestra ningún error.
 Base del CDN:
 
 ```
-https://nexusforgeia.github.io/whitemoon-cdn/
+https://cdn.whitemoon.es/
 ```
+
+La URL antigua https://nexusforgeia.github.io/whitemoon-cdn/ se mantiene activa como respaldo; los clientes nuevos usan cdn.whitemoon.es.
 
 ---
 
@@ -34,7 +36,7 @@ Todos se pegan igual: una etiqueta `<script>` antes de `</body>`, con su
 ### `chat.js` — chatbot de texto
 
 ```html
-<script src="https://nexusforgeia.github.io/whitemoon-cdn/chat.js"
+<script src="https://cdn.whitemoon.es/chat.js"
   data-token="WM-xxxxxxxxxxxx"
   data-color="#4A90D9"
   data-services="Implantes,Ortodoncia,Blanqueamiento,Pedir cita"
@@ -70,7 +72,7 @@ Para clientes con web propia gestionada por WhiteMoon. Comprueba que la licencia
 activa:
 
 ```html
-<script src="https://nexusforgeia.github.io/whitemoon-cdn/license-check.js"
+<script src="https://cdn.whitemoon.es/license-check.js"
   data-token="WM-xxxxxxxxxxxx">
 </script>
 ```
@@ -89,7 +91,7 @@ Instalar el plugin → Ajustes → Insert Headers and Footers → pegar el códi
 
 ```php
 function whitemoon_chatbot() {
-  echo '<script src="https://nexusforgeia.github.io/whitemoon-cdn/chat.js"
+  echo '<script src="https://cdn.whitemoon.es/chat.js"
     data-token="WM-xxxxxxxxxxxx"
     data-color="#4A90D9"
     data-services="Implantes,Ortodoncia,Pedir cita"

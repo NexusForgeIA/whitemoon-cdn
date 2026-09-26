@@ -35,7 +35,7 @@ Los campos mínimos obligatorios son: `id`, `version`, `name`, `sector`.
 1. Crea un archivo `{sector}.json` en esta carpeta siguiendo el esquema de `template-base.json`.
 2. El nombre del archivo debe coincidir exactamente con el `value` del `<option>` en el panel
    (`dental.json` para `<option value="dental">`).
-3. Haz commit a `main` — GitHub Pages lo sirve automáticamente en 1-3 minutos.
+3. Mergea el PR a `main` (rama → PR → squash) — Cloudflare Pages (cdn.whitemoon.es) y GitHub Pages lo sirven en 1-3 minutos.
 4. Verifica en: `https://cdn.whitemoon.es/templates/{sector}.json`
 
 ## URL base CDN

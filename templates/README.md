@@ -36,10 +36,10 @@ Los campos mínimos obligatorios son: `id`, `version`, `name`, `sector`.
 2. El nombre del archivo debe coincidir exactamente con el `value` del `<option>` en el panel
    (`dental.json` para `<option value="dental">`).
 3. Haz commit a `main` — GitHub Pages lo sirve automáticamente en 1-3 minutos.
-4. Verifica en: `https://nexusforgeia.github.io/whitemoon-cdn/templates/{sector}.json`
+4. Verifica en: `https://cdn.whitemoon.es/templates/{sector}.json`
 
 ## URL base CDN
 
 ```
-https://nexusforgeia.github.io/whitemoon-cdn/templates/
+https://cdn.whitemoon.es/templates/
 ```

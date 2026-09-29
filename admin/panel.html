@@ -1220,6 +1220,8 @@ function agenteScript(c){ return snippetForPack(c); }
 //   - calculadora-itp                → Calculadora ITP (widget, sin agente IA)
 function agenteTipoFromPack(pack){
   var p = String(pack||'').toLowerCase();
+  // Web sin agente IA: null explícito, porque el default de la columna es 'laura'.
+  if(PACKS_SIN_AGENTE[p]) return null;
   if(p === 'calculadora-itp') return 'itp';
   if(p === 'orion-ia-agent' || p === 'core-orion' || p === 'core-rag') return 'orion';
   return 'laura'; // spark · mini-core · core-spark-web · whitemoon-360 (CRM y panel aparte)

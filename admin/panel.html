@@ -1038,7 +1038,7 @@ function renderDue(){
 function setEstado(id, activate){
   var c = clientes.filter(function(x){ return x.id===id; })[0]; if(!c) return;
   var nuevo = activate ? 'completado' : 'pausado';
-  if(!confirm((activate?'Activar':'Desactivar')+' "'+(c.cliente_nombre||c.token_cdn)+'"?\n\nEstado → '+nuevo)) return;
+  if(!confirm((activate?'Activar':'Desactivar')+' "'+(c.cliente_nombre||c.token_cdn||'')+'"?\n\nEstado → '+nuevo)) return;
   sbPatch('onboarding_clientes','id=eq.'+encodeURIComponent(id), { estado:nuevo })
   .then(function(){ c.estado=nuevo; render(); toast((activate?'Activado ✅':'Pausado 🚫')); })
   .catch(function(e){ toast('Error: '+e.message,'err'); });

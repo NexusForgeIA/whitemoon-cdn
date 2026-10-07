@@ -48,7 +48,6 @@
             w.showOpts([
               { label: '🤖 Quiero un chatbot IA para mi negocio', flow: 'chatbot' },
               { label: '🌐 Necesito web profesional con IA',      flow: 'web' },
-              { label: '📊 Auditoría IA para mi empresa',         flow: 'auditoria' },
               { label: '🔭 Scout para mi agencia',                flow: 'scout' },
               { label: '💬 Hablar con el equipo',                 flow: 'equipo' }
             ], function(o){ runFlow(o.flow); });
@@ -61,7 +60,6 @@
         switch(key){
           case 'chatbot':   return flowChatbot();
           case 'web':       return flowWeb();
-          case 'auditoria': return flowAuditoria();
           case 'scout':     return flowScout();
           case 'equipo':    return flowEquipo();
           case 'precios':   return mostrarPrecios();
@@ -86,13 +84,13 @@
         var card;
         if(pack === 'Spark'){
           card =
-            '<b>🚀 Pack Spark — 499€ setup + 99€/mes</b><br>'+
+            '<b>🚀 Pack Spark</b><br>'+
             '🤖 Chatbot IA con flujo específico para <b>'+sec+'</b><br>'+
             '📱 Captura leads 24/7 → WhatsApp inmediato<br>'+
             '⚡ Operativo en 5-7 días · Sin permanencia';
         } else {
           card =
-            '<b>🌐 Pack Core Spark Web — 899€ setup + 99€/mes</b><br>'+
+            '<b>🌐 Pack Core Spark Web</b><br>'+
             '🌐 Web profesional + Chatbot IA para <b>'+sec+'</b><br>'+
             '📱 Captura leads 24/7 → WhatsApp inmediato<br>'+
             '🔍 SEO básico incluido · Sin permanencia';
@@ -124,27 +122,12 @@
           { key:'dominio', msg:'¿Tienes dominio y hosting?',  opts:['Tengo todo','Necesito todo','No sé'] }
         ], function(data){
           w.bot(
-            '<b>🌐 Pack Core Spark Web — 899€ setup + 99€/mes</b><br>'+
+            '<b>🌐 Pack Core Spark Web</b><br>'+
             'Web profesional + Chatbot IA para <b>'+u.escapeHtml(data.sector)+'</b><br>'+
             '🔍 SEO básico · 📱 Captura 24/7 → WhatsApp · Sin permanencia',
             function(){ capture('Pack Core Spark Web', data.sector); }
           );
         });
-      }
-
-      // ─── FLUJO AUDITORÍA IA ───────────────────────────────────────────────
-      function flowAuditoria(){
-        w.bot(
-          'La <b>Auditoría IA</b> analiza tu negocio y te dice qué procesos automatizar con IA y qué ROI obtendrías.<br>'+
-          '📋 <b>899€ pago único</b> · Descontable del proyecto',
-          function(){
-            w.flow([
-              { key:'tipo', msg:'¿Para qué tipo de empresa?', opts:['Pyme local','Empresa mediana','Empresa grande'] }
-            ], function(data){
-              capture('Auditoría IA', data.tipo);
-            });
-          }
-        );
       }
 
       // ─── FLUJO SCOUT ──────────────────────────────────────────────────────
@@ -167,20 +150,22 @@
       // ─── FLUJO HABLAR EQUIPO ──────────────────────────────────────────────
       function flowEquipo(){
         w.flow([
-          { key:'tema', msg:'¿Sobre qué tema quieres que te llamemos?', opts:['Chatbot IA','Web + IA','Auditoría','Scout','Otro'] }
+          { key:'tema', msg:'¿Sobre qué tema quieres que te llamemos?', opts:['Chatbot IA','Web + IA','Scout','Otro'] }
         ], function(data){
           capture(data.tema, '');
         });
       }
 
-      // ─── TABLA DE PRECIOS ─────────────────────────────────────────────────
+      // ─── PACKS (sin cifras: el precio se cierra en una llamada) ────────────
       function mostrarPrecios(){
         w.bot(
-          '💰 <b>Precios WhiteMoon</b> — Sin permanencia:<br>'+
-          '🤖 Spark: 499€ setup + 99€/mes<br>'+
-          '🌐 Core Spark Web (web+chatbot): 899€ setup + 99€/mes<br>'+
-          '📚 Core RAG (agente entrenado con tus documentos): 2.499€ setup + 199€/mes<br>'+
-          '📋 Auditoría IA: 899€ pago único',
+          '📦 <b>Packs WhiteMoon</b>:<br>'+
+          '🤖 Spark<br>'+
+          '🌐 Core Spark Web<br>'+
+          '📅 Agente IA Citas<br>'+
+          '🌐 Web Esencial<br>'+
+          '🌐 Web Profesional<br>'+
+          'Propuesta a medida, sin permanencia. La cerramos en una llamada.',
           function(){
             w.showOpts([
               { label:'Recomiéndame el mejor', value:'reco' },
@@ -196,7 +181,6 @@
       // ─── KEYWORD ROUTER ───────────────────────────────────────────────────
       var ROUTE = [
         { kws:['chatbot','bot','asistente'],                          flow:'chatbot' },
-        { kws:['auditoria','analisis','roi'],                         flow:'auditoria' },
         { kws:['scout','crm','prospeccion','agencia'],                flow:'scout' },
         { kws:['web','pagina','wordpress'],                           flow:'web' },
         { kws:['precio','cuanto','coste','presupuesto'],              flow:'precios' },

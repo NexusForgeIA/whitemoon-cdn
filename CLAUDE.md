@@ -17,25 +17,17 @@ Fuente de verdad de packs y precios = el PANEL DEL CDN (admin/panel.html,
 desplegable de packs) + el CHECK de onboarding_clientes.pack. No hay página pública de
 precios y no se ponen precios en la web.
 
-### Tarifa 2026-10 — solo ventas nuevas
-MANDA EL PANEL (`admin/panel.html`: `PACK_MRR_NUEVA` / `PACK_SETUP_NUEVA`). Esta
-tabla es una copia de consulta: si difieren, el panel tiene razón y se corrige
-esta tabla, no al revés. Importes sin IVA.
+MANDA EL PANEL: las cifras de alta y de cuota viven solo en `admin/panel.html`
+y NO se copian en este fichero (ni aquí ni en ningún otro del repo). Para saber
+un precio, se mira el panel.
 
-| Pack            | Alta (pago único) | Cuota mensual |
-|-----------------|-------------------|---------------|
-| spark           | 299 €             | 99 €/mes      |
-| agente-ia-citas | 299 €             | 99 €/mes      |
-| web-esencial    | 299 €             | 59 €/mes      |
-| web-profesional | 299 €             | 79 €/mes      |
-| core-spark-web  | 299 €             | 199 €/mes     |
-
-Regla del corte (`TARIFA_CORTE` + `tarifaDe()` en `admin/panel.html`): la tarifa
-nueva se aplica a los clientes con `created_at` >= 2026-10-07 y al desplegable
-de alta. Los clientes dados de alta antes conservan la tarifa histórica
-(`PACK_MRR` / `PACK_SETUP`), que está congelada y no se edita. Los packs
-retirados solo existen en la histórica. Las cifras históricas no se copian aquí:
-están en el panel.
+### Regla del corte — 2026-10-07
+El panel tiene dos tarifas y `tarifaDe()` elige por cliente según `TARIFA_CORTE`:
+- Tarifa nueva (`PACK_MRR_NUEVA` / `PACK_SETUP_NUEVA`): clientes con
+  `created_at` >= 2026-10-07 y el desplegable de alta.
+- Tarifa histórica (`PACK_MRR` / `PACK_SETUP`): clientes dados de alta antes,
+  que conservan su precio. Está congelada y no se edita. Los packs retirados
+  solo existen aquí.
 
 Si un cliente antiguo tiene un pack que ya no está en el desplegable, el panel lo
 respeta al editarlo pero no lo ofrece en el alta.

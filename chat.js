@@ -187,7 +187,12 @@
   }
 
   // ─── BOOT ───────────────────────────────────────────────────────────────────
+  // Packs de web SIN agente IA: widget de contacto (flujo contacto), sin IA ni
+  // captación. El pack llega de verify-token (res.pack) o de licenses.json.
+  var PACKS_CONTACTO = { 'web-esencial':1, 'web-profesional':1 };
+
   function boot(el, lic, tpl){
+    var esContacto = PACKS_CONTACTO[String(lic.pack || '').toLowerCase()] === 1;
     var tplResp = tpl && tpl.responses ? tpl.responses : null;
     var licResp = lic.responses || null;
     var cfg = {
@@ -205,10 +210,17 @@
       token:      token,
       aiEnabled:  !!lic.aiEnabled,
       agentEndpoint: lic.agentEndpoint || '',  // Edge Function propia del cliente ('' = por defecto)
-      aiPrompt:   lic.aiPrompt || ''
+      aiPrompt:   lic.aiPrompt || '',
+      contacto:   esContacto
     };
 
     var widget = buildWidget(cfg);
+    // Va ANTES de aiEnabled y de lic.template: un pack de contacto nunca carga
+    // IA ni un flujo sectorial, aunque la fila tenga prompt o sector.
+    if (esContacto) {
+      loadFlow('contacto', widget, cfg);
+      return;
+    }
     var flowName = lic.template || 'generic';
     if (lic.aiEnabled) {
       loadFlow('ai-claude', widget, cfg);
@@ -227,7 +239,8 @@
       }
     };
     s.onerror = function(){
-      if(name !== 'generic'){ loadFlow('generic', widget, cfg); }
+      // Sin fallback a generic en modo contacto: generic capta leads.
+      if(name !== 'generic' && !cfg.contacto){ loadFlow('generic', widget, cfg); }
       else { console.error('[WM-CHAT] No se pudo cargar el flujo'); }
     };
     document.head.appendChild(s);
@@ -304,13 +317,15 @@
     var modal = document.createElement('div');
     modal.id = 'wm-chat-modal';
     modal.setAttribute('role', 'dialog');
-    modal.setAttribute('aria-label', 'Chat con ' + escapeHtml(cfg.botName));
+    // Modo contacto: no hay asistente ni nadie "en línea" — nombre del negocio y sin estado.
+    var headName = cfg.contacto ? (cfg.biz || 'Contacto') : cfg.botName;
+    modal.setAttribute('aria-label', 'Chat con ' + escapeHtml(headName));
     modal.innerHTML = [
       '<div class="wm-header">',
         '<div class="wm-avatar">💬</div>',
         '<div class="wm-hinfo">',
-          '<div class="wm-hname">' + escapeHtml(cfg.botName) + '</div>',
-          '<div class="wm-hstatus"><span class="wm-hdot"></span> En línea</div>',
+          '<div class="wm-hname">' + escapeHtml(headName) + '</div>',
+          cfg.contacto ? '' : '<div class="wm-hstatus"><span class="wm-hdot"></span> En línea</div>',
         '</div>',
         '<button class="wm-close" aria-label="Cerrar chat">×</button>',
       '</div>',

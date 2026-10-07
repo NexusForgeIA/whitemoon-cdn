@@ -39,15 +39,25 @@ respeta al editarlo pero no lo ofrece en el alta.
   clientes ya instalados.
 - Script embebido por pack (`snippetForPack()` en `admin/panel.html`):
   - `chat.js` — spark, core-spark-web
+  - `chat.js` — web-esencial, web-profesional (`PACKS_CONTACTO`): widget de
+    contacto SIN IA. Mismo script y token que Spark; siguen sin agente
+    (`PACKS_SIN_AGENTE`: sin system prompt y `agente_tipo` NULL).
   - agente-ia-citas — SIN script, se entrega por QR/enlace (panel de citas)
-  - web-esencial, web-profesional — SIN script, sin token CDN y sin agente IA
-    (web sola; `PACKS_SIN_AGENTE`)
   - `chat.js` — mini-core (retirado — solo clientes instalados). No se vende, pero
     sigue generando `chat.js` a propósito para los clientes que ya lo tengan.
   - calculadora-itp — sin script (ITP retirado)
   - orion-ia-agent, core-orion, core-rag — sin script (voz retirada)
   - whitemoon-360 — sin script. Se gestiona en su propio stack (repo
     WHITEMOON-360-BASE, alta wm360-alta), no desde este panel.
+- Widget de contacto (web-esencial, web-profesional):
+  - `chat.js` elige el flujo `chat-flows/contacto.js` por PACK (`PACKS_CONTACTO`
+    en `boot()`), antes de mirar `aiEnabled` o el sector: aunque la fila tenga
+    prompt o sector, estos packs nunca cargan IA ni un flujo sectorial.
+  - Muestra un mensaje con el nombre del negocio (`cliente_nombre`) y botones de
+    llamar y WhatsApp (`cliente_telefono`). No capta leads y no usa IA.
+  - Con `estado = 'pausado'` verify-token deniega y el widget no aparece.
+  - Dominio y teléfono son OBLIGATORIOS en el alta: sin dominio verify-token
+    deniega (bloqueo por dominio) y sin teléfono no hay botones.
 - Retell/ElevenLabs está retirado del panel: la voz ya no es un producto activo.
   `orion-widget.js` sigue en el repo, pero el panel ya no lo genera.
 - Nunca directo a main, siempre rama + PR
@@ -55,11 +65,12 @@ respeta al editarlo pero no lo ofrece en el alta.
 
 ## Regla de alta de cliente
 Todo cliente necesita:
-1. Cliente creado en el panel CDN. Con su token si el pack lleva agente: spark,
-   agente-ia-citas y core-spark-web. web-esencial y web-profesional no llevan
-   chatbot, así que NO llevan token.
+1. Cliente creado en el panel CDN con su token. El panel lo exige en los 5
+   packs en venta, también en web-esencial y web-profesional (widget de
+   contacto) y en agente-ia-citas (se guarda, pero no genera script: se entrega
+   por QR/enlace).
 2. Pagos pendientes configurados en el panel
-3. Si tiene token y web propia, `license-check.js` instalado en su repo:
+3. Si tiene web propia, `license-check.js` instalado en su repo:
    <script src="https://cdn.whitemoon.es/license-check.js"
      data-token="WM-xxxxx"></script>
 4. Si no paga → desactivar el token desde el panel

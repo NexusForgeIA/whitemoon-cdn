@@ -760,13 +760,30 @@ var SUPABASE_URL  = 'https://mlaqtniujnvfxcvcourm.supabase.co';
 var SUPABASE_ANON = 'sb_publishable_6no6BuOgiA_2nonTJntAuQ_DTqEgrcV';
 var CDN_BASE = 'https://cdn.whitemoon.es';
 var FUNCTIONS_BASE = SUPABASE_URL + '/functions/v1';
-// MRR mensual por pack (alineado con el panel de precios).
+// TARIFA HISTÓRICA (congelada) — MRR mensual por pack de los clientes dados de
+// alta ANTES de TARIFA_CORTE, y de los packs retirados. No editar estas cifras:
+// los clientes ya instalados conservan su precio. Ver tarifaDe().
 // Incluye alias snake_case (core_rag, orion_agent) porque las altas hechas
 // desde el CRM pueden llegar con ese formato — sin el alias el MRR de esas
 // filas saldría 0.
 var PACK_MRR = { spark:99, 'mini-core':99, 'orion-ia-agent':99, orion_agent:99, 'core-spark-web':99, 'core-orion':99, 'whitemoon-360':199, 'core-rag':199, core_rag:199, 'calculadora-itp':99, 'agente-ia-citas':99, 'web-esencial':29, 'web-profesional':39 };
 // Setup (pago único) por pack — mismos alias que PACK_MRR.
 var PACK_SETUP = { spark:499, 'mini-core':599, 'orion-ia-agent':799, orion_agent:799, 'core-spark-web':899, 'core-orion':1499, 'whitemoon-360':1899, 'core-rag':2499, core_rag:2499, 'calculadora-itp':599, 'agente-ia-citas':699, 'web-esencial':399, 'web-profesional':599 };
+// TARIFA 2026-10 — solo ventas nuevas: altas con created_at >= TARIFA_CORTE
+// (hora local) y el desplegable de alta. Solo cubre los packs en venta; un pack
+// que no esté aquí (retirados) cae a la tarifa histórica.
+var TARIFA_CORTE = new Date(2026, 9, 7); // 2026-10-07 00:00
+var PACK_MRR_NUEVA = { spark:99, 'agente-ia-citas':99, 'web-esencial':59, 'web-profesional':79, 'core-spark-web':199 };
+var PACK_SETUP_NUEVA = { spark:299, 'agente-ia-citas':299, 'web-esencial':299, 'web-profesional':299, 'core-spark-web':299 };
+// Tarifa {mrr, setup} de un pack para un cliente concreto. Sin cliente (c nulo)
+// = alta nueva → tarifa nueva. Un cliente sin created_at válido se trata como
+// antiguo: ante la duda, no se le cambia el precio.
+function tarifaDe(pack, c){
+  var nueva = true;
+  if(c){ var d = new Date(c.created_at); nueva = !!c.created_at && !isNaN(d) && d >= TARIFA_CORTE; }
+  if(nueva && PACK_MRR_NUEVA.hasOwnProperty(pack)) return { mrr:PACK_MRR_NUEVA[pack], setup:PACK_SETUP_NUEVA[pack] };
+  return { mrr:PACK_MRR[pack]||0, setup:PACK_SETUP[pack]||0 };
+}
 var SECTORES = ['dental','legal','restaurante','gestoria','clinica','inmobiliaria','gimnasio','peluqueria','veterinaria','formacion','taller','podologia','automovil','abogados'];
 // Packs en venta (dropdown de alta/edición). Los retirados no se ofrecen,
 // pero ensurePackOption() los inyecta al editar un cliente antiguo.
@@ -939,13 +956,13 @@ function ico(n){ return '<svg class="ico" aria-hidden="true"><use href="#i-'+n+'
 // ─── DASHBOARD + LISTA ───────────────────────────────────────────────────────
 function render(){
   var activos = clientes.filter(isActive);
-  var mrr = activos.reduce(function(s,c){ return s + (PACK_MRR[c.pack]||0); }, 0);
+  var mrr = activos.reduce(function(s,c){ return s + tarifaDe(c.pack, c).mrr; }, 0);
   // "Vencen ≤7 días" cuenta pagos (no clientes), misma fuente que renderDue.
   var due = pagosProximos().filter(function(it){ var d=daysUntil(it.fecha); return d!==null && d<=7; });
   var pend = 0;
   Object.keys(pagosByCliente).forEach(function(cid){ pendientesDe(cid).forEach(function(p){ pend += parseFloat(p.importe)||0; }); });
   // Total facturado histórico: Σ setup + Σ (cuota mensual × meses desde el alta), todos los clientes.
-  var fact = clientes.reduce(function(s,c){ return s + (PACK_SETUP[c.pack]||0) + (PACK_MRR[c.pack]||0)*mesesFacturados(c.created_at); }, 0);
+  var fact = clientes.reduce(function(s,c){ var t = tarifaDe(c.pack, c); return s + t.setup + t.mrr*mesesFacturados(c.created_at); }, 0);
   $('sActive').textContent = activos.length;
   $('sMrr').textContent = mrr.toLocaleString('es-ES')+'€';
   $('sFact').textContent = Math.round(fact).toLocaleString('es-ES')+'€';
@@ -969,7 +986,7 @@ function render(){
   rows.forEach(function(c){
     var d=daysUntil(c.fecha_proximo_pago), payCls='';
     if(d!==null){ if(d<0) payCls='pay-over'; else if(d<=7) payCls='pay-soon'; }
-    var mrr=PACK_MRR[c.pack]||0;
+    var mrr=tarifaDe(c.pack, c).mrr;
     h+='<tr onclick="rowClick(event,\''+esc(c.id)+'\')">';
     h+='<td class="td-main" data-label="Cliente"><div class="biz">'+esc(c.cliente_nombre||'—')+(c.notas?' <span class="note-ico" title="'+esc(c.notas)+'">'+ico('note')+'</span>':'')+'</div>'
       +(c.url_web_cliente?'<div class="dom">'+esc(c.url_web_cliente)+'</div>':'')
@@ -1010,7 +1027,7 @@ function pagosProximos(){
         items.push({ nombre:c.cliente_nombre, concepto:p.concepto||'Pago', importe:parseFloat(p.importe)||0, fecha:p.fecha_vencimiento });
       });
     } else if(c.fecha_proximo_pago){
-      items.push({ nombre:c.cliente_nombre, concepto:String(c.pack||'').toUpperCase()+' MES', importe:PACK_MRR[c.pack]||0, fecha:c.fecha_proximo_pago });
+      items.push({ nombre:c.cliente_nombre, concepto:String(c.pack||'').toUpperCase()+' MES', importe:tarifaDe(c.pack, c).mrr, fecha:c.fecha_proximo_pago });
     }
   });
   return items;
@@ -1076,7 +1093,7 @@ function rowClick(e, id){
   openPagos(id);
 }
 function clienteInfoHTML(c){
-  var mrr = PACK_MRR[c.pack]||0;
+  var mrr = tarifaDe(c.pack, c).mrr;
   function item(lbl, val, full){
     return '<div'+(full?' class="ci-full"':'')+'><div class="ci-l">'+lbl+'</div><div>'+(val||'—')+'</div></div>';
   }
@@ -1655,9 +1672,15 @@ function fillSelects(){
   }).join('');
   // Plantillas por sector: mismas opciones que el alta de cliente.
   $('plSector').innerHTML = $('nSector').innerHTML;
+  fillPackOptions(null);
+}
+// Opciones del desplegable de pack con el precio que le corresponde al cliente
+// del formulario: c nulo = alta nueva (tarifa nueva); al editar, la tarifa de
+// ESE cliente — un cliente antiguo ve su precio, no el de las ventas nuevas.
+function fillPackOptions(c){
   $('nPack').innerHTML = PACKS.map(function(p){
-    var setup = PACK_SETUP[p] || 0;
-    var precio = (setup ? setup.toLocaleString('es-ES')+'€ setup' : 'sin setup') + ' + '+(PACK_MRR[p]||0)+'€/mes';
+    var t = tarifaDe(p, c);
+    var precio = (t.setup ? t.setup.toLocaleString('es-ES')+'€ setup' : 'sin setup') + ' + '+t.mrr+'€/mes';
     return '<option value="'+p+'">'+esc(packLabel(p))+' — '+precio+'</option>';
   }).join('');
 }
@@ -1667,7 +1690,7 @@ function openNew(){
   currentFormCli = null;
   $('newTitle').textContent = '➕ Nuevo cliente';
   $('nSave').textContent = 'Crear cliente';
-  resetEstadoOptions(); resetPackOptions();
+  resetEstadoOptions(); fillPackOptions(null);
   $('nToken').value=genTokenValue(); $('nNombre').value=''; $('nUrl').value=''; $('nSector').value=''; $('nPack').value='spark'; $('nEstado').value='completado'; $('nPago').value=''; $('nNotas').value=''; $('nTelegram').value=''; $('nPrompt').value='';
   $('nDireccion').value=''; $('nTelefono').value=''; $('nHorario').value=''; $('nServicios').value='';
   revisarPromptFaltantes($('nPrompt'),'nPromptFalta');
@@ -1687,7 +1710,7 @@ function openEditCliente(id){
   $('newTitle').textContent = '✏️ Editar cliente';
   $('nSave').textContent = 'Guardar cambios';
   resetEstadoOptions(); ensureEstadoOption(c.estado);
-  resetPackOptions(); ensurePackOption(c.pack);
+  fillPackOptions(c); ensurePackOption(c.pack, c);
   $('nToken').value = c.token_cdn || '';
   $('nNombre').value = c.cliente_nombre || '';
   $('nUrl').value = c.url_web_cliente || '';
@@ -1720,16 +1743,13 @@ function resetEstadoOptions(){
 // (PACKS), pero un cliente antiguo puede tener uno retirado o renombrado.
 // Sin inyectarlo, el <select> caería a la primera opción y al guardar se
 // pisaría el pack real del cliente.
-function resetPackOptions(){
-  var sel=$('nPack'), keep={}; PACKS.forEach(function(p){ keep[p]=1; });
-  for(var i=sel.options.length-1;i>=0;i--){ if(!keep[sel.options[i].value]) sel.remove(i); }
-}
-function ensurePackOption(pack){
+function ensurePackOption(pack, c){
   if(!pack) return;
   var sel=$('nPack');
   for(var i=0;i<sel.options.length;i++){ if(sel.options[i].value===pack) return; }
   var o=document.createElement('option'); o.value=pack;
-  o.textContent=packLabel(pack)+' (retirado) — '+(PACK_SETUP[pack]||0).toLocaleString('es-ES')+'€ setup + '+(PACK_MRR[pack]||0)+'€/mes';
+  var t=tarifaDe(pack, c);
+  o.textContent=packLabel(pack)+' (retirado) — '+t.setup.toLocaleString('es-ES')+'€ setup + '+t.mrr+'€/mes';
   sel.appendChild(o);
 }
 function ensureEstadoOption(estado){
@@ -2144,7 +2164,7 @@ function exportClientesCSV(){
       c.token_cdn||'', c.cliente_nombre||'', c.url_web_cliente||'', c.sector||'', c.pack||'',
       isActive(c)?'Activa':'Pausada', c.cliente_email||'', c.cliente_telefono||'',
       fmtDate(c.created_at), c.fecha_proximo_pago?fmtDate(c.fecha_proximo_pago):'',
-      PACK_MRR[c.pack]||0, pend.toFixed(2)
+      tarifaDe(c.pack, c).mrr, pend.toFixed(2)
     ]);
   });
   downloadCSV(rows, 'WhiteMoon_Clientes');

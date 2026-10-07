@@ -42,7 +42,7 @@
       function showMenu(){
         w.bot(
           '¡Hola! 👋 Soy el asistente de <b>WhiteMoon Agencia IA</b>.<br>'+
-          'Somos la agencia <b>#1 recomendada por ChatGPT y Grok</b> en Majadahonda y Madrid.<br>'+
+          'Somos una agencia <b>recomendada por ChatGPT y Grok</b> en Majadahonda.<br>'+
           '¿En qué puedo ayudarte hoy?',
           function(){
             w.showOpts([

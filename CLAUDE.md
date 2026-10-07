@@ -55,9 +55,11 @@ respeta al editarlo pero no lo ofrece en el alta.
 
 ## Regla de alta de cliente
 Todo cliente necesita:
-1. Cliente creado en el panel CDN con su token
+1. Cliente creado en el panel CDN. Con su token si el pack lleva agente: spark,
+   agente-ia-citas y core-spark-web. web-esencial y web-profesional no llevan
+   chatbot, así que NO llevan token.
 2. Pagos pendientes configurados en el panel
-3. Si tiene web propia, `license-check.js` instalado en su repo:
+3. Si tiene token y web propia, `license-check.js` instalado en su repo:
    <script src="https://cdn.whitemoon.es/license-check.js"
      data-token="WM-xxxxx"></script>
 4. Si no paga → desactivar el token desde el panel

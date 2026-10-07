@@ -1,0 +1,9 @@
+# Cloudflare Pages — cabeceras por ruta. Solo aplica en cdn.whitemoon.es:
+# GitHub Pages ignora este fichero (ahí vale el <meta name="robots"> del panel).
+# SOLO noindex para el panel y CLAUDE.md. No añadir aquí caché ni cabeceras de
+# los .js del motor (chat.js, license-check.js...).
+/admin/*
+  X-Robots-Tag: noindex, nofollow
+
+/CLAUDE.md
+  X-Robots-Tag: noindex, nofollow

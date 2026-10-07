@@ -535,7 +535,7 @@ tbody tr:last-child td{border-bottom:none}
     </div>
     <div class="g2">
       <div><label>Dirección</label><input type="text" id="nDireccion" placeholder="C/ Mayor 12, Majadahonda"></div>
-      <div><label>Teléfono</label><input type="text" id="nTelefono" placeholder="912345678"></div>
+      <div><label>Teléfono <span class="req" id="nTelReq" style="display:none">*</span></label><input type="text" id="nTelefono" placeholder="912345678"></div>
     </div>
     <div class="g2">
       <div><label>Sector</label><select id="nSector" onchange="onSectorChange()"></select></div>
@@ -792,9 +792,12 @@ var PACKS = ['spark','core-spark-web','agente-ia-citas','web-esencial','web-prof
 // Packs que se entregan por QR/enlace + panel, sin web del cliente: el dominio
 // no es obligatorio y no hay script de instalación.
 var PACKS_SIN_WEB = { 'agente-ia-citas':1 };
-// Packs de web SIN agente IA: dominio opcional, sin token CDN, sin script de
-// instalación y sin system prompt.
+// Packs de web SIN agente IA: sin system prompt y con agente_tipo NULL.
 var PACKS_SIN_AGENTE = { 'web-esencial':1, 'web-profesional':1 };
+// Packs con widget de contacto (chat.js + flujo contacto, sin IA): llevan token
+// y script como Spark. Dominio obligatorio (verify-token bloquea por dominio) y
+// teléfono obligatorio (de cliente_telefono salen los botones de llamar/WhatsApp).
+var PACKS_CONTACTO = { 'web-esencial':1, 'web-profesional':1 };
 // Sectores del CHECK que no tienen plantilla propia en plantillas_prompt_sector
 // (ni directa ni por alias): la RPC les devuelve la plantilla 'generico'.
 var SECTORES_GENERICOS = { legal:1, abogados:1, clinica:1, gimnasio:1, veterinaria:1, formacion:1, podologia:1 };
@@ -1222,10 +1225,9 @@ function snippetForPack(c){
   var pack = String(c.pack||'').toLowerCase();
   var token = (c.token_cdn||'').trim();
   if(PACKS_SIN_WEB[pack]) return '— Este producto se entrega por QR/enlace, no con script de web.';
-  if(PACKS_SIN_AGENTE[pack]) return '— Web sin agente IA: no hay script de instalación.';
   if(!token) return '— Falta token CDN para generar el script.';
-  // Packs de texto (Laura IA · Claude API): chat.js.
-  if(pack === 'spark' || pack === 'mini-core' || pack === 'core-spark-web'){
+  // Packs de texto (Laura IA · Claude API) y packs de contacto (sin IA): chat.js.
+  if(pack === 'spark' || pack === 'mini-core' || pack === 'core-spark-web' || PACKS_CONTACTO[pack]){
     return '<script src="'+CDN_BASE+'/chat.js"\n  data-token="'+esc(token)+'"><\/script>';
   }
   return '— Este pack no tiene script de instalación.';
@@ -1253,7 +1255,7 @@ function packShowsPrompt(pack){
 function agenteLabel(pack){
   var p = String(pack||'').toLowerCase();
   var tipo = agenteTipoFromPack(pack);
-  if(PACKS_SIN_AGENTE[p]) return 'Sin agente IA (solo web)';
+  if(PACKS_CONTACTO[p]) return 'Widget de contacto (sin IA)';
   if(tipo === 'laura') return 'Laura IA (chat texto · Claude API)';
   if(tipo === 'itp')   return 'CALCULADORA ITP';
   if(p === 'core-rag') return 'Orion IA + RAG (voz · retirado)';
@@ -1790,7 +1792,8 @@ function refreshNewSnippet(){
     pack: $('nPack').value
   };
   $('nScript').textContent = snippetForPack(c);
-  $('nAgenteBadge').textContent = agenteIcon(c.pack)+' Agente: '+agenteLabel(c.pack);
+  var contacto = !!PACKS_CONTACTO[String(c.pack||'').toLowerCase()];
+  $('nAgenteBadge').textContent = agenteIcon(c.pack)+(contacto ? ' ' : ' Agente: ')+agenteLabel(c.pack);
   // core-rag oculta el system prompt de texto (su conocimiento viene del RAG).
   $('nPromptSection').style.display = packShowsPrompt(c.pack) ? 'block' : 'none';
   // Packs sin web (QR/enlace): sin script de instalación y dominio opcional.
@@ -1798,10 +1801,8 @@ function refreshNewSnippet(){
   $('nScriptSection').style.display = sinWeb ? 'none' : 'block';
   $('nScriptQr').style.display = sinWeb ? 'block' : 'none';
   $('nUrlReq').style.display = sinWeb ? 'none' : '';
-  // Web sin agente IA: sin token, sin script y dominio opcional.
-  var sinAgente = !!PACKS_SIN_AGENTE[String(c.pack||'').toLowerCase()];
-  $('nTokenSection').style.display = sinAgente ? 'none' : '';
-  if(sinAgente){ $('nScriptSection').style.display = 'none'; $('nUrlReq').style.display = 'none'; }
+  // Widget de contacto: el teléfono pasa a obligatorio (el dominio ya lo es).
+  $('nTelReq').style.display = contacto ? '' : 'none';
 }
 function copyNewSnippet(){
   var txt = ($('nScript').textContent||'').trim();
@@ -1816,19 +1817,20 @@ function saveCliente(){
   var url=($('nUrl').value||'').trim();
   var pack = $('nPack').value || null;
   var sinAgente = !!PACKS_SIN_AGENTE[String(pack||'').toLowerCase()];
-  if(sinAgente) token = '';
-  if(!token && !sinAgente){ toast('Token obligatorio','err'); return; }
+  if(!token){ toast('Token obligatorio','err'); return; }
   if(!nombre){ toast('Nombre obligatorio','err'); return; }
-  if(!url && !sinAgente && !PACKS_SIN_WEB[String(pack||'').toLowerCase()]){ toast('Dominio web obligatorio','err'); return; }
+  if(!url && !PACKS_SIN_WEB[String(pack||'').toLowerCase()]){ toast('Dominio web obligatorio','err'); return; }
+  // Widget de contacto: sin teléfono válido no hay botones de llamar/WhatsApp.
+  if(PACKS_CONTACTO[String(pack||'').toLowerCase()] && ($('nTelefono').value||'').replace(/[^0-9]/g,'').length < 9){ toast('Teléfono obligatorio (mínimo 9 dígitos)','err'); return; }
   // El prompt no puede salir a producción con placeholders sin rellenar.
   if(packShowsPrompt(pack)){
     var faltan = revisarPromptFaltantes($('nPrompt'),'nPromptFalta');
     if(faltan.length){ toast('Faltan datos en el prompt: '+faltan.join(', '),'err'); return; }
   }
   var body = {
-    token_cdn: token || null,
+    token_cdn: token,
     cliente_nombre: nombre,
-    url_web_cliente: sinAgente ? (url || null) : url,
+    url_web_cliente: url,
     sector: $('nSector').value || null,
     pack: pack,
     // Dirección y teléfono sí son columnas: los usa la plantilla del prompt y
